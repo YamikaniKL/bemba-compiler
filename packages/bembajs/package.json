@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.0.2",
+  "version": "1.0.14",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -26,11 +26,12 @@
   "files": [
     "dist",
     "bin",
+    "vscode",
     "README.md"
   ],
   "scripts": {
     "build": "node build.js",
-    "dev": "node src/server/app.js",
+    "dev": "node dist/dev-server.js",
     "test": "node test/index.js",
     "clean": "rm -rf dist"
   },
@@ -47,7 +48,7 @@
   "author": "BembaJS Team",
   "license": "MIT",
   "dependencies": {
-    "bembajs-core": "workspace:*",
+    "bembajs-core": "^1.0.0",
     "express": "^4.21.2",
     "commander": "^11.1.0",
     "chokidar": "^3.5.3",
@@ -57,6 +58,29 @@
   "devDependencies": {},
   "engines": {
     "node": ">=16.0.0"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "bemba",
+        "aliases": ["Bemba", "bemba"],
+        "extensions": [".bemba"],
+        "configuration": "./vscode/language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bemba",
+        "scopeName": "source.bemba",
+        "path": "./vscode/bemba.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "bemba",
+        "path": "./vscode/snippets.json"
+      }
+    ]
   },
   "repository": {
     "type": "git",
