@@ -607,40 +607,261 @@ class BembaParser {
         const sections = this.extractSections(code);
         const styles = this.extractStyles(code);
         
-        
         let html = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${appName}</title>
-    <style>${styles}</style>
-</head>
-<body>`;
+    <style>
+        * {
+            box-sizing: border-box;
+        }
         
-        sections.forEach(section => {
-            html += `
-    <div class="icipandwa">
-        <h2>${section.umutwe || 'Section'}</h2>
-        <p>${section.ilyashi || ''}</p>`;
-            
-            if (section.amabatani && section.amabatani.length > 0) {
-                html += `
-        <div class="button-container">`;
-                section.amabatani.forEach(button => {
-                    const onClick = button.pakuKlikisha || 'londolola("Button clicked!")';
-                    html += `
-            <button class="ibatani" onclick="${onClick}">${button.ilembo || 'Button'}</button>`;
-                });
-                html += `
-        </div>`;
+        body { 
+            background: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #171717;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-rows: 20px 1fr 20px;
+            align-items: center;
+            justify-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            padding-bottom: 5rem;
+            gap: 4rem;
+        }
+        
+        @media (min-width: 640px) {
+            .grid {
+                padding: 5rem;
+            }
+        }
+        
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            grid-row-start: 2;
+            align-items: center;
+        }
+        
+        @media (min-width: 640px) {
+            main {
+                align-items: flex-start;
+            }
+        }
+        
+        .bemba-logo {
+            width: 180px;
+            height: 38px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        ol {
+            list-style: decimal;
+            list-style-position: inside;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5rem;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        }
+        
+        @media (min-width: 640px) {
+            ol {
+                text-align: left;
+            }
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            code {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 640px) {
+            .button-container {
+                flex-direction: row;
+            }
+        }
+        
+        .ibatani {
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000000;
+            color: #fafafa;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            height: 2.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .ibatani:hover {
+            background: #404040;
+        }
+        
+        .ibatani.secondary {
+            background: transparent;
+            color: #000000;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .ibatani.secondary:hover {
+            background: #f2f2f2;
+            border-color: transparent;
+        }
+        
+        @media (min-width: 640px) {
+            .ibatani {
+                font-size: 1rem;
+                line-height: 1.5rem;
+                height: 3rem;
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
             }
             
+            .ibatani.secondary {
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .ibatani.secondary {
+                width: 158px;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .ibatani:hover {
+                background: #cccccc;
+            }
+            
+            .ibatani.secondary {
+                border-color: rgba(255, 255, 255, 0.145);
+            }
+            
+            .ibatani.secondary:hover {
+                background: #1a1a1a;
+            }
+        }
+        
+        footer {
+            grid-row-start: 3;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #171717;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        
+        .footer-icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        ${styles}
+    </style>
+</head>
+<body class="antialiased">
+    <div class="grid">
+        <main>
+            <div class="bemba-logo">BembaJS</div>
+            <ol>
+                <li>Get started by editing <code>app/page.bemba</code>.</li>
+                <li>Save and see your changes instantly.</li>
+            </ol>
+            <div class="button-container">`;
+        
+        if (sections.length > 0 && sections[0].amabatani && sections[0].amabatani.length > 0) {
+            sections[0].amabatani.forEach((button, index) => {
+                const onClick = button.pakuKlikisha || 'londolola("Button clicked!")';
+                const isSecondary = index > 0;
+                const buttonClass = isSecondary ? 'ibatani secondary' : 'ibatani';
+                html += `
+                <button class="${buttonClass}" onclick="${onClick}">${button.ilembo || 'Button'}</button>`;
+            });
+        } else {
             html += `
-    </div>`;
-        });
+                <button class="ibatani" onclick="londolola('Deploy now!')">Deploy now</button>
+                <button class="ibatani secondary" onclick="londolola('Read our docs!')">Read our docs</button>`;
+        }
         
         html += `
+            </div>
+        </main>
+        <footer>
+            <a class="footer-link" href="#" onclick="londolola('Learn more!')">
+                <span class="footer-icon">📄</span>
+                Learn
+            </a>
+            <a class="footer-link" href="#" onclick="londolola('View examples!')">
+                <span class="footer-icon">🪟</span>
+                Examples
+            </a>
+            <a class="footer-link" href="#" onclick="londolola('Go to BembaJS!')">
+                <span class="footer-icon">🌐</span>
+                Go to bembajs.dev →
+            </a>
+        </footer>
+    </div>
     <script>
         // BembaJS runtime functions
         function londolola(message) {
