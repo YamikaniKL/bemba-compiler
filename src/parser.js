@@ -37,23 +37,6 @@ class BembaParser {
     }
     
     // Main parsing methods
-    parse(tokens) {
-        this.tokens = tokens;
-        this.current = 0;
-        this.errors = [];
-        
-        const program = new ProgramNode();
-        
-        while (!this.isAtEnd()) {
-            const statement = this.parseStatement();
-            if (statement) {
-                program.body.push(statement);
-            }
-        }
-        
-        return program;
-    }
-    
     parseProject(projectRoot) {
         this.projectRoot = projectRoot;
         this.modules.clear();
