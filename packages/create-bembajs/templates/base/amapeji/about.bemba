@@ -1,0 +1,78 @@
+// About page
+pangaIpepa('About', {
+    umutwe: '📖 About BembaJS',
+    ilyashi: 'Learn more about the Bemba programming language and framework',
+    
+    ifiputulwa: [
+        {
+            umutwe: '🇿🇲 What is BembaJS?',
+            ilyashi: 'BembaJS is a modern web framework that allows you to build applications using the Bemba language - making programming accessible to Zambian developers.',
+            amabatani: [
+                {
+                    ilembo: 'Learn Bemba',
+                    pakuKlikisha: 'londolola("Bemba is a beautiful language!")'
+                }
+            ]
+        },
+        {
+            umutwe: '🎯 Our Mission',
+            ilyashi: 'To make programming accessible to African developers by providing tools and frameworks in local languages.',
+            amabatani: [
+                {
+                    ilembo: 'Join Us',
+                    pakuKlikisha: 'londolola("Welcome to the community!")'
+                }
+            ]
+        }
+    ],
+    
+    imikalile: `
+        body { 
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .icipandwa { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ibatani { 
+            background: #f5576c; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .ibatani:hover {
+            background: #e04a5a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    `
+});

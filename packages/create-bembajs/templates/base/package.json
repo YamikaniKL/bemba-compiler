@@ -1,0 +1,41 @@
+{
+  "name": "bemba-app",
+  "version": "1.0.0",
+  "description": "A BembaJS application built with the Bemba programming language",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "bemba tungulula",
+    "build": "bemba akha",
+    "start": "bemba panga",
+    "lint": "bemba lint",
+    "format": "bemba format",
+    "test": "bemba test"
+  },
+  "keywords": [
+    "bemba",
+    "bembajs",
+    "web-framework",
+    "zambia",
+    "african-programming"
+  ],
+  "author": "BembaJS Developer",
+  "license": "MIT",
+  "dependencies": {
+    "bembajs": "^1.0.0"
+  },
+  "devDependencies": {
+    "@bembajs/cli": "^1.0.0",
+    "@bembajs/dev-tools": "^1.0.0"
+  },
+  "bemba": {
+    "version": "1.0.0",
+    "framework": "nextjs-like",
+    "features": [
+      "ssr",
+      "ssg", 
+      "routing",
+      "api-routes",
+      "components"
+    ]
+  }
+}

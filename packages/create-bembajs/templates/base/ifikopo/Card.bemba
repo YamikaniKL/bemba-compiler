@@ -1,0 +1,70 @@
+// Reusable Card component
+fyambaIcipanda('Card', {
+    // Component props
+    ifiputulwa: {
+        umutwe: 'Card Title',
+        ilyashi: 'Card content goes here',
+        umutindo: 'default'
+    },
+    
+    // Component logic
+    imikalile: `
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 8px 0;
+        }
+        
+        .card-content {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .card.primary {
+            border-left: 4px solid #667eea;
+        }
+        
+        .card.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .card.warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .card.danger {
+            border-left: 4px solid #dc3545;
+        }
+    `,
+    
+    // Component template
+    template: `
+        <div class="card {{umutindo}}">
+            <div class="card-header">
+                <h3 class="card-title">{{umutwe}}</h3>
+            </div>
+            <div class="card-content">
+                {{ilyashi}}
+            </div>
+        </div>
+    `
+});

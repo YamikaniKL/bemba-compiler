@@ -1,0 +1,88 @@
+// Home page - Main entry point
+pangaIpepa('Home', {
+    umutwe: '🏠 Welcome to BembaJS',
+    ilyashi: 'Build amazing web applications in the Bemba language',
+    
+    // Page content
+    ifiputulwa: [
+        {
+            umutwe: '🚀 Get Started',
+            ilyashi: 'Welcome to your new BembaJS application! This is your home page.',
+            amabatani: [
+                {
+                    ilembo: 'Learn More',
+                    pakuKlikisha: 'londolola("Welcome to BembaJS!")'
+                },
+                {
+                    ilembo: 'View Docs',
+                    pakuKlikisha: 'londolola("Check out the documentation!")'
+                }
+            ]
+        },
+        {
+            umutwe: '🎯 Features',
+            ilyashi: 'BembaJS provides all the features you need for modern web development.',
+            amabatani: [
+                {
+                    ilembo: 'Components',
+                    pakuKlikisha: 'londolola("Build reusable components!")'
+                },
+                {
+                    ilembo: 'Routing',
+                    pakuKlikisha: 'londolola("File-based routing included!")'
+                }
+            ]
+        }
+    ],
+    
+    // Page styles
+    imikalile: `
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .icipandwa { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin: 20px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .ibatani { 
+            background: #667eea; 
+            color: white; 
+            padding: 15px 30px; 
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .ibatani:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        h1, h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+    `
+});

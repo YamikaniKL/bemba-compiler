@@ -1,0 +1,67 @@
+{
+  "name": "bembajs",
+  "version": "1.0.1",
+  "description": "BembaJS - A Next.js-like framework for programming in Bemba language",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "bemba": "./bin/bemba.js"
+  },
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./cli": {
+      "require": "./dist/cli.js",
+      "import": "./dist/cli.mjs"
+    },
+    "./server": {
+      "require": "./dist/server.js",
+      "import": "./dist/server.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "bin",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node src/server/app.js",
+    "test": "node test/index.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "bemba",
+    "javascript",
+    "framework",
+    "nextjs",
+    "react",
+    "compiler",
+    "zambia",
+    "cli"
+  ],
+  "author": "BembaJS Team",
+  "license": "MIT",
+  "dependencies": {
+    "bembajs-core": "workspace:*",
+    "express": "^4.21.2",
+    "commander": "^11.1.0",
+    "chokidar": "^3.5.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bembajs/bembajs.git",
+    "directory": "packages/bembajs"
+  }
+}
+

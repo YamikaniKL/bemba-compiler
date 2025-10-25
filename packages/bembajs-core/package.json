@@ -1,0 +1,65 @@
+{
+  "name": "bembajs-core",
+  "version": "1.0.0",
+  "description": "BembaJS Core - Compiler and runtime for Bemba language",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    },
+    "./lexer": {
+      "require": "./dist/lexer.js",
+      "import": "./dist/lexer.mjs",
+      "types": "./dist/lexer.d.ts"
+    },
+    "./parser": {
+      "require": "./dist/parser.js",
+      "import": "./dist/parser.mjs",
+      "types": "./dist/parser.d.ts"
+    },
+    "./transformer": {
+      "require": "./dist/transformer.js",
+      "import": "./dist/transformer.mjs",
+      "types": "./dist/transformer.d.ts"
+    },
+    "./generator": {
+      "require": "./dist/generator.js",
+      "import": "./dist/generator.mjs",
+      "types": "./dist/generator.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node build.js",
+    "dev": "node build.js --watch",
+    "test": "node test/index.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "bemba",
+    "compiler",
+    "parser",
+    "lexer",
+    "ast"
+  ],
+  "author": "BembaJS Team",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bembajs/bembajs.git",
+    "directory": "packages/bembajs-core"
+  }
+}
+

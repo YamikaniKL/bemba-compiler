@@ -1,0 +1,62 @@
+// Reusable Button component
+fyambaIcipanda('Button', {
+    // Component props
+    ifiputulwa: {
+        ilembo: 'Button',
+        pakuKlikisha: 'londolola("Button clicked!")',
+        umutindo: 'primary'
+    },
+    
+    // Component logic
+    imikalile: `
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-block;
+            text-decoration: none;
+        }
+        
+        .button.primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .button.primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .button.secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #dee2e6;
+        }
+        
+        .button.secondary:hover {
+            background: #e9ecef;
+            border-color: #adb5bd;
+        }
+        
+        .button.danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .button.danger:hover {
+            background: #c82333;
+        }
+    `,
+    
+    // Component template
+    template: `
+        <button class="button {{umutindo}}" onclick="{{pakuKlikisha}}">
+            {{ilembo}}
+        </button>
+    `
+});
