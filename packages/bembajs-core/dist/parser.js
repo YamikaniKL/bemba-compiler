@@ -883,12 +883,333 @@ class BembaParser {
     }
     
     compileNewSyntax(code) {
-        // For new syntax, use the full compilation pipeline
-        const tokens = this.lexer.tokenize(code);
-        const ast = this.parse(tokens);
-        // Note: This would need the transformer and generator
-        // For now, return a simple message
-        return `<!-- New syntax compilation would go here -->`;
+        // Extract page configuration from pangaIpepa syntax
+        const appName = this.extractAppNameFromNewSyntax(code);
+        const sections = this.extractSectionsFromNewSyntax(code);
+        const styles = this.extractStylesFromNewSyntax(code);
+        
+        // Generate the same modern layout as compileOldSyntax
+        return this.generateModernLayout(appName, sections, styles);
+    }
+    
+    extractAppNameFromNewSyntax(code) {
+        const match = code.match(/pangaIpepa\s*\(\s*["']([^"']+)["']/);
+        return match ? match[1] : 'BembaJS App';
+    }
+    
+    extractSectionsFromNewSyntax(code) {
+        const sections = [];
+        
+        // Extract title and content from pangaIpepa
+        const titleMatch = code.match(/umutwe:\s*["']([^"']*)["']/);
+        const descMatch = code.match(/ilyashi:\s*["']([^"']*)["']/);
+        
+        if (titleMatch || descMatch) {
+            sections.push({
+                title: titleMatch ? titleMatch[1] : 'Get started by editing',
+                content: descMatch ? descMatch[1] : 'Save and see your changes instantly.',
+                buttons: this.extractButtonsFromNewSyntax(code)
+            });
+        }
+        
+        return sections;
+    }
+    
+    extractButtonsFromNewSyntax(code) {
+        const buttons = [];
+        
+        // Look for amabatani array in ifiputulwa
+        const buttonMatches = code.match(/amabatani:\s*\[([\s\S]*?)\]/);
+        if (buttonMatches) {
+            const buttonContent = buttonMatches[1];
+            const buttonRegex = /\{\s*ilembo:\s*["']([^"']+)["']\s*,\s*pakuKlikisha:\s*["']([^"']+)["']\s*\}/g;
+            let match;
+            
+            while ((match = buttonRegex.exec(buttonContent)) !== null) {
+                buttons.push({
+                    label: match[1],
+                    onClick: match[2]
+                });
+            }
+        }
+        
+        return buttons;
+    }
+    
+    extractStylesFromNewSyntax(code) {
+        const styleMatch = code.match(/imikalile:\s*["']([\s\S]*?)["']/);
+        return styleMatch ? styleMatch[1] : '';
+    }
+    
+    generateModernLayout(appName, sections, styles) {
+        // Use the same modern layout generation as compileOldSyntax
+        const defaultButtons = [
+            { label: 'Deploy now', onClick: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")' },
+            { label: 'Read our docs', onClick: 'window.open("https://bembajs.dev/docs", "_blank")' }
+        ];
+        
+        const buttons = sections.length > 0 && sections[0].buttons ? sections[0].buttons : defaultButtons;
+        
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${appName}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body { 
+            background: #fafafa;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            color: #171717;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-rows: 20px 1fr 20px;
+            align-items: center;
+            justify-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            padding-bottom: 5rem;
+            gap: 4rem;
+        }
+        
+        @media (min-width: 640px) {
+            .grid {
+                padding: 5rem;
+            }
+        }
+        
+        main {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            grid-row-start: 2;
+            align-items: center;
+        }
+        
+        @media (min-width: 640px) {
+            main {
+                align-items: flex-start;
+            }
+        }
+        
+        .bemba-logo {
+            width: 180px;
+            height: 38px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        
+        ol {
+            list-style: decimal;
+            list-style-position: inside;
+            text-align: center;
+            font-size: 0.875rem;
+            line-height: 1.5rem;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        }
+        
+        @media (min-width: 640px) {
+            ol {
+                text-align: left;
+            }
+        }
+        
+        li {
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.01em;
+        }
+        
+        code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            font-weight: 600;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            code {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+        
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        @media (min-width: 640px) {
+            .button-container {
+                flex-direction: row;
+            }
+        }
+        
+        .ibatani {
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000000;
+            color: #fafafa;
+            gap: 0.5rem;
+            font-weight: 500;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            height: 2.5rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        
+        .ibatani:hover {
+            background: #404040;
+        }
+        
+        .ibatani.secondary {
+            background: transparent;
+            color: #000000;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .ibatani.secondary:hover {
+            background: #f2f2f2;
+            border-color: transparent;
+        }
+        
+        @media (min-width: 640px) {
+            .ibatani {
+                font-size: 1rem;
+                line-height: 1.5rem;
+                height: 3rem;
+                padding-left: 1.25rem;
+                padding-right: 1.25rem;
+            }
+            
+            .ibatani.secondary {
+                width: 100%;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .ibatani.secondary {
+                width: 158px;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .ibatani:hover {
+                background: #cccccc;
+            }
+            
+            .ibatani.secondary {
+                border-color: rgba(255, 255, 255, 0.145);
+            }
+            
+            .ibatani.secondary:hover {
+                background: #1a1a1a;
+            }
+        }
+        
+        footer {
+            grid-row-start: 3;
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .footer-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #171717;
+            text-decoration: none;
+        }
+        
+        .footer-link:hover {
+            text-decoration: underline;
+            text-underline-offset: 4px;
+        }
+        
+        .footer-icon {
+            width: 16px;
+            height: 16px;
+        }
+        
+        ${styles}
+    </style>
+</head>
+<body class="antialiased">
+    <div class="grid">
+        <main>
+            <div class="bemba-logo">BembaJS</div>
+            <ol>
+                <li>Get started by editing <code>app/page.bemba</code>.</li>
+                <li>Save and see your changes instantly.</li>
+            </ol>
+            <div class="button-container">
+                ${buttons.map((button, index) => `
+                    <button class="ibatani ${index === 1 ? 'secondary' : ''}" onclick="${button.onClick}">
+                        ${button.label}
+                    </button>
+                `).join('')}
+            </div>
+        </main>
+        <footer>
+            <a href="https://bembajs.dev" class="footer-link" target="_blank" rel="noopener noreferrer">
+                <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                BembaJS
+            </a>
+            <a href="https://github.com/bembajs/bembajs" class="footer-link" target="_blank" rel="noopener noreferrer">
+                <svg class="footer-icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+            </a>
+        </footer>
+    </div>
+    <script>
+        // BembaJS runtime functions
+        function londolola(message) {
+            alert(message);
+        }
+        
+        function pangaIpepa(title, content) {
+            console.log('Page:', title, content);
+        }
+        
+        function fyambaIcipanda(name, props) {
+            console.log('Component:', name, props);
+        }
+    </script>
+</body>
+</html>`;
     }
     
     extractAppName(code) {
