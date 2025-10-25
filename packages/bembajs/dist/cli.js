@@ -54,6 +54,24 @@ program
         console.log('📍 Server will be available at: http://localhost:3000');
         console.log('🔄 Hot reload enabled');
         console.log('💡 Press Ctrl+C to stop');
+        
+        // Start the actual development server
+        try {
+            const BembaDevServer = require('./dev-server');
+            const server = new BembaDevServer({ port: 3000 });
+            server.start();
+            
+            // Handle Ctrl+C
+            process.on('SIGINT', () => {
+                console.log('\n🛑 Stopping BembaJS development server...');
+                process.exit(0);
+            });
+            
+        } catch (error) {
+            console.error('❌ Failed to start development server:', error.message);
+            console.log('💡 Make sure you are in a BembaJS project directory');
+            process.exit(1);
+        }
     });
 
 // Build command
