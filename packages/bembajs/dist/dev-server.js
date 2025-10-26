@@ -72,6 +72,15 @@ function compileBemba(code) {
                                 buttonActions[index] : 
                                 `alert('${btnText} clicked!')`;
                             
+                            // Extract URL from window.open("URL", "_blank") pattern
+                            let href = '#';
+                            if (btnAction.includes('window.open(')) {
+                                const urlMatch = btnAction.match(/window\.open\(['"`]([^'"`]+)['"`]/);
+                                if (urlMatch) {
+                                    href = urlMatch[1];
+                                }
+                            }
+                            
                             // First button is primary (Deploy Now), second is secondary (Documentation)
                             const isPrimary = index === 0;
                             const buttonClass = isPrimary ? 
@@ -82,7 +91,7 @@ function compileBemba(code) {
                                 `<img alt="Vercel logomark" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
                                 btnText;
                             
-                            return `<a class="${buttonClass}" href="#" onclick="${btnAction}; return false;" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
+                            return `<a class="${buttonClass}" href="${href}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
                         }).join('');
                     }
                 }
@@ -124,8 +133,8 @@ function compileBemba(code) {
         <main>
             <img alt="BembaJS logo" width="100" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/bemba-logo.svg">
             <div class="content-section">
-                <h1>To get started, edit the amapeji/index.bemba file.</h1>
-                <p>Looking for a starting point or more instructions? Head over to <a href="https://bembajs.dev/templates">Templates</a> or the <a href="https://bembajs.dev/learn">Learning</a> center.</p>
+                <h1>Ukutampa bwino, lemba pali amapeji/index.bemba file</h1>
+                <p>Uleefwaya ukutampa nelyo ukufwailko ifpefyo fyakukonkelemo? Ya ku <a href="https://bembajs.dev/learn">Learning Center</a></p>
             </div>
             <div class="button-container">
                 ${sections}
