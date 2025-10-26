@@ -51,7 +51,7 @@ function compileBemba(code) {
                                 'rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]';
                             
                             const buttonContent = isPrimary ? 
-                                `<img alt="Vercel logomark" loading="lazy" width="20" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/favicon.png">${btnText}` :
+                                `<img alt="Vercel logomark" loading="lazy" width="20" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
                                 btnText;
                             
                             return `<a class="${buttonClass}" href="#" onclick="${btnAction}; return false;" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
@@ -77,13 +77,24 @@ function compileBemba(code) {
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.png">
     <style>
+        :root {
+            --font-geist-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            --font-geist-mono: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+        }
+        
+        body {
+            font-family: var(--font-geist-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
         ${customStyles}
     </style>
 </head>
-<body class="antialiased">
+<body class="__variable_4d318d __variable_ea5f4b antialiased">
     <div class="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
         <main class="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-            <img alt="BembaJS logo" width="180" height="38" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/favicon.png">
+            <img alt="BembaJS logo" width="180" height="38" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/bemba-logo.svg">
             <ol class="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
                 <li class="mb-2 tracking-[-.01em]">Get started by editing<!-- --> <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">amapeji/index.bemba</code>.</li>
                 <li class="tracking-[-.01em]">Save and see your changes instantly.</li>
@@ -94,15 +105,15 @@ function compileBemba(code) {
         </main>
         <footer class="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
             <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/learn" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="File icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/favicon.png">
+                <img aria-hidden="true" alt="File icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/file.svg">
                 Learn
             </a>
             <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://github.com/bembajs/bembajs/tree/main/examples" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Window icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/favicon.png">
+                <img aria-hidden="true" alt="Window icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/window.svg">
                 Examples
             </a>
             <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Globe icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/favicon.png">
+                <img aria-hidden="true" alt="Globe icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/globe.svg">
                 Go to bembajs.dev →
             </a>
         </footer>

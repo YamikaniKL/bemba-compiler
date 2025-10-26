@@ -1,6 +1,6 @@
 {
   "name": "bembajs-core",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "BembaJS Core - Compiler and runtime for Bemba language",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

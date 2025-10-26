@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -48,7 +48,7 @@
   "author": "BembaJS Team",
   "license": "MIT",
   "dependencies": {
-    "bembajs-core": "^1.0.0",
+    "bembajs-core": "^1.0.1",
     "express": "^4.21.2",
     "commander": "^11.1.0",
     "chokidar": "^3.5.3",
