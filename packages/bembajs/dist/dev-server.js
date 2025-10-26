@@ -72,14 +72,14 @@ function compileBemba(code) {
                                 buttonActions[index] : 
                                 `alert('${btnText} clicked!')`;
                             
-                            // First button is primary (Deploy now), second is secondary (Read our docs)
+                            // First button is primary (Deploy Now), second is secondary (Documentation)
                             const isPrimary = index === 0;
                             const buttonClass = isPrimary ? 
-                                'rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto' :
-                                'rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]';
+                                'ibatani' :
+                                'ibatani secondary';
                             
                             const buttonContent = isPrimary ? 
-                                `<img alt="Vercel logomark" loading="lazy" width="20" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
+                                `<img alt="Vercel logomark" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
                                 btnText;
                             
                             return `<a class="${buttonClass}" href="#" onclick="${btnAction}; return false;" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
@@ -120,31 +120,17 @@ function compileBemba(code) {
     </style>
 </head>
 <body class="__variable_4d318d __variable_ea5f4b antialiased">
-    <div class="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-        <main class="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-            <img alt="BembaJS logo" width="180" height="38" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/bemba-logo.svg">
-            <ol class="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-                <li class="mb-2 tracking-[-.01em]">Get started by editing<!-- --> <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">amapeji/index.bemba</code>.</li>
-                <li class="tracking-[-.01em]">Save and see your changes instantly.</li>
-            </ol>
-            <div class="flex gap-4 items-center flex-col sm:flex-row">
+    <div class="container">
+        <main>
+            <img alt="BembaJS logo" width="100" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/bemba-logo.svg">
+            <div class="content-section">
+                <h1>To get started, edit the amapeji/index.bemba file.</h1>
+                <p>Looking for a starting point or more instructions? Head over to <a href="https://bembajs.dev/templates">Templates</a> or the <a href="https://bembajs.dev/learn">Learning</a> center.</p>
+            </div>
+            <div class="button-container">
                 ${sections}
             </div>
         </main>
-        <footer class="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/learn" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="File icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/file.svg">
-                Learn
-            </a>
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://github.com/bembajs/bembajs/tree/main/examples" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Window icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/window.svg">
-                Examples
-            </a>
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Globe icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/globe.svg">
-                Go to bembajs.dev →
-            </a>
-        </footer>
     </div>
 </body>
 </html>`;
