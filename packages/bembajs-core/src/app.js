@@ -86,8 +86,15 @@ function compileNewSyntax(code, type = 'component') {
         // Transform
         const transformed = transformer.transform(mockAST);
         
-        // Generate
-        const generated = generator.generate(transformed);
+        // Generate - use HTML generator for pages
+        let generated;
+        if (type === 'page') {
+            // Extract page config from the mock AST
+            const pageConfig = extractPageConfig(mockAST);
+            generated = generator.generateHTMLFromPage(pageConfig);
+        } else {
+            generated = generator.generate(transformed);
+        }
         
         // Wrap in HTML for preview
         return wrapInHTML(generated, type);
@@ -124,14 +131,89 @@ function createMockAST(code, type) {
         };
     }
     
+    if (type === 'page' || code.includes('pangaIpepa')) {
+        return {
+            type: 'Page',
+            config: extractPageConfigFromCode(code)
+        };
+    }
+    
     return {
         type: 'Program',
         statements: []
     };
 }
 
+// Extract page configuration from BembaJS code
+function extractPageConfigFromCode(code) {
+    // Simple regex-based extraction for demo purposes
+    const config = {
+        umutwe: 'Panga BembaJS App',
+        ilyashi: 'Yapangwa na create bembajs app',
+        ifiputulwa: [{
+            umutwe: 'Tantika ukupanga ukulemba',
+            ilyashi: 'Bika na ukumona ifyakusendeka mwangu.',
+            amabatani: [
+                {
+                    ilembo: 'Panga pa Vercel',
+                    pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
+                },
+                {
+                    ilembo: 'Soma amakalata yetu',
+                    pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+                }
+            ]
+        }],
+        imikalile: extractCSSFromCode(code)
+    };
+    
+    return config;
+}
+
+// Extract CSS from the code
+function extractCSSFromCode(code) {
+    const cssMatch = code.match(/imikalile:\s*`([\s\S]*?)`/);
+    if (cssMatch) {
+        return cssMatch[1].trim();
+    }
+    return '';
+}
+
+// Extract page config from mock AST
+function extractPageConfig(mockAST) {
+    if (mockAST.type === 'Page' && mockAST.config) {
+        return mockAST.config;
+    }
+    
+    // Fallback to default config
+    return {
+        umutwe: 'Panga BembaJS App',
+        ilyashi: 'Yapangwa na create bembajs app',
+        ifiputulwa: [{
+            umutwe: 'Tantika ukupanga ukulemba',
+            ilyashi: 'Bika na ukumona ifyakusendeka mwangu.',
+            amabatani: [
+                {
+                    ilembo: 'Panga pa Vercel',
+                    pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
+                },
+                {
+                    ilembo: 'Soma amakalata yetu',
+                    pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+                }
+            ]
+        }],
+        imikalile: ''
+    };
+}
+
 // Wrap generated code in HTML for preview
 function wrapInHTML(code, type) {
+    // If it's a page type, generate the full HTML structure
+    if (type === 'page') {
+        return code; // The code is already HTML
+    }
+    
     return `<!DOCTYPE html>
 <html lang="en">
 <head>

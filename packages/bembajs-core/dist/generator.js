@@ -425,6 +425,86 @@ const nextConfig = {
 
 module.exports = nextConfig`;
     }
+    
+    // Generate HTML from BembaJS page configuration
+    generateHTMLFromPage(pageConfig) {
+        const title = pageConfig.umutwe || 'BembaJS App';
+        const description = pageConfig.ilyashi || 'Yapangwa na BembaJS';
+        const sections = pageConfig.ifiputulwa || [];
+        const styles = pageConfig.imikalile || '';
+        
+        // Generate main content
+        let mainContent = '';
+        if (sections.length > 0) {
+            const section = sections[0]; // Use first section
+            mainContent = `
+        <main class="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+            <img alt="BembaJS logo" width="180" height="38" src="/bemba-logo.svg" class="dark:invert" style="color:transparent">
+            <ol class="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+                <li class="mb-2 tracking-[-.01em]">Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">amapeji/index.bemba</code>.</li>
+                <li class="tracking-[-.01em]">Bika na ukumona ifyakusendeka mwangu.</li>
+            </ol>
+            <div class="flex gap-4 items-center flex-col sm:flex-row">
+                ${this.generateButtons(section.amabatani || [])}
+            </div>
+        </main>`;
+        }
+        
+        // Generate footer
+        const footer = `
+        <footer class="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
+            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/learn" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" alt="File icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8.177 14.323l2.896-2.896a1.5 1.5 0 000-2.122L8.177 6.409a1.5 1.5 0 00-2.122 0L3.159 9.305a1.5 1.5 0 000 2.122l2.896 2.896a1.5 1.5 0 002.122 0z"/>
+                </svg>
+                Funda
+            </a>
+            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/examples" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" alt="Window icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M0 0h16v16H0V0zm1 1v14h14V1H1z"/>
+                </svg>
+                Ifyabukaya
+            </a>
+            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" alt="Globe icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0a8 8 0 100 16A8 8 0 008 0zM1.5 8a6.5 6.5 0 1113 0 6.5 6.5 0 01-13 0z"/>
+                </svg>
+                Ya ku bembajs.dev →
+            </a>
+        </footer>`;
+        
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title}</title>
+    <meta name="description" content="${description}">
+    <style>
+        ${styles}
+    </style>
+</head>
+<body class="antialiased">
+    <div class="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+        ${mainContent}
+        ${footer}
+    </div>
+</body>
+</html>`;
+    }
+    
+    generateButtons(buttons) {
+        if (!buttons || buttons.length === 0) return '';
+        
+        return buttons.map((button, index) => {
+            const isSecondary = index > 0;
+            const buttonClass = isSecondary 
+                ? 'rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]'
+                : 'rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-black text-white gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto';
+            
+            return `<a class="${buttonClass}" href="#" onclick="${button.pakuKlikisha || 'return false;'}" target="_blank" rel="noopener noreferrer">${button.ilembo}</a>`;
+        }).join('\n                ');
+    }
 }
 
 module.exports = BembaGenerator;
