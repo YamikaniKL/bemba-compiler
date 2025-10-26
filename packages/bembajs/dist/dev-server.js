@@ -38,12 +38,29 @@ function compileBemba(code) {
                     
                     // Parse button actions more carefully to handle complex URLs
                     const buttonActions = [];
-                    const actionMatches = sectionsData.match(/pakuKlikisha:\s*['"`]([^'"`]*?)['"`]/g);
-                    if (actionMatches) {
-                        actionMatches.forEach(action => {
-                            const match = action.match(/pakuKlikisha:\s*['"`]([^'"`]*?)['"`]/);
-                            if (match) {
-                                buttonActions.push(match[1]);
+                    
+                    // Find all button action blocks more carefully
+                    const buttonBlocks = sectionsData.match(/\{[^}]*pakuKlikisha:[^}]*\}/g);
+                    
+                    if (buttonBlocks) {
+                        buttonBlocks.forEach(block => {
+                            // Find the pakuKlikisha line and extract everything after the colon
+                            const lines = block.split('\n');
+                            for (const line of lines) {
+                                if (line.includes('pakuKlikisha:')) {
+                                    // Find the start of the quoted string
+                                    const colonIndex = line.indexOf(':');
+                                    const quoteStart = line.indexOf("'", colonIndex);
+                                    if (quoteStart !== -1) {
+                                        // Find the end of the quoted string (last single quote)
+                                        const quoteEnd = line.lastIndexOf("'");
+                                        if (quoteEnd > quoteStart) {
+                                            const action = line.substring(quoteStart + 1, quoteEnd);
+                                            buttonActions.push(action);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
                         });
                     }
