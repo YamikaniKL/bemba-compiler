@@ -15,12 +15,12 @@ const BembaGenerator = require('./generator');
 // Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../../../public')));
+app.use(express.static(path.join(__dirname, '../public')));
 
-// Test endpoint to show our new boilerplate
-app.get('/test-boilerplate', (req, res) => {
+// Route to serve the main IDE with updated boilerplate
+app.get('/', (req, res) => {
     const generator = new BembaGenerator();
-    const testPageConfig = {
+    const defaultPageConfig = {
         umutwe: 'Panga BembaJS App',
         ilyashi: 'Yapangwa na create bembajs app',
         ifiputulwa: [{
@@ -143,13 +143,8 @@ app.get('/test-boilerplate', (req, res) => {
         `
     };
     
-    const htmlOutput = generator.generateHTMLFromPage(testPageConfig);
+    const htmlOutput = generator.generateHTMLFromPage(defaultPageConfig);
     res.send(htmlOutput);
-});
-
-// Route to serve the index.html
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../../../public/index.html'));
 });
 
 // Old compiler endpoint (backward compatible)

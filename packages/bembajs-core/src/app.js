@@ -17,9 +17,134 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Route to serve the index.html
+// Route to serve the main IDE with updated boilerplate
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
+    const generator = new BembaGenerator();
+    const defaultPageConfig = {
+        umutwe: 'Panga BembaJS App',
+        ilyashi: 'Yapangwa na create bembajs app',
+        ifiputulwa: [{
+            umutwe: 'Tantika ukupanga ukulemba',
+            ilyashi: 'Bika na ukumona ifyakusendeka mwangu.',
+            amabatani: [
+                {
+                    ilembo: 'Panga pa Vercel',
+                    pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
+                },
+                {
+                    ilembo: 'Soma amakalata yetu',
+                    pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+                }
+            ]
+        }],
+        imikalile: `
+            body {
+                font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+                margin: 0;
+                padding: 0;
+                background: #fafafa;
+                color: #171717;
+            }
+            
+            .grid {
+                display: grid;
+                grid-template-rows: 20px 1fr 20px;
+                align-items: center;
+                justify-items: center;
+                min-height: 100vh;
+                padding: 2rem;
+                padding-bottom: 5rem;
+                gap: 4rem;
+            }
+            
+            @media (min-width: 640px) {
+                .grid {
+                    padding: 5rem;
+                }
+            }
+            
+            main {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+                grid-row-start: 2;
+                align-items: center;
+            }
+            
+            @media (min-width: 640px) {
+                main {
+                    align-items: flex-start;
+                }
+            }
+            
+            ol {
+                list-style: decimal;
+                list-style-position: inside;
+                text-align: center;
+                font-size: 0.875rem;
+                line-height: 1.5rem;
+                font-family: var(--font-geist-mono), 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            }
+            
+            @media (min-width: 640px) {
+                ol {
+                    text-align: left;
+                }
+            }
+            
+            li {
+                margin-bottom: 0.5rem;
+                letter-spacing: -0.01em;
+            }
+            
+            code {
+                background: rgba(0, 0, 0, 0.05);
+                padding: 0.125rem 0.25rem;
+                border-radius: 0.25rem;
+                font-family: var(--font-geist-mono), 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+                font-weight: 600;
+            }
+            
+            @media (prefers-color-scheme: dark) {
+                code {
+                    background: rgba(255, 255, 255, 0.06);
+                }
+            }
+            
+            footer {
+                grid-row-start: 3;
+                display: flex;
+                gap: 1.5rem;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .footer-link {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                color: #171717;
+                text-decoration: none;
+            }
+            
+            .footer-link:hover {
+                text-decoration: underline;
+                text-underline-offset: 4px;
+            }
+            
+            /* CSS Variables for fonts */
+            :root {
+                --font-geist-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+                --font-geist-mono: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            }
+        `
+    };
+    
+    const htmlOutput = generator.generateHTMLFromPage(defaultPageConfig);
+    res.send(htmlOutput);
 });
 
 // Old compiler endpoint (backward compatible)
