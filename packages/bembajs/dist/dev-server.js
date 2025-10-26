@@ -33,15 +33,26 @@ function compileBemba(code) {
                 if (sectionsMatch) {
                     const sectionsData = sectionsMatch[1];
                     
-                    // Look for buttons directly in the sections data
+                    // Look for buttons directly in the sections data - improved parsing
                     const buttonMatches = sectionsData.match(/ilembo:\s*['"`]([^'"`]+)['"`]/g);
-                    const buttonActions = sectionsData.match(/pakuKlikisha:\s*['"`]([^'"`]+)['"`]/g);
+                    
+                    // Parse button actions more carefully to handle complex URLs
+                    const buttonActions = [];
+                    const actionMatches = sectionsData.match(/pakuKlikisha:\s*['"`]([^'"`]*?)['"`]/g);
+                    if (actionMatches) {
+                        actionMatches.forEach(action => {
+                            const match = action.match(/pakuKlikisha:\s*['"`]([^'"`]*?)['"`]/);
+                            if (match) {
+                                buttonActions.push(match[1]);
+                            }
+                        });
+                    }
                     
                     if (buttonMatches) {
                         sections = buttonMatches.map((btn, index) => {
                             const btnText = btn.match(/['"`]([^'"`]+)['"`]/)[1];
                             const btnAction = buttonActions && buttonActions[index] ? 
-                                buttonActions[index].match(/['"`]([^'"`]+)['"`]/)[1] : 
+                                buttonActions[index] : 
                                 `alert('${btnText} clicked!')`;
                             
                             // First button is primary (Deploy now), second is secondary (Read our docs)
