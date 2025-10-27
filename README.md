@@ -1,141 +1,128 @@
 # BembaJS
 
-A Next.js-like framework for programming in the Bemba language 🇿🇲
+<div align="center">
 
-## 🚀 Quick Start
+![BembaJS Logo](https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350)
 
-### Create a New Project
+**A Next.js-like framework for programming in the Bemba language** 🇿🇲
+
+[![npm version](https://badge.fury.io/js/bembajs.svg)](https://www.npmjs.com/package/bembajs)
+[![npm downloads](https://img.shields.io/npm/dm/bembajs.svg)](https://www.npmjs.com/package/bembajs)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)](https://marketplace.visualstudio.com/items?itemName=bembajs.bembajs-language-support)
+
+*Programming in Bemba Language - Made Easy!*
+
+</div>
+
+---
+
+## ✨ **What's New in Version 1.0**
+
+🎉 **BembaJS Version 1.0** is here! This major release brings:
+
+- 🎨 **VS Code Extension** - Full marketplace integration with syntax highlighting
+- 🚀 **Next.js-like Styling** - Beautiful Tailwind CSS integration
+- 🌍 **Rich Bemba Content** - Programming in authentic Bemba language
+- ⚡ **Automatic IDE Support** - Works seamlessly like JavaScript files
+- 📦 **Production Ready** - Optimized builds and deployment ready
+
+---
+
+## 🚀 **Quick Start**
+
+### **Create Your First BembaJS App**
 
 ```bash
-# Using npm
+# Create a new project
 npm create bembajs@latest my-app
 
-# Using npx
-npx create-bembajs my-app
+# Navigate to your project
+cd my-app
 
-# Using Bun
-bun create bembajs my-app
-```
-
-### Install Globally
-
-```bash
-# Using npm
-npm install -g bembajs
-
-# Using Bun
-bun install -g bembajs
-```
-
-### Use the CLI
-
-```bash
-# Create new project
-bemba panga my-app
+# Install dependencies
+npm install
 
 # Start development server
-cd my-app
-bemba tungulula
-
-# Build for production
-bemba akha
+npm run dev
 ```
 
-## 📦 Packages
+**That's it!** Open [http://localhost:3000](http://localhost:3000) to see your app running.
 
-This monorepo contains the following packages:
+### **VS Code Extension (Recommended)**
 
-- **`@bembajs/core`** - Core compiler (lexer, parser, transformer, generator)
-- **`bembajs`** - Main package with CLI and SDK
-- **`create-bembajs`** - Project scaffolding tool (like create-next-app)
+For the best development experience, install the official VS Code extension:
 
-## 🎯 Features
+1. **Open VS Code**
+2. **Go to Extensions** (Ctrl+Shift+X)
+3. **Search**: "BembaJS Language Support"
+4. **Click Install**
 
-- ✅ **Next.js-like Framework** - File-based routing, SSR, SSG
-- ✅ **Bemba Language** - Program in Bemba with full syntax support
-- ✅ **Component System** - Reusable components with props
-- ✅ **API Routes** - Server-side API endpoints
-- ✅ **Hot Module Replacement** - Fast development experience
-- ✅ **Bun Optimization** - Native Bun support for faster builds
-- ✅ **VS Code/Cursor Integration** - Full IDE support
-- ✅ **TypeScript Support** - Optional type safety
-- ✅ **Production Ready** - Optimized builds for deployment
-
-## 📚 Documentation
-
-### Installation Methods
-
-#### Global Installation
+Or install via command line:
 ```bash
-npm install -g bembajs
+code --install-extension bembajs.bembajs-language-support
 ```
 
-Then use the CLI:
+---
+
+## 🎨 **VS Code/Cursor Integration**
+
+BembaJS now includes **professional IDE support** with:
+
+### **✨ Features**
+- 🎨 **Syntax Highlighting** - Full color-coded BembaJS keywords
+- 🎯 **File Icons** - Custom icons for `.bemba` files
+- 📝 **Code Snippets** - Auto-completion for common patterns
+- 🚀 **Commands** - Right-click to create projects and start servers
+- 🌍 **Language Support** - Complete BembaJS language integration
+
+### **📦 Installation Options**
+
+#### **Option 1: VS Code Marketplace (Recommended)**
 ```bash
-bemba panga my-app
-cd my-app
-bemba tungulula
+# Install from marketplace
+code --install-extension bembajs.bembajs-language-support
 ```
 
-#### Local Installation with npx
+#### **Option 2: Global Installation**
 ```bash
-npx bembajs panga my-app
-cd my-app
-npx bemba tungulula
+# Install globally
+npm install -g bembajs@latest
+
+# Install IDE support
+bemba install-ide
 ```
 
-#### Using with Bun
+#### **Option 3: Automatic (New Projects)**
+New BembaJS projects automatically include VS Code configuration:
 ```bash
-bun install -g bembajs
-bemba panga my-app
-cd my-app
-bun run dev
+npm create bembajs@latest my-app
+# .bemba files automatically recognized!
 ```
 
-### Programmatic API (SDK)
+---
 
-```javascript
-import { compile, createDevServer, build } from 'bembajs';
+## 🎯 **Core Features**
 
-// Compile Bemba code
-const result = compile(code);
+### **🌍 Bemba Language Programming**
+Write web applications in the beautiful Bemba language:
 
-// Start dev server programmatically
-const server = await createDevServer({
-  port: 3000,
-  watch: true
-});
-
-// Build for production
-await build({
-  output: 'dist',
-  minify: true
-});
-```
-
-### CLI Commands
-
-- `bemba panga <name>` - Create new project
-- `bemba tungulula` - Start development server
-- `bemba akha` - Build for production
-- `bemba lint` - Lint Bemba code
-- `bemba format` - Format Bemba code
-
-### Bemba Language Syntax
-
-#### Creating Pages
 ```bemba
 pangaIpepa('Home', {
-    umutwe: 'Welcome to BembaJS',
-    ilyashi: 'Build amazing web applications',
+    umutwe: 'Tantika ukupanga ukulemba',
+    ilyashi: 'Bika na ukumona ifyakusendeka mwangu. Ya ku <a href="https://github.com/YamikaniKL/bemba-compiler">Learning Center</a>',
     ifiputulwa: [
         {
-            umutwe: 'Get Started',
-            ilyashi: 'Learn BembaJS',
+            umutwe: 'Ukutampa bwino',
+            ilyashi: 'Lemba pali amapeji/index.bemba file',
             amabatani: [
                 {
-                    ilembo: 'Click Me',
-                    pakuKlikisha: 'londolola("Hello!")'
+                    ilembo: 'Panga pa Vercel',
+                    pakuKlikisha: 'window.open("https://vercel.com/new", "_blank")'
+                },
+                {
+                    ilembo: 'Soma amakalata yetu',
+                    pakuKlikisha: 'window.open("https://github.com/YamikaniKL/bemba-compiler", "_blank")'
                 }
             ]
         }
@@ -143,7 +130,97 @@ pangaIpepa('Home', {
 });
 ```
 
-#### Creating Components
+### **🎨 Next.js-like Framework**
+- ✅ **File-based Routing** - Pages in `amapeji/` directory
+- ✅ **Component System** - Reusable components in `ifikopo/`
+- ✅ **API Routes** - Server endpoints in `maapi/`
+- ✅ **Static Assets** - Files in `maungu/` directory
+- ✅ **Hot Reload** - Instant updates during development
+
+### **⚡ Modern Development Experience**
+- ✅ **Tailwind CSS** - Beautiful, responsive styling
+- ✅ **TypeScript Support** - Optional type safety
+- ✅ **Bun Optimization** - Native Bun support for faster builds
+- ✅ **Production Ready** - Optimized builds for deployment
+
+---
+
+## 📦 **Packages**
+
+This monorepo contains:
+
+| Package | Description | Version |
+|---------|-------------|---------|
+| **`bembajs`** | Main framework with CLI and SDK | [![npm](https://img.shields.io/npm/v/bembajs.svg)](https://www.npmjs.com/package/bembajs) |
+| **`create-bembajs`** | Project scaffolding tool | [![npm](https://img.shields.io/npm/v/create-bembajs.svg)](https://www.npmjs.com/package/create-bembajs) |
+| **`bembajs-core`** | Core compiler (lexer, parser, transformer) | Internal |
+
+---
+
+## 🛠️ **CLI Commands**
+
+```bash
+# Create new project
+bemba panga my-app
+
+# Start development server
+bemba tungulula
+
+# Build for production
+bemba akha
+
+# Install IDE support
+bemba install-ide
+
+# Show help
+bemba help
+```
+
+---
+
+## 📚 **Documentation**
+
+### **Project Structure**
+```
+my-app/
+├── amapeji/           # Pages (like Next.js pages/)
+│   └── index.bemba
+├── ifikopo/           # Components (like Next.js components/)
+│   ├── Button.bemba
+│   └── Card.bemba
+├── maapi/             # API routes (like Next.js api/)
+│   ├── hello.bemba
+│   └── users.bemba
+├── maungu/            # Static files (like Next.js public/)
+│   ├── favicon.ico
+│   └── logo.png
+├── bemba.config.js    # Configuration file
+└── package.json
+```
+
+### **Bemba Language Syntax**
+
+#### **Creating Pages**
+```bemba
+pangaIpepa('Home', {
+    umutwe: 'Welcome to BembaJS',
+    ilyashi: 'Build amazing web applications in Bemba',
+    ifiputulwa: [
+        {
+            umutwe: 'Get Started',
+            ilyashi: 'Learn BembaJS programming',
+            amabatani: [
+                {
+                    ilembo: 'Click Me',
+                    pakuKlikisha: 'londolola("Hello from Bemba!")'
+                }
+            ]
+        }
+    ]
+});
+```
+
+#### **Creating Components**
 ```bemba
 fyambaIcipanda('Button', {
     ifiputulwa: {
@@ -155,89 +232,33 @@ fyambaIcipanda('Button', {
             padding: 12px 24px;
             background: #667eea;
             color: white;
+            border-radius: 8px;
         }
     `
 });
 ```
 
-#### Creating API Routes
+#### **Creating API Routes**
 ```bemba
 pangaApi('hello', {
     method: 'GET',
     handler: `
         return {
             status: 200,
-            data: { message: 'Hello from BembaJS!' }
+            data: { 
+                message: 'Hello from BembaJS!',
+                language: 'Bemba'
+            }
         };
     `
 });
 ```
 
-## 🛠️ Development
+---
 
-### Setup
+## 🌟 **Bun Support**
 
-```bash
-# Install pnpm if you haven't
-npm install -g pnpm
-
-# Install dependencies
-pnpm install
-
-# Build all packages
-pnpm build
-
-# Run tests
-pnpm test
-```
-
-### Workspace Structure
-
-```
-bembajs/
-├── packages/
-│   ├── bembajs-core/     # Core compiler
-│   ├── bembajs/          # Main package
-│   └── create-bembajs/   # Scaffolding tool
-├── package.json          # Root workspace config
-└── pnpm-workspace.yaml   # Workspace definition
-```
-
-### Building Packages
-
-```bash
-# Build all packages
-pnpm build
-
-# Build specific package
-pnpm --filter @bembajs/core build
-pnpm --filter bembajs build
-pnpm --filter create-bembajs build
-```
-
-### Testing
-
-```bash
-# Test all packages
-pnpm test
-
-# Test with Node.js
-pnpm test:node
-
-# Test with Bun
-bun test
-```
-
-## 🌟 Bun Support
-
-BembaJS is optimized for Bun with:
-
-- **Bun's Native Transpiler** - Faster builds
-- **Bun's File Watcher** - Hot reload
-- **Bun's SQLite** - Caching
-- **Bun's Bundler** - Production builds
-
-### Using with Bun
+BembaJS is optimized for Bun with native performance:
 
 ```bash
 # Install with Bun
@@ -246,26 +267,87 @@ bun install -g bembajs
 # Create project with Bun
 bun create bembajs my-app
 
-# Run with Bun
+# Run with Bun (faster!)
 cd my-app
 bun run dev
 ```
 
-## 📄 License
-
-MIT License - see LICENSE file for details
-
-## 🤝 Contributing
-
-Contributions are welcome! Please see CONTRIBUTING.md for details.
-
-## 📞 Support
-
-- **Documentation**: [https://bembajs.dev/docs](https://bembajs.dev/docs)
-- **GitHub**: [https://github.com/bembajs/bembajs](https://github.com/bembajs/bembajs)
-- **Discord**: [https://discord.gg/bembajs](https://discord.gg/bembajs)
-- **Email**: support@bembajs.dev
+**Bun Features:**
+- ⚡ **Native Transpiler** - Faster builds
+- 🔥 **Hot Reload** - Instant updates
+- 💾 **SQLite Caching** - Faster subsequent builds
+- 📦 **Bundler** - Optimized production builds
 
 ---
 
+## 🚀 **Deployment**
+
+### **Vercel (Recommended)**
+```bash
+# Deploy to Vercel
+npm install -g vercel
+vercel
+```
+
+### **Other Platforms**
+- **Netlify** - Static site hosting
+- **Railway** - Full-stack deployment
+- **Render** - Container deployment
+- **AWS** - Cloud hosting
+
+---
+
+## 🤝 **Contributing**
+
+We welcome contributions! Here's how to get started:
+
+```bash
+# Fork the repository
+git clone https://github.com/YamikaniKL/bemba-compiler.git
+cd bemba-compiler
+
+# Install dependencies
+pnpm install
+
+# Build packages
+pnpm build
+
+# Run tests
+pnpm test
+```
+
+**Contributing Areas:**
+- 🐛 **Bug Fixes** - Report and fix issues
+- ✨ **New Features** - Add functionality
+- 📚 **Documentation** - Improve docs
+- 🎨 **VS Code Extension** - Enhance IDE support
+- 🌍 **Bemba Language** - Improve language features
+
+---
+
+## 📞 **Support & Community**
+
+- 🌐 **Website**: [https://bembajs.dev](https://bembajs.dev)
+- 📖 **Documentation**: [https://github.com/YamikaniKL/bemba-compiler](https://github.com/YamikaniKL/bemba-compiler)
+- 🐛 **Issues**: [GitHub Issues](https://github.com/YamikaniKL/bemba-compiler/issues)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/YamikaniKL/bemba-compiler/discussions)
+- 📧 **Email**: [support@bembajs.dev](mailto:support@bembajs.dev)
+
+---
+
+## 📄 **License**
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
+
+<div align="center">
+
 **Built with ❤️ for the Zambian developer community** 🇿🇲
+
+*Making programming accessible in African languages*
+
+[![Star on GitHub](https://img.shields.io/github/stars/YamikaniKL/bemba-compiler?style=social)](https://github.com/YamikaniKL/bemba-compiler)
+[![Follow on Twitter](https://img.shields.io/twitter/follow/bembajs?style=social)](https://twitter.com/bembajs)
+
+</div>
