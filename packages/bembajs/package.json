@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -63,8 +63,13 @@
     "languages": [
       {
         "id": "bemba",
-        "aliases": ["Bemba", "bemba"],
-        "extensions": [".bemba"],
+        "aliases": [
+          "Bemba",
+          "bemba"
+        ],
+        "extensions": [
+          ".bemba"
+        ],
         "configuration": "./vscode/language-configuration.json"
       }
     ],
@@ -88,4 +93,3 @@
     "directory": "packages/bembajs"
   }
 }
-
