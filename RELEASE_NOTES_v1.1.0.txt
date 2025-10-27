@@ -1,0 +1,191 @@
+BembaJS v1.1.0 "Cisokolola" Release Notes
+
+Language Enhancement Release
+
+BembaJS v1.1.0 "Cisokolola" (The Beginning) introduces major language enhancements that make programming in Bemba more powerful and developer-friendly than ever before.
+
+What's New
+
+State Management System
+- ukusunga - Declare component state with initial values
+- ukusungaKabili - State with side effects (equivalent to useState + useEffect)
+- ukuCinja - Update state values with automatic React hooks generation
+
+Enhanced Event Handling
+- pakuKlikisha - Click events (existing)
+- pakuLemba - Input change events
+- pakuTumina - Form submit events
+- pakuCinja - Select change events
+- pakuIngia - Focus events
+- pakuFuma - Blur events
+- pakuKwesha - Mouse enter events
+- pakuSiya - Mouse leave events
+
+Component Props & Validation
+- ificingilila - Define component props with types
+- Type validation - string, number, boolean, array, object, function
+- Required props - Mark props as mandatory
+- Default values - Set fallback values for optional props
+- Children support - Handle child components
+
+Built-in Functions
+- Console functions: londolola, londololaError, londololaWarning
+- String functions: ukuPima, ukuPindula, ukuGawanya, ukuSanganya
+- Array functions: ukuOnjela, ukuCotola, ukuPindula, ukuSankha
+- Math functions: ukuBalisha, ukuCepula, ukuCilisha, ukuGawanya
+
+Bemba Error Messages
+- Complete error system in Bemba language
+- Syntax errors: Ifipushi fya syntax: [details]
+- Runtime errors: Ifipushi fya kutantika: [details]
+- Validation errors: Ifipushi fya kupepesha: [details]
+- Component errors: Ifipushi fya component: [details]
+- API errors: Ifipushi fya API: [details]
+
+VS Code Extension Updates
+
+Enhanced Syntax Highlighting
+- State management keywords - ukusunga, ukusungaKabili, ukuCinja
+- Event handler keywords - All 8 event types with distinct highlighting
+- Props validation keywords - ificingilila, type, required, default
+- Built-in function highlighting - All utility functions
+
+New Code Snippets
+- State Management - ukusunga snippet for state declaration
+- State Update - ukuCinja snippet for state updates
+- State with Effects - ukusungaKabili snippet for side effects
+- Component Props - ificingilila snippet for props definition
+- Form Input - input snippet for form fields
+- Form Submit - pakuTumina snippet for form handling
+- Console Log - londolola snippet for logging
+
+Updated Syntax Examples
+
+State Management
+```bemba
+fyambaIcipanda('Counter', {
+    ifiputulwa: {
+        ukusunga: {
+            namba: 0,
+            izina: '',
+            wasalwa: false
+        },
+        amabatani: [
+            {
+                ilembo: 'Onjela: ' + namba,
+                pakuKlikisha: 'ukuCinja("namba", namba + 1)'
+            }
+        ]
+    }
+});
+```
+
+Form Handling
+```bemba
+fyambaIcipanda('ContactForm', {
+    ifiputulwa: {
+        ukusunga: {
+            izina: '',
+            email: '',
+            message: '',
+            emailError: ''
+        },
+        forms: [
+            {
+                inputs: [
+                    {
+                        type: 'text',
+                        name: 'izina',
+                        placeholder: 'Lemba izina lyobe',
+                        pakuLemba: 'ukuCinja("izina", event.target.value)',
+                        required: true
+                    }
+                ],
+                pakuTumina: `
+                    event.preventDefault();
+                    londolola('Form submitted successfully!');
+                `
+            }
+        ]
+    }
+});
+```
+
+Props Validation
+```bemba
+fyambaIcipanda('UserCard', {
+    ificingilila: {
+        izina: { 
+            type: 'string', 
+            required: true 
+        },
+        umaka: { 
+            type: 'number', 
+            default: 0 
+        },
+        ifoto: { 
+            type: 'string' 
+        }
+    },
+    ifiputulwa: {
+        umutwe: props.izina,
+        ilyashi: `Age: ${props.umaka} years old`
+    }
+});
+```
+
+Technical Implementation
+
+Core Files Updated
+- src/constants.js - Added all new keywords and functions
+- src/errors.js - Complete Bemba error message system
+- src/parser.js - Enhanced parsing for state and events
+- src/transformer.js - Transform new syntax to React
+- src/generator.js - Generate React hooks and components
+
+Generated React Code
+- useState hooks for state management
+- useEffect hooks for side effects
+- Event handlers (onClick, onChange, onSubmit, etc.)
+- Proper state update functions
+- Component props with validation
+
+Example Files
+
+New comprehensive examples in the examples/ directory:
+- state-management.bemba - Counter component with state
+- form-handling.bemba - Contact form with validation
+- props-validation.bemba - UserCard with props and validation
+
+Installation
+
+```bash
+# Install latest version
+npm install -g bembajs@latest
+npm install -g create-bembajs@latest
+
+# Create new project
+create-bembajs my-app
+cd my-app
+bemba dev
+```
+
+Breaking Changes
+
+None. This is a minor version release with backward compatibility maintained.
+
+Migration Guide
+
+No migration required. All existing BembaJS code continues to work unchanged.
+
+What's Next
+
+- Advanced component patterns
+- Server-side rendering enhancements
+- Performance optimizations
+- Additional built-in functions
+- Mobile development support
+
+Full Changelog: https://github.com/YamikaniKL/bemba-compiler/compare/v1.0.0...v1.1.0
+
+This release represents a significant step forward in making BembaJS a comprehensive framework for programming in the Bemba language. The enhanced state management, event handling, and props validation make it easier than ever to build complex applications while maintaining the beauty and expressiveness of the Bemba language.

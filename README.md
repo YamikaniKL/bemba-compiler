@@ -6,6 +6,8 @@
 
 **A Next.js-like framework for programming in the Bemba language**
 
+**Version 1.1.0 "Cisokolola" (The Beginning)**
+
 [![npm version](https://badge.fury.io/js/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![npm downloads](https://img.shields.io/npm/dm/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
