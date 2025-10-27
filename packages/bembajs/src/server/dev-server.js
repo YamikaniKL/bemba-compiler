@@ -20,18 +20,32 @@ function compileBemba(code) {
                 const pageName = pageMatch[1];
                 const pageData = pageMatch[2];
                 
-                // Extract title and content
-                const titleMatch = pageData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
-                const contentMatch = pageData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
+                // Extract title and content from page level
+                const pageTitleMatch = pageData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
+                const pageContentMatch = pageData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
                 
-                const title = titleMatch ? titleMatch[1] : pageName;
-                const content = contentMatch ? contentMatch[1] : 'Welcome to BembaJS!';
+                const pageTitle = pageTitleMatch ? pageTitleMatch[1] : pageName;
+                const pageContent = pageContentMatch ? pageContentMatch[1] : 'Welcome to BembaJS!';
                 
                 // Extract sections (ifiputulwa) - improved parsing
                 let sections = '';
+                let sectionTitle = pageTitle;
+                let sectionContent = pageContent;
+                
                 const sectionsMatch = pageData.match(/ifiputulwa:\s*\[([\s\S]*?)\]/);
                 if (sectionsMatch) {
                     const sectionsData = sectionsMatch[1];
+                    
+                    // Extract title and content from the first section
+                    const sectionTitleMatch = sectionsData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
+                    const sectionContentMatch = sectionsData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
+                    
+                    if (sectionTitleMatch) {
+                        sectionTitle = sectionTitleMatch[1];
+                    }
+                    if (sectionContentMatch) {
+                        sectionContent = sectionContentMatch[1];
+                    }
                     
                     // Look for buttons directly in the sections data - improved parsing
                     const buttonMatches = sectionsData.match(/ilembo:\s*['"`]([^'"`]+)['"`]/g);
@@ -109,8 +123,8 @@ function compileBemba(code) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
-    <meta name="description" content="${content}">
+    <title>${pageTitle}</title>
+    <meta name="description" content="${pageContent}">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.png">
@@ -120,8 +134,8 @@ function compileBemba(code) {
             theme: {
                 extend: {
                     colors: {
-                        background: 'var(--background)',
-                        foreground: 'var(--foreground)',
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
                     },
                     fontFamily: {
                         sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
@@ -133,22 +147,22 @@ function compileBemba(code) {
     </script>
     <style>
         :root {
-            --background: #ffffff;
-            --foreground: #171717;
+            --background: 0 0% 100%;
+            --foreground: 0 0% 9%;
             --font-geist-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
             --font-geist-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --background: #0a0a0a;
-                --foreground: #ededed;
+                --background: 0 0% 4%;
+                --foreground: 0 0% 93%;
             }
         }
 
         body {
-            background: var(--background);
-            color: var(--foreground);
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
             font-family: var(--font-geist-sans);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -158,7 +172,7 @@ function compileBemba(code) {
     </style>
 </head>
 <body class="antialiased">
-    <div class="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+    <div class="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
         <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
             <img
                 class="dark:invert"
@@ -169,10 +183,10 @@ function compileBemba(code) {
             />
             <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
                 <h1 class="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-                    ${title}
+                    ${sectionTitle}
                 </h1>
                 <p class="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-                    ${content}
+                    ${sectionContent}
                 </p>
             </div>
             <div class="flex flex-col gap-4 text-base font-medium sm:flex-row">
