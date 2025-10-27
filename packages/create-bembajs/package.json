@@ -1,6 +1,6 @@
 {
   "name": "create-bembajs",
-  "version": "1.0.12",
+  "version": "1.1.0",
   "description": "Create BembaJS apps with one command (like create-next-app)",
   "main": "./index.js",
   "bin": {

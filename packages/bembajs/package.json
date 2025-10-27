@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.0.33",
+  "version": "1.1.0",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

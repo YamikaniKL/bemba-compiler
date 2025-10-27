@@ -1,0 +1,164 @@
+{
+  "Page Creation": {
+    "prefix": "pangaIpepa",
+    "body": [
+      "pangaIpepa('${1:Page Name}', {",
+      "    umutwe: '${2:Page Title}',",
+      "    ilyashi: '${3:Page Description}',",
+      "    ",
+      "    ifiputulwa: [",
+      "        {",
+      "            umutwe: '${4:Section Title}',",
+      "            ilyashi: '${5:Section Content}',",
+      "            amabatani: [",
+      "                {",
+      "                    ilembo: '${6:Button Text}',",
+      "                    pakuKlikisha: 'londolola(\"${7:Button Action}\")'",
+      "                }",
+      "            ]",
+      "        }",
+      "    ],",
+      "    ",
+      "    imikalile: `",
+      "        ${8:// Custom styles here}",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new BembaJS page"
+  },
+  "Component Creation": {
+    "prefix": "fyambaIcipanda",
+    "body": [
+      "fyambaIcipanda('${1:ComponentName}', {",
+      "    ifiputulwa: {",
+      "        ${2:// Component content}",
+      "    },",
+      "    imikalile: `",
+      "        ${3:// Component styles}",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new BembaJS component"
+  },
+  "API Route": {
+    "prefix": "pangaApi",
+    "body": [
+      "pangaApi('${1:route-name}', {",
+      "    method: '${2|GET,POST,PUT,DELETE|}',",
+      "    handler: `",
+      "        return {",
+      "            status: 200,",
+      "            data: { message: '${3:Hello from BembaJS API}' }",
+      "        };",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new API route"
+  },
+  "Button": {
+    "prefix": "ibatani",
+    "body": [
+      "{",
+      "    ilembo: '${1:Button Text}',",
+      "    pakuKlikisha: 'londolola(\"${2:Button Action}\")'",
+      "}"
+    ],
+    "description": "Create a button"
+  },
+  "Section": {
+    "prefix": "icipandwa",
+    "body": [
+      "{",
+      "    umutwe: '${1:Section Title}',",
+      "    ilyashi: '${2:Section Content}',",
+      "    amabatani: [",
+      "        ${3:// buttons here}",
+      "    ]",
+      "}"
+    ],
+    "description": "Create a section"
+  },
+  "Styles": {
+    "prefix": "imikalile",
+    "body": [
+      "imikalile: `",
+      "    ${1:.class-name {",
+      "        ${2:// styles here}",
+      "    }}",
+      "`"
+    ],
+    "description": "Add custom styles"
+  },
+  "State Management": {
+    "prefix": "ukusunga",
+    "body": [
+      "ukusunga: {",
+      "    ${1:stateName}: ${2:initialValue},",
+      "    ${3:anotherState}: ${4:anotherValue}",
+      "}"
+    ],
+    "description": "Declare component state"
+  },
+  "State Update": {
+    "prefix": "ukuCinja",
+    "body": [
+      "ukuCinja('${1:stateName}', ${2:newValue})"
+    ],
+    "description": "Update state value"
+  },
+  "State with Effects": {
+    "prefix": "ukusungaKabili",
+    "body": [
+      "ukusungaKabili: {",
+      "    ${1:stateName}: ${2:initialValue},",
+      "    effect: `",
+      "        ${3:// side effect code here}",
+      "    `",
+      "}"
+    ],
+    "description": "State with side effects"
+  },
+  "Component Props": {
+    "prefix": "ificingilila",
+    "body": [
+      "ificingilila: {",
+      "    ${1:propName}: {",
+      "        type: '${2|string,number,boolean,array,object,function|}',",
+      "        required: ${3|true,false|},",
+      "        default: ${4:defaultValue}",
+      "    }",
+      "}"
+    ],
+    "description": "Define component props"
+  },
+  "Form Input": {
+    "prefix": "input",
+    "body": [
+      "{",
+      "    type: '${1|text,email,password,number,textarea|}',",
+      "    name: '${2:fieldName}',",
+      "    placeholder: '${3:Placeholder text}',",
+      "    pakuLemba: 'ukuCinja(\"${4:stateName}\", event.target.value)',",
+      "    required: ${5|true,false|}",
+      "}"
+    ],
+    "description": "Create form input"
+  },
+  "Form Submit": {
+    "prefix": "pakuTumina",
+    "body": [
+      "pakuTumina: `",
+      "    event.preventDefault();",
+      "    ${1:// form submission logic}",
+      "`"
+    ],
+    "description": "Form submit handler"
+  },
+  "Console Log": {
+    "prefix": "londolola",
+    "body": [
+      "londolola(${1:'message'})"
+    ],
+    "description": "Console log in Bemba"
+  }
+}

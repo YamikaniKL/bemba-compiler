@@ -1,0 +1,46 @@
+{
+  "files.associations": {
+    "*.bemba": "bemba"
+  },
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "keyword.control.bemba",
+        "settings": {
+          "foreground": "#C678DD"
+        }
+      },
+      {
+        "scope": "keyword.other.bemba",
+        "settings": {
+          "foreground": "#E06C75"
+        }
+      },
+      {
+        "scope": "entity.name.function.bemba",
+        "settings": {
+          "foreground": "#61AFEF"
+        }
+      },
+      {
+        "scope": "variable.other.property.bemba",
+        "settings": {
+          "foreground": "#D19A66"
+        }
+      },
+      {
+        "scope": "string.quoted.double.bemba, string.quoted.single.bemba, string.quoted.template.bemba",
+        "settings": {
+          "foreground": "#98C379"
+        }
+      },
+      {
+        "scope": "comment.line.double-slash.bemba, comment.block.bemba",
+        "settings": {
+          "foreground": "#5C6370",
+          "fontStyle": "italic"
+        }
+      }
+    ]
+  }
+}
