@@ -29,22 +29,26 @@ function compileBemba(code) {
                 
                 // Extract sections (ifiputulwa) - improved parsing
                 let sections = '';
-                let sectionTitle = pageTitle;
-                let sectionContent = pageContent;
+                let sectionSteps = '';
                 
                 const sectionsMatch = pageData.match(/ifiputulwa:\s*\[([\s\S]*?)\]/);
                 if (sectionsMatch) {
                     const sectionsData = sectionsMatch[1];
                     
-                    // Extract title and content from the first section
-                    const sectionTitleMatch = sectionsData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
-                    const sectionContentMatch = sectionsData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
-                    
-                    if (sectionTitleMatch) {
-                        sectionTitle = sectionTitleMatch[1];
-                    }
-                    if (sectionContentMatch) {
-                        sectionContent = sectionContentMatch[1];
+                    // Extract amalembelo (steps) array
+                    const stepsMatch = sectionsData.match(/amalembelo:\s*\[([\s\S]*?)\]/);
+                    if (stepsMatch) {
+                        const stepsData = stepsMatch[1];
+                        // Extract individual steps
+                        const stepMatches = stepsData.match(/['"`]([^'"`]+)['"`]/g);
+                        if (stepMatches) {
+                            sectionSteps = stepMatches.map((step, index) => {
+                                const stepText = step.replace(/^['"`]|['"`]$/g, '');
+                                const isLast = index === stepMatches.length - 1;
+                                const marginClass = isLast ? '' : ' mb-2';
+                                return `<li class="tracking-[-0.01em]${marginClass}">${stepText}</li>`;
+                            }).join('\n                ');
+                        }
                     }
                     
                     // Look for buttons directly in the sections data - improved parsing
@@ -176,19 +180,14 @@ function compileBemba(code) {
         <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
             <img
                 class="dark:invert"
-                src="/bemba-logo.svg"
+                src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350"
                 alt="BembaJS logo"
-                width="100"
-                height="20"
+                width="180"
+                height="38"
             />
-            <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-                <h1 class="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-                    ${sectionTitle}
-                </h1>
-                <p class="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-                    ${sectionContent}
-                </p>
-            </div>
+            <ol class="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+                ${sectionSteps}
+            </ol>
             <div class="flex flex-col gap-4 text-base font-medium sm:flex-row">
                 ${sections}
             </div>

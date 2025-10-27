@@ -3,11 +3,13 @@ pangaIpepa('Home', {
     umutwe: 'Panga BembaJS App',
     ilyashi: 'Yapangwa na create bembajs app',
     
-    // Page content - new centered layout structure
+    // Page content - ordered list structure matching Next.js
     ifiputulwa: [
         {
-            umutwe: 'Tantika ukupanga ukulemba amapeji/index.bemba file.',
-            ilyashi: 'Uleefwaya ukutampa nelyo ukufwailiko ifpefyo fyakukonkelemo? Yendela ku <a href="https://vercel.com/templates?framework=next.js&utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs" class="font-medium text-zinc-950 dark:text-zinc-50">Ama-templates</a> nangu <a href="https://bembajs.dev/learn" class="font-medium text-zinc-950 dark:text-zinc-50">Learning center</a>.',
+            amalembelo: [
+                'Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">amapeji/index.bemba</code>.',
+                'Bika na ukumona ifyakusendeka mwangu.'
+            ],
             amabatani: [
                 {
                     ilembo: 'Panga pa Vercel',
