@@ -17,7 +17,7 @@ pangaIpepa('Home', {
                 },
                 {
                     ilembo: 'Soma amakalata yetu',
-                    pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+                    pakuKlikisha: 'window.open("https://github.com/YamikaniKL/bemba-compiler", "_blank")'
                 }
             ]
         }

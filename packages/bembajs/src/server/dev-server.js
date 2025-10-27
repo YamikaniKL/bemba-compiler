@@ -114,12 +114,14 @@ function compileBemba(code) {
                             // First button is primary (Deploy Now), second is secondary (Documentation)
                             const isPrimary = index === 0;
                             const buttonClass = isPrimary ? 
-                                'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px] whitespace-nowrap' :
-                                'flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px] whitespace-nowrap';
+                                'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:min-w-[158px] whitespace-nowrap' :
+                                'flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-6 py-3 text-sm font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:w-auto sm:min-w-[158px] whitespace-nowrap';
+                            
+                            const vercelIcon = `<svg width="20" height="20" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark:invert"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor"/></svg>`;
                             
                             const buttonContent = isPrimary ? 
-                                `<img class="dark:invert" src="https://vercel.com/favicon.ico" alt="Vercel logomark" width="16" height="16" style="margin-right: 8px;">${btnText}` :
-                                btnText;
+                                `${vercelIcon}<span>${btnText}</span>` :
+                                `<span>${btnText}</span>`;
                             
                             return `<a class="${buttonClass}" href="${href}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
                         }).join('');
@@ -196,7 +198,6 @@ function compileBemba(code) {
                 width="180"
                 height="38"
                 class="dark:invert"
-                style="filter: invert(1);"
             />
             <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left mt-8">
                 <ol class="list-inside list-decimal text-sm font-[family-name:var(--font-geist-mono)]">
