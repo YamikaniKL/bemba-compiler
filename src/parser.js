@@ -173,6 +173,9 @@ class BembaParser {
                     case BEMBA_SYNTAX.STATE:
                         component.state = value;
                         break;
+                    case BEMBA_SYNTAX.STATE_WITH_EFFECTS:
+                        component.stateWithEffects = value;
+                        break;
                     case BEMBA_SYNTAX.CONSTRUCTOR:
                         component.lifecycle.constructor = value;
                         break;
@@ -253,6 +256,34 @@ class BembaParser {
         this.consume('RIGHT_BRACE', 'Expected }');
         
         return { properties };
+    }
+    
+    // Event handler parsing
+    parseEventHandlers() {
+        const handlers = {};
+        
+        // Parse all event handler types
+        const eventTypes = [
+            BEMBA_SYNTAX.EVENTS.onClick,
+            BEMBA_SYNTAX.EVENTS.onChange,
+            BEMBA_SYNTAX.EVENTS.onSubmit,
+            BEMBA_SYNTAX.EVENTS.onSelectChange,
+            BEMBA_SYNTAX.EVENTS.onFocus,
+            BEMBA_SYNTAX.EVENTS.onBlur,
+            BEMBA_SYNTAX.EVENTS.onMouseEnter,
+            BEMBA_SYNTAX.EVENTS.onMouseLeave
+        ];
+        
+        for (const eventType of eventTypes) {
+            if (this.check(eventType)) {
+                this.advance(); // consume event handler keyword
+                this.consume('COLON', `Expected : after ${eventType}`);
+                const handler = this.parseExpression();
+                handlers[eventType] = handler;
+            }
+        }
+        
+        return handlers;
     }
     
     // Expression parsing
@@ -388,7 +419,17 @@ class BembaParser {
         if (this.match('FALSE')) return { type: 'BOOLEAN', value: false };
         if (this.match('TRUE')) return { type: 'BOOLEAN', value: true };
         if (this.match('NUMBER', 'STRING')) return this.previous();
-        if (this.match('IDENTIFIER')) return this.previous();
+        
+        if (this.match('IDENTIFIER')) {
+            const identifier = this.previous();
+            
+            // Check if it's a function call
+            if (this.match('LEFT_PAREN')) {
+                return this.parseFunctionCall(identifier.literal);
+            }
+            
+            return identifier;
+        }
         
         if (this.match('LEFT_PAREN')) {
             const expr = this.parseExpression();
@@ -397,6 +438,35 @@ class BembaParser {
         }
         
         throw new Error(`Unexpected token: ${this.peek().type}`);
+    }
+    
+    // Function call parsing
+    parseFunctionCall(name) {
+        const args = [];
+        
+        if (!this.check('RIGHT_PAREN')) {
+            do {
+                args.push(this.parseExpression());
+            } while (this.match('COMMA'));
+        }
+        
+        this.consume('RIGHT_PAREN', 'Expected ) after function arguments');
+        
+        // Special handling for state update function
+        if (name === BEMBA_SYNTAX.UPDATE_STATE) {
+            return { 
+                type: 'FUNCTION_CALL', 
+                name: name, 
+                args: args, 
+                isStateUpdate: true 
+            };
+        }
+        
+        return { 
+            type: 'FUNCTION_CALL', 
+            name: name, 
+            args: args 
+        };
     }
     
     // Hook parsing
