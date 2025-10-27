@@ -1,0 +1,59 @@
+// Home Page - amapeji/index.bemba
+import { Header } from '../../ifikopo/Header.bemba';
+import { Footer } from '../../ifikopo/Footer.bemba';
+import { UserCard } from '../../ifikopo/UserCard.bemba';
+
+pangaIpepa({
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa className="home-page">
+                <Header />
+                
+                <iciputulwa className="hero-section">
+                    <umutwe_ukulu>Mwaiseni ku BembaJS!</umutwe_ukulu>
+                    <ukulondolola>
+                        Build modern web applications using the Bemba language.
+                        Experience the power of programming in your native tongue.
+                    </ukulondolola>
+                    <ibatani 
+                        className="cta-button"
+                        pakuKlikisha={() => ukuya('/about')}
+                    >
+                        Learn More
+                    </ibatani>
+                </iciputulwa>
+                
+                <iciputulwa className="features-section">
+                    <umutwe_ukulu>Features</umutwe_ukulu>
+                    <iciputulwa className="features-grid">
+                        <iciputulwa className="feature-card">
+                            <umutwe_ukulu>Native Language</umutwe_ukulu>
+                            <ukulondolola>Program in Bemba with familiar syntax</ukulondolola>
+                        </iciputulwa>
+                        <iciputulwa className="feature-card">
+                            <umutwe_ukulu>Modern Framework</umutwe_ukulu>
+                            <ukulondolola>Built on React and Next.js</ukulondolola>
+                        </iciputulwa>
+                        <iciputulwa className="feature-card">
+                            <umutwe_ukulu>Full Stack</umutwe_ukulu>
+                            <ukulondolola>Frontend, backend, and API routes</ukulondolola>
+                        </iciputulwa>
+                    </iciputulwa>
+                </iciputulwa>
+                
+                <Footer />
+            </icipandwa>
+        )
+    },
+    ukutolaCifukwa: lombako nokuti() {
+        // Fetch featured users
+        const response = leka ukutuma('/mafungulo/users');
+        const users = leka response.json();
+        
+        bwelela {
+            ifyapangwa: {
+                featuredUsers: users.data.slice(0, 3)
+            }
+        }
+    }
+});

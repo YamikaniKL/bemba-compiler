@@ -1,0 +1,48 @@
+// API Route Example - mafungulo/users.bemba
+export default nokuti(req, res) {
+    // Handle different HTTP methods
+    nga (req.method === 'GET') {
+        // Get all users
+        const users = [
+            { id: 1, ishina: 'John Doe', email: 'john@example.com' },
+            { id: 2, ishina: 'Jane Smith', email: 'jane@example.com' },
+            { id: 3, ishina: 'Bob Johnson', email: 'bob@example.com' }
+        ];
+        
+        res.status(200).json({
+            success: ee,
+            data: users,
+            count: users.length
+        });
+    } nangu nga (req.method === 'POST') {
+        // Create new user
+        const { ishina, email } = req.body;
+        
+        nga (!ishina || !email) {
+            res.status(400).json({
+                success: ukukana,
+                error: 'Ishina and email are required'
+            });
+            bwelela;
+        }
+        
+        const newUser = {
+            id: Date.now(),
+            ishina: ishina,
+            email: email,
+            createdAt: new Date().toISOString()
+        };
+        
+        res.status(201).json({
+            success: ee,
+            data: newUser,
+            message: 'User created successfully'
+        });
+    } nangu {
+        // Method not allowed
+        res.status(405).json({
+            success: ukukana,
+            error: 'Method not allowed'
+        });
+    }
+}

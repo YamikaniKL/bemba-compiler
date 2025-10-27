@@ -1,0 +1,133 @@
+// Props Validation Example - UserCard Component
+fyambaIcipanda('UserCard', {
+    ificingilila: {
+        // Required string prop
+        izina: { 
+            type: 'string', 
+            required: true 
+        },
+        
+        // Optional number with default
+        umaka: { 
+            type: 'number', 
+            default: 0 
+        },
+        
+        // Optional string
+        ifoto: { 
+            type: 'string' 
+        },
+        
+        // Boolean with default
+        wasalwa: {
+            type: 'boolean',
+            default: false
+        },
+        
+        // Array prop
+        amafoto: {
+            type: 'array',
+            default: []
+        },
+        
+        // Object prop
+        amakalata: {
+            type: 'object',
+            default: {}
+        },
+        
+        // Function prop
+        pakuKlikisha: {
+            type: 'function'
+        }
+    },
+    ifiputulwa: {
+        umutwe: props.izina,
+        ilyashi: `Age: ${props.umaka} years old`,
+        ifoto: props.ifoto ? `<img src="${props.ifoto}" alt="${props.izina}" />` : '',
+        status: props.wasalwa ? 'Active' : 'Inactive',
+        amabatani: [
+            {
+                ilembo: 'View Profile',
+                pakuKlikisha: props.pakuKlikisha ? 'props.pakuKlikisha()' : 'londolola("Profile clicked")'
+            }
+        ],
+        imikalile: `
+            .user-card {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 16px;
+                margin: 8px;
+                background: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            
+            .user-card img {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                object-fit: cover;
+            }
+            
+            .user-card h3 {
+                margin: 8px 0;
+                color: #333;
+            }
+            
+            .user-card p {
+                margin: 4px 0;
+                color: #666;
+            }
+            
+            .status-active {
+                color: green;
+                font-weight: bold;
+            }
+            
+            .status-inactive {
+                color: red;
+                font-weight: bold;
+            }
+        `
+    }
+});
+
+// Usage example in parent component
+fyambaIcipanda('UserList', {
+    ifiputulwa: {
+        ukusunga: {
+            users: [
+                {
+                    izina: 'John Banda',
+                    umaka: 25,
+                    ifoto: '/john.jpg',
+                    wasalwa: true,
+                    amafoto: ['photo1.jpg', 'photo2.jpg'],
+                    amakalata: { phone: '123-456-7890', email: 'john@example.com' }
+                },
+                {
+                    izina: 'Jane Mwila',
+                    umaka: 30,
+                    ifoto: '/jane.jpg',
+                    wasalwa: false,
+                    amafoto: [],
+                    amakalata: { phone: '098-765-4321', email: 'jane@example.com' }
+                }
+            ]
+        },
+        umutwe: 'User Directory',
+        ilyashi: 'Browse our user profiles',
+        ifikopo: users.map(user => ({
+            name: 'UserCard',
+            props: {
+                izina: user.izina,
+                umaka: user.umaka,
+                ifoto: user.ifoto,
+                wasalwa: user.wasalwa,
+                amafoto: user.amafoto,
+                amakalata: user.amakalata,
+                pakuKlikisha: `() => londolola('Clicked on ${user.izina}')`
+            }
+        }))
+    }
+});

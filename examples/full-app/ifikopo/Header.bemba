@@ -1,0 +1,57 @@
+// Header Component
+fyambaIcipanda('Header', {
+    ifyapangwa: {
+        ishina: icishilano
+    },
+    ifyakubika: {
+        isMenuOpen: ukukana,
+        scrollY: 0
+    },
+    ukupanga: nokuti() {
+        // Listen for scroll events
+        bomfyaCintikoLya(() => {
+            const handleScroll = () => {
+                ici.ifyakubika.scrollY = window.scrollY;
+            };
+            
+            window.addEventListener('scroll', handleScroll);
+            
+            bwelela () => {
+                window.removeEventListener('scroll', handleScroll);
+            };
+        }, []);
+    },
+    ukwisulula: nokuti() {
+        const [isMenuOpen, setIsMenuOpen] = bomfyaFyakubika(ici.ifyakubika.isMenuOpen);
+        
+        const toggleMenu = bomfyaUkubomfya(() => {
+            setIsMenuOpen(!isMenuOpen);
+        }, [isMenuOpen]);
+        
+        bwelela (
+            <iciputulwa className={`header ${ici.ifyakubika.scrollY > 50 ? 'scrolled' : ''}`}>
+                <iciputulwa className="header-content">
+                    <umukunko href="/" className="logo">
+                        {ici.ifyapangwa.ishina || 'BembaJS'}
+                    </umukunko>
+                    
+                    <iciputulwa className={`nav-menu ${isMenuOpen ? 'open' : ''}`}>
+                        <umukunko href="/" className="nav-link">Home</umukunko>
+                        <umukunko href="/about" className="nav-link">About</umukunko>
+                        <umukunko href="/users" className="nav-link">Users</umukunko>
+                        <umukunko href="/contact" className="nav-link">Contact</umukunko>
+                    </iciputulwa>
+                    
+                    <ibatani 
+                        className="menu-toggle"
+                        pakuKlikisha={toggleMenu}
+                    >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </ibatani>
+                </iciputulwa>
+            </iciputulwa>
+        )
+    }
+});

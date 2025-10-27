@@ -1,0 +1,65 @@
+// User Card Component
+fyambaIcipanda('UserCard', {
+    ifyapangwa: {
+        user: icilonganino,
+        showActions: ukukwata
+    },
+    ifyakubika: {
+        isLiked: ukukana,
+        likeCount: 0
+    },
+    ukupanga: nokuti() {
+        // Initialize like count from user data
+        ici.ifyakubika.likeCount = ici.ifyapangwa.user?.likes || 0;
+    },
+    ukwisulula: nokuti() {
+        const [isLiked, setIsLiked] = bomfyaFyakubika(ici.ifyakubika.isLiked);
+        const [likeCount, setLikeCount] = bomfyaFyakubika(ici.ifyakubika.likeCount);
+        
+        const handleLike = bomfyaUkubomfya(() => {
+            nga (isLiked) {
+                setLikeCount(likeCount - 1);
+            } nangu {
+                setLikeCount(likeCount + 1);
+            }
+            setIsLiked(!isLiked);
+        }, [isLiked, likeCount]);
+        
+        const handleViewProfile = bomfyaUkubomfya(() => {
+            ukuya(`/users/${ici.ifyapangwa.user.id}`);
+        }, [ici.ifyapangwa.user.id]);
+        
+        bwelela (
+            <iciputulwa className="user-card">
+                <icikope 
+                    src={ici.ifyapangwa.user.avatar || '/amashinda/default-avatar.png'}
+                    alt={ici.ifyapangwa.user.ishina}
+                    className="user-avatar"
+                />
+                
+                <iciputulwa className="user-info">
+                    <umutwe_ukulu>{ici.ifyapangwa.user.ishina}</umutwe_ukulu>
+                    <ukulondolola className="user-email">{ici.ifyapangwa.user.email}</ukulondolola>
+                    <ukulondolola className="user-bio">{ici.ifyapangwa.user.bio}</ukulondolola>
+                </iciputulwa>
+                
+                {ici.ifyapangwa.showActions && (
+                    <iciputulwa className="user-actions">
+                        <ibatani 
+                            className={`like-button ${isLiked ? 'liked' : ''}`}
+                            pakuKlikisha={handleLike}
+                        >
+                            ❤️ {likeCount}
+                        </ibatani>
+                        <ibatani 
+                            className="view-profile-button"
+                            pakuKlikisha={handleViewProfile}
+                        >
+                            View Profile
+                        </ibatani>
+                    </iciputulwa>
+                )}
+            </iciputulwa>
+        )
+    }
+});

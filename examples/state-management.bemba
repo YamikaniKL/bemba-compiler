@@ -1,0 +1,39 @@
+// State Management Example - Counter Component
+fyambaIcipanda('Counter', {
+    ifiputulwa: {
+        ukusunga: {
+            namba: 0,
+            izina: '',
+            wasalwa: false
+        },
+        umutwe: 'Counter Component',
+        ilyashi: 'This component demonstrates state management in BembaJS',
+        amabatani: [
+            {
+                ilembo: 'Onjela: ' + namba,
+                pakuKlikisha: 'ukuCinja("namba", namba + 1)'
+            },
+            {
+                ilembo: 'Cepula',
+                pakuKlikisha: 'ukuCinja("namba", namba - 1)'
+            },
+            {
+                ilembo: 'Reset',
+                pakuKlikisha: 'ukuCinja("namba", 0)'
+            }
+        ],
+        inputs: [
+            {
+                type: 'text',
+                placeholder: 'Lemba izina',
+                pakuLemba: 'ukuCinja("izina", event.target.value)'
+            }
+        ],
+        checkboxes: [
+            {
+                label: 'Wasalwa',
+                pakuCinja: 'ukuCinja("wasalwa", event.target.checked)'
+            }
+        ]
+    }
+});

@@ -1,0 +1,26 @@
+// Simple test component for web IDE
+fyambaIcipanda('SimpleTest', {
+    ifyapangwa: {
+        ishina: icishilano
+    },
+    ifyakubika: {
+        count: 0,
+        message: 'Mwaiseni!'
+    },
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa className="test-component">
+                <umutwe_ukulu>BembaJS Test Component</umutwe_ukulu>
+                <ukulondolola>Ishina: {ici.ifyapangwa.ishina}</ukulondolola>
+                <ukulondolola>Count: {ici.ifyakubika.count}</ukulondolola>
+                <ukulondolola>{ici.ifyakubika.message}</ukulondolola>
+                <ibatani pakuKlikisha={() => {
+                    ici.ifyakubika.count = ici.ifyakubika.count + 1;
+                    londolola('Button clicked!');
+                }}>
+                    Click Me!
+                </ibatani>
+            </icipandwa>
+        )
+    }
+});
