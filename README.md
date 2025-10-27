@@ -4,7 +4,7 @@
 
 ![BembaJS Logo](https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350)
 
-**A Next.js-like framework for programming in the Bemba language** 🇿🇲
+**A Next.js-like framework for programming in the Bemba language**
 
 [![npm version](https://badge.fury.io/js/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![npm downloads](https://img.shields.io/npm/dm/bembajs.svg)](https://www.npmjs.com/package/bembajs)
@@ -17,21 +17,9 @@
 
 ---
 
-## ✨ **What's New in Version 1.0**
+## Quick Start
 
-🎉 **BembaJS Version 1.0** is here! This major release brings:
-
-- 🎨 **VS Code Extension** - Full marketplace integration with syntax highlighting
-- 🚀 **Next.js-like Styling** - Beautiful Tailwind CSS integration
-- 🌍 **Rich Bemba Content** - Programming in authentic Bemba language
-- ⚡ **Automatic IDE Support** - Works seamlessly like JavaScript files
-- 📦 **Production Ready** - Optimized builds and deployment ready
-
----
-
-## 🚀 **Quick Start**
-
-### **Create Your First BembaJS App**
+### Create Your First BembaJS App
 
 ```bash
 # Create a new project
@@ -49,139 +37,28 @@ npm run dev
 
 **That's it!** Open [http://localhost:3000](http://localhost:3000) to see your app running.
 
-### **VS Code Extension (Recommended)**
+---
 
-For the best development experience, install the official VS Code extension:
+## Features
 
-1. **Open VS Code**
-2. **Go to Extensions** (Ctrl+Shift+X)
-3. **Search**: "BembaJS Language Support"
-4. **Click Install**
-
-Or install via command line:
-```bash
-code --install-extension bembajs.bembajs-language-support
-```
+- **File-based Routing** - Automatic routing based on file structure
+- **Component System** - Reusable components with props
+- **API Routes** - Server-side API endpoints
+- **State Management** - Component state with effects
+- **Event Handling** - Comprehensive event system
+- **Props Validation** - Type-safe component props
+- **Built-in Functions** - Utility functions in Bemba language
+- **Error Messages** - Complete error system in Bemba
+- **VS Code Support** - Syntax highlighting and snippets
+- **Hot Reload** - Instant updates during development
+- **Production Ready** - Optimized builds and deployment
 
 ---
 
-## 🎨 **VS Code/Cursor Integration**
-
-BembaJS now includes **professional IDE support** with:
-
-### **✨ Features**
-- 🎨 **Syntax Highlighting** - Full color-coded BembaJS keywords
-- 🎯 **File Icons** - Custom icons for `.bemba` files
-- 📝 **Code Snippets** - Auto-completion for common patterns
-- 🚀 **Commands** - Right-click to create projects and start servers
-- 🌍 **Language Support** - Complete BembaJS language integration
-
-### **📦 Installation Options**
-
-#### **Option 1: VS Code Marketplace (Recommended)**
-```bash
-# Install from marketplace
-code --install-extension bembajs.bembajs-language-support
-```
-
-#### **Option 2: Global Installation**
-```bash
-# Install globally
-npm install -g bembajs@latest
-
-# Install IDE support
-bemba install-ide
-```
-
-#### **Option 3: Automatic (New Projects)**
-New BembaJS projects automatically include VS Code configuration:
-```bash
-npm create bembajs@latest my-app
-# .bemba files automatically recognized!
-```
-
----
-
-## 🎯 **Core Features**
-
-### **🌍 Bemba Language Programming**
-Write web applications in the beautiful Bemba language:
-
-```bemba
-pangaIpepa('Home', {
-    umutwe: 'Tantika ukupanga ukulemba',
-    ilyashi: 'Bika na ukumona ifyakusendeka mwangu. Ya ku <a href="https://github.com/YamikaniKL/bemba-compiler">Learning Center</a>',
-    ifiputulwa: [
-        {
-            umutwe: 'Ukutampa bwino',
-            ilyashi: 'Lemba pali amapeji/index.bemba file',
-            amabatani: [
-                {
-                    ilembo: 'Panga pa Vercel',
-                    pakuKlikisha: 'window.open("https://vercel.com/new", "_blank")'
-                },
-                {
-                    ilembo: 'Soma amakalata yetu',
-                    pakuKlikisha: 'window.open("https://github.com/YamikaniKL/bemba-compiler", "_blank")'
-                }
-            ]
-        }
-    ]
-});
-```
-
-### **🎨 Next.js-like Framework**
-- ✅ **File-based Routing** - Pages in `amapeji/` directory
-- ✅ **Component System** - Reusable components in `ifikopo/`
-- ✅ **API Routes** - Server endpoints in `maapi/`
-- ✅ **Static Assets** - Files in `maungu/` directory
-- ✅ **Hot Reload** - Instant updates during development
-
-### **⚡ Modern Development Experience**
-- ✅ **Tailwind CSS** - Beautiful, responsive styling
-- ✅ **TypeScript Support** - Optional type safety
-- ✅ **Bun Optimization** - Native Bun support for faster builds
-- ✅ **Production Ready** - Optimized builds for deployment
-
----
-
-## 📦 **Packages**
-
-This monorepo contains:
-
-| Package | Description | Version |
-|---------|-------------|---------|
-| **`bembajs`** | Main framework with CLI and SDK | [![npm](https://img.shields.io/npm/v/bembajs.svg)](https://www.npmjs.com/package/bembajs) |
-| **`create-bembajs`** | Project scaffolding tool | [![npm](https://img.shields.io/npm/v/create-bembajs.svg)](https://www.npmjs.com/package/create-bembajs) |
-| **`bembajs-core`** | Core compiler (lexer, parser, transformer) | Internal |
-
----
-
-## 🛠️ **CLI Commands**
-
-```bash
-# Create new project
-bemba panga my-app
-
-# Start development server
-bemba tungulula
-
-# Build for production
-bemba akha
-
-# Install IDE support
-bemba install-ide
-
-# Show help
-bemba help
-```
-
----
-
-## 📖 **BembaJS Language Syntax Reference**
+## Language Syntax Reference
 
 <details>
-<summary><strong>📘 Basic Syntax - Pages, Components & API Routes</strong></summary>
+<summary><strong>Basic Syntax - Pages, Components & API Routes</strong></summary>
 
 ### Creating Pages (`pangaIpepa`)
 
@@ -195,7 +72,7 @@ pangaIpepa('Home', {
             ilyashi: 'Section content',
             amalembelo: [
                 'Step one',
-                'Step two', 
+                'Step two',
                 'Step three'
             ],
             amabatani: [
@@ -209,50 +86,20 @@ pangaIpepa('Home', {
 });
 ```
 
-**Keywords:**
-- `pangaIpepa(name, config)` - Create a new page
-- `umutwe` - Title/heading
-- `ilyashi` - Description/paragraph (supports HTML)
-- `ifiputulwa` - Content sections array
-- `amalembelo` - Ordered list of steps
-- `amabatani` - Buttons array
-- `ilembo` - Button label
-- `pakuKlikisha` - Click event handler
-
 ### Creating Components (`fyambaIcipanda`)
 
 ```bemba
-fyambaIcipanda('Button', {
+fyambaIcipanda('ComponentName', {
     ificingilila: {
-        ilembo: { type: 'string', required: true },
-        umitundu: { type: 'string', default: 'primary' }
+        izina: { type: 'string', required: true },
+        umaka: { type: 'number', default: 0 }
     },
     ifiputulwa: {
-        amabatani: [
-            {
-                ilembo: props.ilembo,
-                pakuKlikisha: 'londolola("Clicked!")'
-            }
-        ]
-    },
-    imikalile: `
-        .button {
-            padding: 12px 24px;
-            border-radius: 8px;
-        }
-        .button-primary {
-            background: #667eea;
-            color: white;
-        }
-    `
+        umutwe: props.izina,
+        ilyashi: `Age: ${props.umaka} years old`
+    }
 });
 ```
-
-**Keywords:**
-- `fyambaIcipanda(name, config)` - Create a component
-- `ificingilila` - Props definition
-- `ifiputulwa` - Component content
-- `imikalile` - CSS styles
 
 ### Creating API Routes (`pangaApi`)
 
@@ -262,28 +109,18 @@ pangaApi('users', {
     handler: `
         return {
             status: 200,
-            data: {
-                users: [
-                    { id: 1, izina: 'John' },
-                    { id: 2, izina: 'Jane' }
-                ]
-            }
+            data: { message: 'Hello from BembaJS API' }
         };
     `
 });
 ```
 
-**Keywords:**
-- `pangaApi(endpoint, config)` - Create API route
-- `method` - HTTP method (GET, POST, PUT, DELETE)
-- `handler` - Request handler function
-
 </details>
 
 <details>
-<summary><strong>🔄 State Management - Data & Updates</strong></summary>
+<summary><strong>State Management</strong></summary>
 
-### Declaring State (`ukusunga`)
+### Basic State (`ukusunga`)
 
 ```bemba
 fyambaIcipanda('Counter', {
@@ -303,49 +140,42 @@ fyambaIcipanda('Counter', {
 });
 ```
 
-### Updating State (`ukuCinja`)
-
-```bemba
-// Update single value
-ukuCinja('namba', namba + 1)
-
-// Update with function
-ukuCinja('izina', (prev) => prev + ' Banda')
-
-// Update multiple values
-ukuCinja({
-    namba: 10,
-    izina: 'John',
-    wasalwa: true
-})
-```
-
 ### State with Effects (`ukusungaKabili`)
 
 ```bemba
-fyambaIcipanda('DataLoader', {
+fyambaIcipanda('DataComponent', {
     ifiputulwa: {
         ukusungaKabili: {
-            data: null,
+            data: [],
+            loading: true,
             effect: `
-                fetch('/api/users')
+                fetch('/api/data')
                     .then(res => res.json())
-                    .then(data => ukuCinja('data', data));
+                    .then(data => {
+                        ukuCinja('data', data);
+                        ukuCinja('loading', false);
+                    });
             `
         }
     }
 });
 ```
 
-**Keywords:**
-- `ukusunga` - Declare component state
-- `ukuCinja(name, value)` - Update state value
-- `ukusungaKabili` - State with side effects
+### State Updates (`ukuCinja`)
+
+```bemba
+// Update single state
+ukuCinja('namba', namba + 1)
+
+// Update multiple states
+ukuCinja('izina', 'John')
+ukuCinja('wasalwa', true)
+```
 
 </details>
 
 <details>
-<summary><strong>🎯 Event Handling - User Interactions</strong></summary>
+<summary><strong>Event Handling</strong></summary>
 
 ### Click Events (`pakuKlikisha`)
 
@@ -353,7 +183,7 @@ fyambaIcipanda('DataLoader', {
 amabatani: [
     {
         ilembo: 'Click Me',
-        pakuKlikisha: 'londolola("Hello!")'
+        pakuKlikisha: 'londolola("Button clicked!")'
     }
 ]
 ```
@@ -361,263 +191,116 @@ amabatani: [
 ### Input Events (`pakuLemba`)
 
 ```bemba
-ifiputulwa: {
-    inputs: [
-        {
-            type: 'text',
-            placeholder: 'Lemba izina',
-            pakuLemba: 'ukuCinja("izina", event.target.value)'
-        }
-    ]
-}
+inputs: [
+    {
+        type: 'text',
+        placeholder: 'Lemba izina',
+        pakuLemba: 'ukuCinja("izina", event.target.value)'
+    }
+]
 ```
 
-### Form Submit (`pakuTumina`)
+### Form Events (`pakuTumina`)
 
 ```bemba
 forms: [
     {
         pakuTumina: `
             event.preventDefault();
-            console.log('Form submitted:', izina);
+            londolola('Form submitted!');
         `
     }
 ]
 ```
 
-### Change Events (`pakuCinja`)
+### Other Events
 
-```bemba
-selects: [
-    {
-        options: ['Option 1', 'Option 2'],
-        pakuCinja: 'ukuCinja("selected", event.target.value)'
-    }
-]
-```
-
-### Mouse Events
-
-```bemba
-// Mouse enter
-pakuKwesha: 'ukuCinja("isHovering", true)'
-
-// Mouse leave
-pakuSiya: 'ukuCinja("isHovering", false)'
-```
-
-### Focus Events
-
-```bemba
-// On focus
-pakuIngia: 'ukuCinja("isFocused", true)'
-
-// On blur
-pakuFuma: 'ukuCinja("isFocused", false)'
-```
-
-**All Event Handlers:**
-- `pakuKlikisha` - onClick
-- `pakuLemba` - onChange (for inputs)
-- `pakuTumina` - onSubmit (for forms)
-- `pakuCinja` - onChange (for selects)
-- `pakuIngia` - onFocus
-- `pakuFuma` - onBlur
-- `pakuKwesha` - onMouseEnter
-- `pakuSiya` - onMouseLeave
+- `pakuCinja` - Select change events
+- `pakuIngia` - Focus events
+- `pakuFuma` - Blur events
+- `pakuKwesha` - Mouse enter events
+- `pakuSiya` - Mouse leave events
 
 </details>
 
 <details>
-<summary><strong>📦 Component Props - Passing Data</strong></summary>
+<summary><strong>Component Props & Validation</strong></summary>
 
-### Defining Props (`ificingilila`)
+### Props Definition (`ificingilila`)
 
 ```bemba
 fyambaIcipanda('UserCard', {
     ificingilila: {
-        // Required string prop
         izina: { 
             type: 'string', 
             required: true 
         },
-        
-        // Optional number with default
         umaka: { 
             type: 'number', 
             default: 0 
         },
-        
-        // Optional string
         ifoto: { 
             type: 'string' 
         },
-        
-        // Boolean with default
         wasalwa: {
             type: 'boolean',
             default: false
-        },
-        
-        // Array prop
-        amafoto: {
-            type: 'array',
-            default: []
         }
-    }
-});
-```
-
-### Using Props in Components
-
-```bemba
-ifiputulwa: {
-    umutwe: props.izina,
-    ilyashi: 'Age: ' + props.umaka,
-    ifoto: props.ifoto
-}
-```
-
-### Passing Props
-
-```bemba
-// In parent component
-ifikopo: [
-    {
-        name: 'UserCard',
-        props: {
-            izina: 'John Banda',
-            umaka: 25,
-            ifoto: '/john.jpg',
-            wasalwa: true
-        }
-    }
-]
-```
-
-### Children Props
-
-```bemba
-fyambaIcipanda('Container', {
-    ificingilila: {
-        children: { type: 'node' }
     },
     ifiputulwa: {
-        wrapper: {
-            content: props.children
-        }
+        umutwe: props.izina,
+        ilyashi: `Age: ${props.umaka} years old`
     }
 });
 ```
 
-**Prop Types:**
+### Prop Types
+
 - `string` - Text values
 - `number` - Numeric values
 - `boolean` - True/false values
 - `array` - List of items
-- `object` - Complex objects
-- `node` - Child components
+- `object` - Key-value pairs
 - `function` - Callback functions
 
 </details>
 
 <details>
-<summary><strong>🎨 Styling - CSS & Tailwind</strong></summary>
+<summary><strong>Styling</strong></summary>
 
-### Inline Styles (`imikalile`)
-
-```bemba
-fyambaIcipanda('StyledButton', {
-    imikalile: `
-        .button {
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        
-        .button:active {
-            transform: translateY(0);
-        }
-    `
-});
-```
-
-### Scoped Styles
+### CSS Styles (`imikalile`)
 
 ```bemba
-// Styles are automatically scoped to the component
-imikalile: `
-    /* This only affects this component */
-    .title {
-        font-size: 24px;
-        color: #333;
-    }
-`
-```
-
-### Dynamic Styles
-
-```bemba
-fyambaIcipanda('DynamicButton', {
+fyambaIcipanda('StyledComponent', {
     ifiputulwa: {
-        ukusunga: {
-            isActive: false
-        }
+        umutwe: 'Styled Component'
     },
     imikalile: `
-        .button {
-            background: ${isActive ? '#667eea' : '#gray'};
-            color: ${isActive ? 'white' : 'black'};
+        .component {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .component h1 {
+            color: #333;
+            margin: 0 0 16px 0;
         }
     `
 });
 ```
 
-### Tailwind CSS Classes
+### Tailwind CSS Integration
 
-```bemba
-// Tailwind classes work automatically in BembaJS
-amabatani: [
-    {
-        ilembo: 'Styled Button',
-        classes: 'px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors'
-    }
-]
-```
-
-### CSS Variables
-
-```bemba
-imikalile: `
-    :root {
-        --primary-color: #667eea;
-        --secondary-color: #764ba2;
-        --spacing: 16px;
-    }
-    
-    .button {
-        background: var(--primary-color);
-        padding: var(--spacing);
-    }
-`
-```
+BembaJS includes Tailwind CSS by default for utility-first styling.
 
 </details>
 
 <details>
-<summary><strong>📝 Forms & Validation - User Input</strong></summary>
+<summary><strong>Forms & Validation</strong></summary>
 
-### Basic Form
+### Form Handling
 
 ```bemba
 fyambaIcipanda('ContactForm', {
@@ -625,7 +308,8 @@ fyambaIcipanda('ContactForm', {
         ukusunga: {
             izina: '',
             email: '',
-            message: ''
+            message: '',
+            emailError: ''
         },
         forms: [
             {
@@ -641,19 +325,20 @@ fyambaIcipanda('ContactForm', {
                         type: 'email',
                         name: 'email',
                         placeholder: 'Email yobe',
-                        pakuLemba: 'ukuCinja("email", event.target.value)',
+                        pakuLemba: `
+                            ukuCinja('email', event.target.value);
+                            if (!event.target.value.includes('@')) {
+                                ukuCinja('emailError', 'Email yakufwile kuba na @');
+                            } else {
+                                ukuCinja('emailError', '');
+                            }
+                        `,
                         required: true
-                    },
-                    {
-                        type: 'textarea',
-                        name: 'message',
-                        placeholder: 'Ubutumwa',
-                        pakuLemba: 'ukuCinja("message", event.target.value)'
                     }
                 ],
                 pakuTumina: `
                     event.preventDefault();
-                    console.log({ izina, email, message });
+                    londolola('Form submitted successfully!');
                 `
             }
         ]
@@ -661,114 +346,40 @@ fyambaIcipanda('ContactForm', {
 });
 ```
 
-### Input Validation
+### Input Types
 
-```bemba
-ifiputulwa: {
-    ukusunga: {
-        email: '',
-        emailError: ''
-    },
-    inputs: [
-        {
-            type: 'email',
-            pakuLemba: `
-                ukuCinja('email', event.target.value);
-                if (!event.target.value.includes('@')) {
-                    ukuCinja('emailError', 'Email yakufwile kuba na @');
-                } else {
-                    ukuCinja('emailError', '');
-                }
-            `
-        }
-    ]
-}
-```
-
-### Form with Validation
-
-```bemba
-forms: [
-    {
-        pakuTumina: `
-            event.preventDefault();
-            
-            // Validate
-            if (!izina) {
-                return londolola('Lemba izina lyobe!');
-            }
-            
-            if (!email.includes('@')) {
-                return londolola('Email yakufwile kuba na @');
-            }
-            
-            // Submit
-            fetch('/api/contact', {
-                method: 'POST',
-                body: JSON.stringify({ izina, email, message })
-            });
-        `
-    }
-]
-```
-
-### Select Dropdowns
-
-```bemba
-selects: [
-    {
-        name: 'icalo',
-        options: [
-            { value: 'zm', label: 'Zambia' },
-            { value: 'mw', label: 'Malawi' },
-            { value: 'zw', label: 'Zimbabwe' }
-        ],
-        pakuCinja: 'ukuCinja("icalo", event.target.value)'
-    }
-]
-```
-
-### Checkboxes & Radio Buttons
-
-```bemba
-checkboxes: [
-    {
-        label: 'Ninasuma terms',
-        pakuCinja: 'ukuCinja("agreed", event.target.checked)'
-    }
-],
-
-radios: [
-    {
-        name: 'gender',
-        options: ['Male', 'Female', 'Other'],
-        pakuCinja: 'ukuCinja("gender", event.target.value)'
-    }
-]
-```
+- `text` - Text input
+- `email` - Email input
+- `password` - Password input
+- `number` - Number input
+- `textarea` - Multi-line text
+- `checkbox` - Checkbox input
+- `radio` - Radio button
+- `select` - Dropdown select
 
 </details>
 
 <details>
-<summary><strong>🌐 Data Fetching - APIs & Async</strong></summary>
+<summary><strong>Data Fetching</strong></summary>
 
-### Fetch API Data
+### Fetch API Integration
 
 ```bemba
-fyambaIcipanda('UserList', {
+fyambaIcipanda('DataComponent', {
     ifiputulwa: {
         ukusungaKabili: {
-            users: [],
+            data: [],
             loading: true,
+            error: null,
             effect: `
                 fetch('/api/users')
                     .then(res => res.json())
                     .then(data => {
-                        ukuCinja('users', data);
+                        ukuCinja('data', data);
                         ukuCinja('loading', false);
                     })
                     .catch(error => {
-                        console.error(error);
+                        ukuCinja('error', error.message);
                         ukuCinja('loading', false);
                     });
             `
@@ -777,239 +388,225 @@ fyambaIcipanda('UserList', {
 });
 ```
 
-### POST Data
+### API Routes
 
 ```bemba
-pakuKlikisha: `
-    fetch('/api/users', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            izina: izina,
-            email: email
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        londolola('User added!');
-        ukuCinja('users', [...users, data]);
-    });
-`
-```
-
-### API Integration
-
-```bemba
-// Define API endpoint
 pangaApi('users', {
     method: 'GET',
     handler: `
-        const users = await database.getUsers();
+        const users = [
+            { izina: 'John', umaka: 25 },
+            { izina: 'Jane', umaka: 30 }
+        ];
+        
         return {
             status: 200,
             data: users
         };
     `
 });
-
-// Use in component
-ukusungaKabili: {
-    users: [],
-    effect: `
-        fetch('/maapi/users')
-            .then(res => res.json())
-            .then(data => ukuCinja('users', data));
-    `
-}
-```
-
-### Loading States
-
-```bemba
-ifiputulwa: {
-    ukusunga: {
-        data: null,
-        loading: true,
-        error: null
-    },
-    ukusungaKabili: {
-        effect: `
-            ukuCinja('loading', true);
-            fetch('/api/data')
-                .then(res => res.json())
-                .then(data => {
-                    ukuCinja('data', data);
-                    ukuCinja('loading', false);
-                })
-                .catch(err => {
-                    ukuCinja('error', err.message);
-                    ukuCinja('loading', false);
-                });
-        `
-    }
-}
 ```
 
 </details>
 
 <details>
-<summary><strong>🔤 Built-in Functions - Utilities</strong></summary>
+<summary><strong>Built-in Functions</strong></summary>
 
 ### Console Functions
 
 ```bemba
-londolola(message)          // console.log()
-londololaError(error)       // console.error()
-londololaWarning(warning)   // console.warn()
+londolola('Hello World!')           // console.log
+londololaError('Error occurred')     // console.error
+londololaWarning('Warning message')  // console.warn
 ```
 
 ### String Functions
 
 ```bemba
-ukuPima(string)            // string.length
-ukuPindula(string, old, new) // string.replace()
-ukuGawanya(string, sep)    // string.split()
-ukuSanganya(array, sep)    // array.join()
+ukuPima('Hello')           // string.length
+ukuPindula('a', 'b')       // string.replace
+ukuGawanya('a,b,c')        // string.split
+ukuSanganya(['a','b','c']) // array.join
 ```
 
 ### Array Functions
 
 ```bemba
-ukuOnjela(array, item)     // array.push()
-ukuCotola(array, index)    // array.splice()
-ukuPindula(array, fn)      // array.map()
-ukuSankha(array, fn)       // array.filter()
+ukuOnjela(array, item)     // array.push
+ukuCotola(array, index)    // array.splice
+ukuPindula(array, fn)      // array.map
+ukuSankha(array, fn)       // array.filter
 ```
 
 ### Math Functions
 
 ```bemba
-ukuBalisha(a, b)           // a + b
-ukuCepula(a, b)            // a - b
-ukuCilisha(a, b)           // a * b
-ukuGawanya(a, b)           // a / b
+ukuBalisha(a, b)           // addition
+ukuCepula(a, b)            // subtraction
+ukuCilisha(a, b)           // multiplication
+ukuGawanya(a, b)           // division
 ```
 
 </details>
 
 ---
 
-## 📚 **Documentation**
+## VS Code Support
 
-### **Project Structure**
+### Automatic Installation
+
+```bash
+# Install BembaJS globally
+npm install -g bembajs@latest
+
+# Install VS Code language support
+bemba install-ide
+```
+
+### Manual Installation
+
+1. Install the [BembaJS Language Support](https://marketplace.visualstudio.com/items?itemName=bembajs.bembajs-language-support) extension
+2. Open any `.bemba` file
+3. Enjoy syntax highlighting and snippets!
+
+### Features
+
+- Syntax highlighting for Bemba keywords
+- Code snippets for common patterns
+- File association for `.bemba` files
+- Custom icon for Bemba files
+- Auto-completion and bracket matching
+
+---
+
+## Project Structure
+
 ```
 my-app/
-├── amapeji/           # Pages (like Next.js pages/)
-│   └── index.bemba
-├── ifikopo/           # Components (like Next.js components/)
-│   ├── Button.bemba
-│   └── Card.bemba
-├── maapi/             # API routes (like Next.js api/)
-│   ├── hello.bemba
-│   └── users.bemba
-├── maungu/            # Static files (like Next.js public/)
-│   ├── favicon.ico
-│   └── logo.png
-├── bemba.config.js    # Configuration file
+├── amapeji/           # Pages (file-based routing)
+│   ├── index.bemba
+│   └── about.bemba
+├── ifikopo/           # Components
+│   ├── Header.bemba
+│   └── Footer.bemba
+├── mafungulo/         # API routes
+│   ├── users.bemba
+│   └── posts.bemba
+├── amashinda/         # Static assets
+│   ├── images/
+│   └── favicon.ico
+├── imikalile/         # Styles
+│   └── globals.css
+├── bemba.config.js    # Configuration
 └── package.json
 ```
 
 ---
 
-## 🌟 **Bun Support**
+## Configuration
 
-BembaJS is optimized for Bun with native performance:
+### bemba.config.js
 
-```bash
-# Install with Bun
-bun install -g bembajs
-
-# Create project with Bun
-bun create bembajs my-app
-
-# Run with Bun (faster!)
-cd my-app
-bun run dev
+```javascript
+module.exports = {
+    // Development server port
+    port: 3000,
+    
+    // Build output directory
+    output: './dist',
+    
+    // Enable hot reload
+    hotReload: true,
+    
+    // Open browser automatically
+    openBrowser: true,
+    
+    // API server port
+    apiPort: 3001,
+    
+    // Enable static site generation
+    ssg: false,
+    
+    // Enable server-side rendering
+    ssr: true,
+    
+    // Build optimizations
+    optimize: true,
+    
+    // Routing configuration
+    routing: {
+        trailingSlash: false,
+        caseSensitive: false
+    }
+};
 ```
-
-**Bun Features:**
-- ⚡ **Native Transpiler** - Faster builds
-- 🔥 **Hot Reload** - Instant updates
-- 💾 **SQLite Caching** - Faster subsequent builds
-- 📦 **Bundler** - Optimized production builds
 
 ---
 
-## 🚀 **Deployment**
+## Error Messages
 
-### **Vercel (Recommended)**
-```bash
-# Deploy to Vercel
-npm install -g vercel
-vercel
-```
+BembaJS provides error messages in the Bemba language:
 
-### **Other Platforms**
-- **Netlify** - Static site hosting
-- **Railway** - Full-stack deployment
-- **Render** - Container deployment
-- **AWS** - Cloud hosting
+- **Syntax Errors**: `Ifipushi fya syntax: [error details]`
+- **Runtime Errors**: `Ifipushi fya kutantika: [error details]`
+- **Validation Errors**: `Ifipushi fya kupepesha: [error details]`
+- **Component Errors**: `Ifipushi fya component: [error details]`
+- **API Errors**: `Ifipushi fya API: [error details]`
 
 ---
 
-## 🤝 **Contributing**
+## Examples
 
-We welcome contributions! Here's how to get started:
+Check out the `examples/` directory for:
+
+- `state-management.bemba` - Counter component with state
+- `form-handling.bemba` - Contact form with validation
+- `props-validation.bemba` - UserCard with props and validation
+- `api-route.bemba` - API endpoint example
+- `basic-component.bemba` - Simple component example
+
+---
+
+## Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+### Development Setup
 
 ```bash
-# Fork the repository
+# Clone the repository
 git clone https://github.com/YamikaniKL/bemba-compiler.git
-cd bemba-compiler
 
 # Install dependencies
-pnpm install
-
-# Build packages
-pnpm build
+npm install
 
 # Run tests
-pnpm test
+npm test
+
+# Build packages
+npm run build
 ```
 
-**Contributing Areas:**
-- 🐛 **Bug Fixes** - Report and fix issues
-- ✨ **New Features** - Add functionality
-- 📚 **Documentation** - Improve docs
-- 🎨 **VS Code Extension** - Enhance IDE support
-- 🌍 **Bemba Language** - Improve language features
-
 ---
 
-## 📞 **Support & Community**
-
-- 🌐 **Website**: [https://bembajs.dev](https://bembajs.dev)
-- 📖 **Documentation**: [https://github.com/YamikaniKL/bemba-compiler](https://github.com/YamikaniKL/bemba-compiler)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/YamikaniKL/bemba-compiler/issues)
-- 💬 **Discussions**: [GitHub Discussions](https://github.com/YamikaniKL/bemba-compiler/discussions)
-- 📧 **Email**: [support@bembajs.dev](mailto:support@bembajs.dev)
-
----
-
-## 📄 **License**
+## License
 
 MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
+## Support
+
+- **Documentation**: [GitHub Wiki](https://github.com/YamikaniKL/bemba-compiler/wiki)
+- **Issues**: [GitHub Issues](https://github.com/YamikaniKL/bemba-compiler/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/YamikaniKL/bemba-compiler/discussions)
+
+---
+
 <div align="center">
 
-**Built with ❤️ for the Zambian developer community** 🇿🇲
+**Made with ❤️ for the Bemba-speaking developer community**
 
-*Making programming accessible in African languages*
-
-[![Star on GitHub](https://img.shields.io/github/stars/YamikaniKL/bemba-compiler?style=social)](https://github.com/YamikaniKL/bemba-compiler)
-[![Follow on Twitter](https://img.shields.io/twitter/follow/bembajs?style=social)](https://twitter.com/bembajs)
+[Website](https://bembajs.dev) • [Documentation](https://github.com/YamikaniKL/bemba-compiler/wiki) • [Examples](https://github.com/YamikaniKL/bemba-compiler/tree/main/examples)
 
 </div>
