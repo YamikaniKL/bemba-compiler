@@ -21,11 +21,13 @@
   "author": "BembaJS Developer",
   "license": "MIT",
   "dependencies": {
-    "bembajs": "^1.0.0"
+    "bembajs": "^1.0.24",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@bembajs/cli": "^1.0.0",
-    "@bembajs/dev-tools": "^1.0.0"
+    "eslint": "^8.0.0",
+    "prettier": "^3.0.0"
   },
   "bemba": {
     "version": "1.0.0",

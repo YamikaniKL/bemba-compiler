@@ -84,11 +84,11 @@ function compileBemba(code) {
                             // First button is primary (Deploy Now), second is secondary (Documentation)
                             const isPrimary = index === 0;
                             const buttonClass = isPrimary ? 
-                                'rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto' :
-                                'rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]';
+                                'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]' :
+                                'flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]';
                             
                             const buttonContent = isPrimary ? 
-                                `<img alt="Vercel logomark" loading="lazy" width="20" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
+                                `<img class="dark:invert" src="/vercel.svg" alt="Vercel logomark" width="16" height="16">${btnText}` :
                                 btnText;
                             
                             return `<a class="${buttonClass}" href="${href}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
@@ -114,232 +114,71 @@ function compileBemba(code) {
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'var(--background)',
+                        foreground: 'var(--foreground)',
+                    },
+                    fontFamily: {
+                        sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['var(--font-geist-mono)', 'SF Mono', 'Monaco', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --font-geist-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            --font-geist-mono: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            --background: #ffffff;
+            --foreground: #171717;
+            --font-geist-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            --font-geist-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         }
-        
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: #0a0a0a;
+                --foreground: #ededed;
+            }
+        }
+
         body {
+            background: var(--background);
+            color: var(--foreground);
             font-family: var(--font-geist-sans);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-rows: 20px 1fr 20px;
-            align-items: center;
-            justify-items: center;
-            min-height: 100vh;
-            padding: 2rem;
-            padding-bottom: 5rem;
-            gap: 4rem;
-        }
-        
-        @media (min-width: 640px) {
-            .grid {
-                padding: 5rem;
-            }
-        }
-        
-        main {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            grid-row-start: 2;
-            align-items: center;
-        }
-        
-        @media (min-width: 640px) {
-            main {
-                align-items: flex-start;
-            }
-        }
-        
-        .logo {
-            width: 180px;
-            height: 38px;
-        }
-        
-        ol {
-            list-style: decimal;
-            list-style-position: inside;
-            text-align: center;
-            font-size: 0.875rem;
-            line-height: 1.5rem;
-            font-family: var(--font-geist-mono);
-        }
-        
-        @media (min-width: 640px) {
-            ol {
-                text-align: left;
-            }
-        }
-        
-        li {
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
-        }
-        
-        li:last-child {
-            margin-bottom: 0;
-        }
-        
-        code {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            font-family: var(--font-geist-mono);
-            font-weight: 600;
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            code {
-                background: rgba(255, 255, 255, 0.06);
-            }
-        }
-        
-        .button-container {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-direction: column;
-        }
-        
-        @media (min-width: 640px) {
-            .button-container {
-                flex-direction: row;
-            }
-        }
-        
-        .ibatani {
-            border-radius: 9999px;
-            border: 1px solid transparent;
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #000000;
-            color: #fafafa;
-            gap: 0.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            height: 2.5rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        
-        .ibatani:hover {
-            background: #404040;
-        }
-        
-        .ibatani.secondary {
-            background: transparent;
-            color: #000000;
-            border-color: rgba(0, 0, 0, 0.08);
-        }
-        
-        .ibatani.secondary:hover {
-            background: #f2f2f2;
-            border-color: transparent;
-        }
-        
-        @media (min-width: 640px) {
-            .ibatani {
-                font-size: 1rem;
-                line-height: 1.5rem;
-                height: 3rem;
-                padding-left: 1.25rem;
-                padding-right: 1.25rem;
-            }
-            
-            .ibatani.secondary {
-                width: auto;
-            }
-        }
-        
-        @media (min-width: 768px) {
-            .ibatani.secondary {
-                width: 158px;
-            }
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .ibatani:hover {
-                background: #cccccc;
-            }
-            
-            .ibatani.secondary {
-                border-color: rgba(255, 255, 255, 0.145);
-            }
-            
-            .ibatani.secondary:hover {
-                background: #1a1a1a;
-            }
-        }
-        
-        footer {
-            grid-row-start: 3;
-            display: flex;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .footer-link {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #171717;
-            text-decoration: none;
-        }
-        
-        .footer-link:hover {
-            text-decoration: underline;
-            text-underline-offset: 4px;
-        }
-        
-        .footer-icon {
-            width: 16px;
-            height: 16px;
         }
         
         ${customStyles}
     </style>
 </head>
-<body class="__variable_4d318d __variable_ea5f4b antialiased">
-    <div class="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-        <main class="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-            <img alt="BembaJS logo" width="180" height="38" decoding="async" data-nimg="1" class="dark:invert logo" style="color:transparent" src="/bemba-logo.svg">
-            <ol class="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-                <li class="mb-2 tracking-[-.01em]">Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">amapeji/index.bemba</code>.</li>
-                <li class="tracking-[-.01em]">Bika na ukumona ifyakusendeka mwangu.</li>
-            </ol>
-            <div class="flex gap-4 items-center flex-col sm:flex-row">
+<body class="antialiased">
+    <div class="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
+        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+            <img
+                class="dark:invert"
+                src="/bemba-logo.svg"
+                alt="BembaJS logo"
+                width="100"
+                height="20"
+            />
+            <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+                <h1 class="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+                    ${title}
+                </h1>
+                <p class="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+                    ${content}
+                </p>
+            </div>
+            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row">
                 ${sections}
             </div>
         </main>
-        <footer class="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/learn" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="File icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/file.svg">
-                Funda
-            </a>
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev/examples" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Window icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/window.svg">
-                Ifyabukaya
-            </a>
-            <a class="flex items-center gap-2 hover:underline hover:underline-offset-4" href="https://bembajs.dev" target="_blank" rel="noopener noreferrer">
-                <img aria-hidden="true" alt="Globe icon" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" style="color:transparent" src="/globe.svg">
-                Ya ku bembajs.dev →
-            </a>
-        </footer>
     </div>
 </body>
 </html>`;
