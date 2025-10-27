@@ -189,19 +189,20 @@ function compileBemba(code) {
 </head>
 <body class="antialiased">
     <div class="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black sm:items-start">
             <img
-                class="dark:invert"
                 src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350"
                 alt="BembaJS logo"
                 width="180"
                 height="38"
-                style="filter: invert(1);"
+                style="filter: invert(1) brightness(0) saturate(100%);"
             />
-            <ol class="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-                ${sectionSteps}
-            </ol>
-            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row">
+            <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left mt-8">
+                <ol class="list-inside list-decimal text-sm font-[family-name:var(--font-geist-mono)]">
+                    ${sectionSteps}
+                </ol>
+            </div>
+            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row mt-8">
                 ${sections}
             </div>
         </main>
