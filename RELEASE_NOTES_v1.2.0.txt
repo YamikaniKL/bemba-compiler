@@ -1,0 +1,206 @@
+BembaJS v1.2.0 "React Integration" Release Notes
+
+React Ecosystem Integration Release
+
+BembaJS v1.2.0 "React Integration" transforms BembaJS into a fully functional React framework that can use any React component library and npm package, with "Pisha" as the lightning-fast build tool.
+
+What's New
+
+React Ecosystem Integration
+- Full React Compatibility - Use any React component library
+- NPM Package Support - Import any npm package with Bemba syntax
+- Component Wrappers - Shadcn/ui, Material-UI, and more
+- Mixed Components - Use React and BembaJS components together
+- Hot Module Replacement - Instant updates for .bemba files
+
+Pisha Build Tool
+- Lightning Fast - Built on Vite for instant server start
+- Hot Reload - Changes reflect immediately without losing state
+- Production Builds - Optimized bundles with code splitting
+- CSS Framework Support - Tailwind CSS, Bootstrap, and more
+- TypeScript Support - Full TypeScript support out of the box
+
+Import/Export System
+- ingisa - Import React libraries and npm packages
+- fumya - Export components and modules
+- ukufuma - From keyword for imports
+- chisangwa - Default export keyword
+- nga - As keyword for aliases
+
+Component Wrapper System
+- Generic React wrapper - Converts Bemba props to React props
+- Shadcn/ui wrappers - Button, Input, Card, Dialog, Select
+- Material-UI wrappers - Button, TextField, Card, Dialog, Select, Typography
+- Prop mapping system - pakuKlikisha → onClick, imikalile → className
+- Event handler conversion - String handlers to functions
+- Wrapper registry - Extensible system for new libraries
+
+Updated Syntax Examples
+
+React Integration
+```bemba
+// Import React libraries
+ingisa React ukufuma 'react'
+ingisa { Button } ukufuma '@shadcn/ui'
+ingisa { TextField } ukufuma '@mui/material/TextField'
+
+fyambaIcipanda('MyApp', {
+    ukusunga: {
+        izina: '',
+        email: ''
+    },
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'TextField',
+                library: 'mui',
+                props: {
+                    label: 'Lemba izina',
+                    pakuLemba: 'ukuCinja("izina", event.target.value)',
+                    variant: 'outlined'
+                }
+            },
+            {
+                name: 'Button',
+                library: 'shadcn',
+                props: {
+                    pakuKlikisha: 'londolola("Submitted!")',
+                    imikalile: 'bg-blue-500 hover:bg-blue-700'
+                },
+                ifika: 'Submit'
+            }
+        ]
+    }
+});
+```
+
+NPM Packages Integration
+```bemba
+// Import npm packages
+ingisa axios ukufuma 'axios'
+ingisa dayjs ukufuma 'dayjs'
+
+fyambaIcipanda('DataComponent', {
+    ukusungaKabili: {
+        data: [],
+        loading: true,
+        effect: `
+            axios.get('/api/data')
+                .then(response => {
+                    ukuCinja('data', response.data);
+                    ukuCinja('loading', false);
+                });
+        `
+    },
+    ifiputulwa: {
+        ilyashi: loading ? 'Loading...' : 'Data loaded: ' + data.length + ' items'
+    }
+});
+```
+
+Mixed React and BembaJS
+```bemba
+// Pure React component
+function ReactCounter({ initialCount = 0 }) {
+    const [count, setCount] = useState(initialCount);
+    return <div>Count: {count}</div>;
+}
+
+// BembaJS component using React component
+fyambaIcipanda('MixedExample', {
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'ReactCounter',
+                props: { initialCount: 5 }
+            }
+        ]
+    }
+});
+```
+
+Technical Implementation
+
+Core Files Updated
+- src/generator.js - Enhanced React/JSX output with imports
+- src/constants.js - Added import/export keywords
+- packages/bembajs/src/wrappers/ - Complete wrapper system
+- packages/pisha/ - Full Pisha build tool package
+
+Generated React Code
+- Clean JSX output with proper imports
+- Optimized hook imports (only what's needed)
+- Component wrapper integration
+- Event handler conversion
+- Props validation and mapping
+
+Pisha Build Tool Features
+- Vite-based development server
+- Hot module replacement for .bemba files
+- Production builds with optimization
+- CSS framework integration
+- TypeScript support
+- Custom configuration
+
+Example Files
+
+New comprehensive examples:
+- shadcn-integration.bemba - Using Shadcn/ui components
+- mui-integration.bemba - Using Material-UI components
+- npm-packages.bemba - Using npm packages (axios, dayjs)
+- mixed-react-bemba.bemba - Mixing React and BembaJS
+
+Installation
+
+```bash
+# Install latest version
+npm install -g bembajs@latest
+npm install -g pisha@latest
+
+# Create new project
+create-bembajs my-app
+cd my-app
+
+# Start development server
+pisha dev
+```
+
+Commands
+
+```bash
+# Development server
+pisha dev
+
+# Build for production
+pisha build
+
+# Preview production build
+pisha preview
+```
+
+Breaking Changes
+
+None. This is a minor version release with backward compatibility maintained.
+
+Migration Guide
+
+No migration required. All existing BembaJS code continues to work unchanged.
+
+New Features Available:
+- Import React libraries with ingisa keyword
+- Use component wrappers for UI libraries
+- Mix React and BembaJS components
+- Use Pisha for faster development
+
+What's Next
+
+- Advanced component patterns
+- Server-side rendering enhancements
+- Performance optimizations
+- Additional built-in functions
+- Mobile development support
+- AI integration features
+
+Full Changelog: https://github.com/YamikaniKL/bemba-compiler/compare/v1.1.0...v1.2.0
+
+This release represents a major milestone in making BembaJS a comprehensive React framework. The React ecosystem integration, component wrappers, and Pisha build tool make it easier than ever to build complex applications while maintaining the beauty and expressiveness of the Bemba language.

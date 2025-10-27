@@ -1,0 +1,84 @@
+// Material-UI Integration Example
+ingisa React ukufuma 'react'
+ingisa { Button } ukufuma '@mui/material/Button'
+ingisa { TextField } ukufuma '@mui/material/TextField'
+ingisa { Card } ukufuma '@mui/material/Card'
+ingisa { Typography } ukufuma '@mui/material/Typography'
+
+fyambaIcipanda('MuiExample', {
+    ukusunga: {
+        namba: 0,
+        izina: '',
+        loading: false
+    },
+    ifiputulwa: {
+        umutwe: 'Material-UI Integration',
+        ilyashi: 'This component demonstrates using Material-UI components with BembaJS',
+        ifikopo: [
+            {
+                name: 'Card',
+                library: 'mui',
+                props: {
+                    imikalile: 'max-w-md mx-auto p-4',
+                    elevation: 3
+                },
+                ifika: [
+                    {
+                        name: 'Typography',
+                        library: 'mui',
+                        props: {
+                            variant: 'h4',
+                            imikalile: 'mb-4 text-center',
+                            color: 'primary'
+                        },
+                        ifika: 'Counter: ' + namba
+                    },
+                    {
+                        name: 'TextField',
+                        library: 'mui',
+                        props: {
+                            label: 'Lemba izina',
+                            placeholder: 'Izina lyobe',
+                            pakuLemba: 'ukuCinja("izina", event.target.value)',
+                            imikalile: 'mb-4 w-full',
+                            variant: 'outlined',
+                            fullWidth: true
+                        }
+                    },
+                    {
+                        name: 'Button',
+                        library: 'mui',
+                        props: {
+                            pakuKlikisha: 'ukuCinja("namba", namba + 1)',
+                            imikalile: 'mr-2',
+                            variant: 'contained',
+                            color: 'primary'
+                        },
+                        ifika: 'Onjela'
+                    },
+                    {
+                        name: 'Button',
+                        library: 'mui',
+                        props: {
+                            pakuKlikisha: 'ukuCinja("namba", namba - 1)',
+                            imikalile: 'mr-2',
+                            variant: 'outlined',
+                            color: 'secondary'
+                        },
+                        ifika: 'Cepula'
+                    },
+                    {
+                        name: 'Button',
+                        library: 'mui',
+                        props: {
+                            pakuKlikisha: 'ukuCinja("namba", 0)',
+                            variant: 'text',
+                            color: 'error'
+                        },
+                        ifika: 'Reset'
+                    }
+                ]
+            }
+        ]
+    }
+});

@@ -1,0 +1,58 @@
+// Shadcn/ui Integration Example
+ingisa React ukufuma 'react'
+ingisa { Button } ukufuma '@shadcn/ui'
+ingisa { Input } ukufuma '@shadcn/ui'
+ingisa { Card } ukufuma '@shadcn/ui'
+
+fyambaIcipanda('ShadcnExample', {
+    ukusunga: {
+        izina: '',
+        email: '',
+        wasalwa: false
+    },
+    ifiputulwa: {
+        umutwe: 'Shadcn/ui Integration',
+        ilyashi: 'This component demonstrates using Shadcn/ui components with BembaJS',
+        ifikopo: [
+            {
+                name: 'Card',
+                library: 'shadcn',
+                props: {
+                    imikalile: 'max-w-md mx-auto p-6'
+                },
+                ifika: [
+                    {
+                        name: 'Input',
+                        library: 'shadcn',
+                        props: {
+                            type: 'text',
+                            placeholder: 'Lemba izina lyobe',
+                            pakuLemba: 'ukuCinja("izina", event.target.value)',
+                            imikalile: 'mb-4'
+                        }
+                    },
+                    {
+                        name: 'Input',
+                        library: 'shadcn',
+                        props: {
+                            type: 'email',
+                            placeholder: 'Email yobe',
+                            pakuLemba: 'ukuCinja("email", event.target.value)',
+                            imikalile: 'mb-4'
+                        }
+                    },
+                    {
+                        name: 'Button',
+                        library: 'shadcn',
+                        props: {
+                            pakuKlikisha: 'ukuCinja("wasalwa", true); londolola("Form submitted!")',
+                            imikalile: 'w-full',
+                            variant: 'default'
+                        },
+                        ifika: 'Submit'
+                    }
+                ]
+            }
+        ]
+    }
+});

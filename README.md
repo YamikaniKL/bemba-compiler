@@ -6,16 +6,35 @@
 
 **A Next.js-like framework for programming in the Bemba language**
 
-**Version 1.1.0 "Cisokolola" (The Beginning)**
+**Version 1.2.0 "React Integration" - Full React Ecosystem Support**
 
 [![npm version](https://badge.fury.io/js/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![npm downloads](https://img.shields.io/npm/dm/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![VS Code Extension](https://img.shields.io/badge/VS%20Code-Extension-blue)](https://marketplace.visualstudio.com/items?itemName=bembajs.bembajs-language-support)
 
-*Programming in Bemba Language - Made Easy!*
+*Programming in Bemba Language - Now with Full React Integration!*
 
 </div>
+
+---
+
+## What's New in v1.2.0
+
+### React Ecosystem Integration
+- **Full React Compatibility** - Use any React component library
+- **NPM Package Support** - Import any npm package with Bemba syntax
+- **Component Wrappers** - Shadcn/ui, Material-UI, and more
+- **Pisha Build Tool** - Lightning-fast Vite-based development
+- **Hot Module Replacement** - Instant updates for .bemba files
+- **Mixed Components** - Use React and BembaJS components together
+
+### Pisha Build Tool
+- **Lightning Fast** - Built on Vite for instant server start
+- **Hot Reload** - Changes reflect immediately without losing state
+- **Production Builds** - Optimized bundles with code splitting
+- **CSS Framework Support** - Tailwind CSS, Bootstrap, and more
+- **TypeScript Support** - Full TypeScript support out of the box
 
 ---
 
@@ -33,11 +52,22 @@ cd my-app
 # Install dependencies
 npm install
 
-# Start development server
-npm run dev
+# Start development server with Pisha
+pisha dev
 ```
 
 **That's it!** Open [http://localhost:3000](http://localhost:3000) to see your app running.
+
+### Using React Libraries
+
+```bash
+# Install UI libraries
+npm install @shadcn/ui @mui/material
+
+# Use in your .bemba files
+ingisa { Button } ukufuma '@shadcn/ui'
+ingisa { TextField } ukufuma '@mui/material/TextField'
+```
 
 ---
 
@@ -54,6 +84,99 @@ npm run dev
 - **VS Code Support** - Syntax highlighting and snippets
 - **Hot Reload** - Instant updates during development
 - **Production Ready** - Optimized builds and deployment
+- **React Integration** - Use any React component library
+- **NPM Packages** - Import any npm package
+- **Pisha Build Tool** - Lightning-fast Vite-based development
+- **CSS Frameworks** - Tailwind CSS, Bootstrap, and more
+
+---
+
+## React Integration
+
+### Using React Component Libraries
+
+```bemba
+// Import React libraries
+ingisa React ukufuma 'react'
+ingisa { Button } ukufuma '@shadcn/ui'
+ingisa { TextField } ukufuma '@mui/material/TextField'
+
+fyambaIcipanda('MyApp', {
+    ukusunga: {
+        izina: '',
+        email: ''
+    },
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'TextField',
+                library: 'mui',
+                props: {
+                    label: 'Lemba izina',
+                    pakuLemba: 'ukuCinja("izina", event.target.value)',
+                    variant: 'outlined'
+                }
+            },
+            {
+                name: 'Button',
+                library: 'shadcn',
+                props: {
+                    pakuKlikisha: 'londolola("Submitted!")',
+                    imikalile: 'bg-blue-500 hover:bg-blue-700'
+                },
+                ifika: 'Submit'
+            }
+        ]
+    }
+});
+```
+
+### Using NPM Packages
+
+```bemba
+// Import npm packages
+ingisa axios ukufuma 'axios'
+ingisa dayjs ukufuma 'dayjs'
+
+fyambaIcipanda('DataComponent', {
+    ukusungaKabili: {
+        data: [],
+        loading: true,
+        effect: `
+            axios.get('/api/data')
+                .then(response => {
+                    ukuCinja('data', response.data);
+                    ukuCinja('loading', false);
+                });
+        `
+    },
+    ifiputulwa: {
+        ilyashi: loading ? 'Loading...' : 'Data loaded: ' + data.length + ' items'
+    }
+});
+```
+
+### Mixed React and BembaJS
+
+```bemba
+// Pure React component
+function ReactCounter({ initialCount = 0 }) {
+    const [count, setCount] = useState(initialCount);
+    return <div>Count: {count}</div>;
+}
+
+// BembaJS component using React component
+fyambaIcipanda('MixedExample', {
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'ReactCounter',
+                props: { initialCount: 5 }
+            }
+        ]
+    }
+});
+```
 
 ---
 
@@ -115,6 +238,25 @@ pangaApi('users', {
         };
     `
 });
+```
+
+### Import/Export (`ingisa`/`fumya`)
+
+```bemba
+// Import React libraries
+ingisa React ukufuma 'react'
+ingisa { useState, useEffect } ukufuma 'react'
+
+// Import UI components
+ingisa { Button } ukufuma '@shadcn/ui'
+ingisa { TextField } ukufuma '@mui/material/TextField'
+
+// Import npm packages
+ingisa axios ukufuma 'axios'
+ingisa dayjs ukufuma 'dayjs'
+
+// Export components
+fumya chisangwa MyComponent
 ```
 
 </details>

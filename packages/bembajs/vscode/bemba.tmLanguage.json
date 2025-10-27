@@ -100,6 +100,10 @@
           "match": "\\b(ificingilila|type|required|default)\\b"
         },
         {
+          "name": "keyword.import.bemba",
+          "match": "\\b(ingisa|fumya|ukufuma|chisangwa|nga)\\b"
+        },
+        {
           "name": "keyword.other.bemba",
           "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|imikalile|ifikopo|maapi|amapeji|maungu|mafungulo|mautils|mahooks|macontext|amalembelo|inputs|forms|selects|checkboxes|radios)\\b"
         }

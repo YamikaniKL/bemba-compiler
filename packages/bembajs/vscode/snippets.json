@@ -160,5 +160,44 @@
       "londolola(${1:'message'})"
     ],
     "description": "Console log in Bemba"
+  },
+  "Import Statement": {
+    "prefix": "ingisa",
+    "body": [
+      "ingisa ${1:React} ukufuma '${2:react}'"
+    ],
+    "description": "Import statement in Bemba"
+  },
+  "Named Import": {
+    "prefix": "ingisaNamed",
+    "body": [
+      "ingisa { ${1:Button} } ukufuma '${2:@shadcn/ui}'"
+    ],
+    "description": "Named import in Bemba"
+  },
+  "Export Statement": {
+    "prefix": "fumya",
+    "body": [
+      "fumya chisangwa ${1:ComponentName}"
+    ],
+    "description": "Export statement in Bemba"
+  },
+  "React Component with Imports": {
+    "prefix": "reactComponent",
+    "body": [
+      "ingisa React ukufuma 'react'",
+      "ingisa { ${1:useState} } ukufuma 'react'",
+      "",
+      "fyambaIcipanda('${2:ComponentName}', {",
+      "    ukusunga: {",
+      "        ${3:stateName}: ${4:initialValue}",
+      "    },",
+      "    ifiputulwa: {",
+      "        umutwe: '${5:Component Title}',",
+      "        ilyashi: '${6:Component description}'",
+      "    }",
+      "});"
+    ],
+    "description": "React component with imports"
   }
 }
