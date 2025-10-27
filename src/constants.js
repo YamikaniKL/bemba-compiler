@@ -65,6 +65,13 @@ const BEMBA_SYNTAX = {
         onMouseLeave: 'pakuSiya'
     },
     
+    // Import/Export
+    IMPORT: 'ingisa',
+    EXPORT: 'fumya',
+    FROM: 'ukufuma',
+    DEFAULT: 'chisangwa',
+    AS: 'nga',
+    
     // Control flow
     RETURN: 'bwelela',
     FUNCTION: 'nokuti',

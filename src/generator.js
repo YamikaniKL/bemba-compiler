@@ -57,34 +57,75 @@ class BembaGenerator {
     
     // React Component generation
     generateReactComponent(node) {
-        const imports = this.generateReactImports();
+        const imports = this.generateReactImports(node);
         const stateDeclarations = this.generateStateDeclarations(node.state, node.stateWithEffects);
-        const hooks = node.hooks.map(hook => this.generateReactHook(hook)).join('\n');
+        const hooks = node.hooks ? node.hooks.map(hook => this.generateReactHook(hook)).join('\n') : '';
         const methods = this.generateMethods(node.methods);
         const render = this.generateJSXReturn(node.render);
+        
+        // Clean up empty sections
+        const stateSection = stateDeclarations ? `  ${stateDeclarations}\n\n` : '';
+        const hooksSection = hooks ? `  ${hooks}\n\n` : '';
+        const methodsSection = methods ? `  ${methods}\n\n` : '';
         
         return `${imports}
 
 ${this.generateComponentComment(node.name)}
-function ${node.name}({ ${this.generatePropsSignature(node.props)} }) {
-${this.increaseIndent()}${stateDeclarations}
-${hooks}
-${methods}
-${this.increaseIndent()}return (
-${this.increaseIndent()}${render}
-${this.decreaseIndent()});
-${this.decreaseIndent()}}
-
-export default ${node.name};`;
+export default function ${node.name}({ ${this.generatePropsSignature(node.props)} }) {
+${stateSection}${hooksSection}${methodsSection}  return (
+    ${render}
+  );
+}`;
     }
     
-    generateReactImports() {
-        return `import React${this.generateHookImports()} from 'react';`;
+    generateReactImports(node) {
+        const imports = [];
+        
+        // Always import React with hooks
+        const hooks = this.determineRequiredHooks(node);
+        if (hooks.length > 0) {
+            imports.push(`import React, { ${hooks.join(', ')} } from 'react';`);
+        } else {
+            imports.push(`import React from 'react';`);
+        }
+        
+        // Add custom imports if any
+        if (node.imports && node.imports.length > 0) {
+            node.imports.forEach(imp => {
+                imports.push(this.generateImport(imp));
+            });
+        }
+        
+        return imports.join('\n');
     }
     
-    generateHookImports() {
-        const hooks = ['useState', 'useEffect', 'useContext', 'useRef', 'useReducer', 'useMemo', 'useCallback'];
-        return hooks.length > 0 ? `, { ${hooks.join(', ')} }` : '';
+    determineRequiredHooks(node) {
+        const hooks = new Set();
+        
+        // Check if state is used
+        if (node.state && Object.keys(node.state).length > 0) {
+            hooks.add('useState');
+        }
+        
+        // Check if effects are used
+        if (node.stateWithEffects && node.stateWithEffects.effect) {
+            hooks.add('useState');
+            hooks.add('useEffect');
+        }
+        
+        // Add other hooks if present
+        if (node.hooks && node.hooks.length > 0) {
+            node.hooks.forEach(hook => {
+                if (hook.type === 'useEffect') hooks.add('useEffect');
+                if (hook.type === 'useContext') hooks.add('useContext');
+                if (hook.type === 'useRef') hooks.add('useRef');
+                if (hook.type === 'useReducer') hooks.add('useReducer');
+                if (hook.type === 'useMemo') hooks.add('useMemo');
+                if (hook.type === 'useCallback') hooks.add('useCallback');
+            });
+        }
+        
+        return Array.from(hooks);
     }
     
     generateComponentComment(name) {
