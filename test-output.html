@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BembaJS Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                    },
+                    fontFamily: {
+                        sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['var(--font-geist-mono)', 'Menlo', 'Monaco', 'monospace'],
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 0 0% 9%;
+            --font-geist-sans: 'Geist Sans', 'Inter', system-ui, sans-serif;
+            --font-geist-mono: 'Geist Mono', 'Menlo', 'Monaco', monospace;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: 0 0% 9%;
+                --foreground: 0 0% 98%;
+            }
+        }
+        
+        body {
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            font-family: var(--font-geist-sans);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
+            <img
+                class="dark:invert"
+                src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350"
+                alt="BembaJS logo"
+                width="180"
+                height="38"
+                style="filter: invert(1);"
+            />
+            <ol class="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
+                <li class="tracking-[-0.01em] mb-2">Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">amapeji/index.bemba</code>.</li>
+                <li class="tracking-[-0.01em]">Bika na ukumona ifyakusendeka mwangu.</li>
+            </ol>
+            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row">
+                <a class="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]" href="https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs" target="_blank" rel="noopener noreferrer"><img class="dark:invert" src="/vercel.svg" alt="Vercel logomark" width="16" height="16">Panga pa Vercel</a><a class="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]" href="https://bembajs.dev/docs" target="_blank" rel="noopener noreferrer">Soma amakalata yetu</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

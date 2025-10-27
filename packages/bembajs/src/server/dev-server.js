@@ -39,7 +39,7 @@ function compileBemba(code) {
                     const stepsMatch = sectionsData.match(/amalembelo:\s*\[([\s\S]*?)\]/);
                     if (stepsMatch) {
                         const stepsData = stepsMatch[1];
-                        // Extract individual steps
+                        // Extract individual steps - handle both single and double quotes
                         const stepMatches = stepsData.match(/['"`]([^'"`]+)['"`]/g);
                         if (stepMatches) {
                             sectionSteps = stepMatches.map((step, index) => {
@@ -48,6 +48,18 @@ function compileBemba(code) {
                                 const marginClass = isLast ? '' : ' mb-2';
                                 return `<li class="tracking-[-0.01em]${marginClass}">${stepText}</li>`;
                             }).join('\n                ');
+                        }
+                    }
+                    
+                    // Fallback: if no amalembelo found, use umutwe and ilyashi
+                    if (!sectionSteps) {
+                        const sectionTitleMatch = sectionsData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
+                        const sectionContentMatch = sectionsData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
+                        
+                        if (sectionTitleMatch || sectionContentMatch) {
+                            const title = sectionTitleMatch ? sectionTitleMatch[1] : '';
+                            const content = sectionContentMatch ? sectionContentMatch[1] : '';
+                            sectionSteps = `<li class="tracking-[-0.01em] mb-2">${title}</li><li class="tracking-[-0.01em]">${content}</li>`;
                         }
                     }
                     
@@ -184,6 +196,7 @@ function compileBemba(code) {
                 alt="BembaJS logo"
                 width="180"
                 height="38"
+                style="filter: invert(1);"
             />
             <ol class="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
                 ${sectionSteps}
