@@ -2,6 +2,17 @@
 
 All notable changes to the "bembajs-language-support" extension will be documented in this file.
 
+## [1.3.2] - 2025-11-24
+
+### Fixed
+- **Icon Display** - Fixed rectangle icons issue by simplifying icon theme to only define .bemba file icons, allowing VS Code to use default icons for other file types
+
+## [1.3.1] - 2025-11-24
+
+### Fixed
+- **VS Code Compatibility** - Fixed compatibility issue with VS Code 1.99.3 by updating engine requirements to ^1.80.0
+- **Icons** - Added comprehensive icon support for .bemba files and common file types (.js, .ts, .json, .html, .css, etc.)
+
 ## [1.3.0] - 2025-01-28
 
 ### Added
