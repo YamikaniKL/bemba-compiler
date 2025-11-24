@@ -1,0 +1,30 @@
+// API Route - Hello endpoint
+pangaApi('hello', {
+    method: 'GET',
+    
+    // API handler
+    handler: `
+        // Simple API response
+        return {
+            status: 200,
+            data: {
+                message: 'Hello from BembaJS API!',
+                language: 'Bemba',
+                framework: 'BembaJS',
+                timestamp: new Date().toISOString()
+            }
+        };
+    `,
+    
+    // API documentation
+    documentation: {
+        description: 'Returns a hello message from the BembaJS API',
+        parameters: [],
+        response: {
+            message: 'string',
+            language: 'string',
+            framework: 'string',
+            timestamp: 'string'
+        }
+    }
+});

@@ -1,0 +1,41 @@
+{
+  "name": "create-bembajs",
+  "version": "1.3.0",
+  "description": "Create BembaJS apps with one command (like create-next-app) - Now with control flow syntax and Chakra UI support",
+  "main": "./index.js",
+  "bin": {
+    "create-bembajs": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "templates",
+    "helpers"
+  ],
+  "scripts": {
+    "test": "node test/index.js"
+  },
+  "keywords": [
+    "bemba",
+    "create-bembajs",
+    "scaffold",
+    "generator",
+    "cli"
+  ],
+  "author": "BembaJS Team",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "prompts": "^2.4.2",
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "validate-npm-package-name": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bembajs/bembajs.git",
+    "directory": "packages/create-bembajs"
+  }
+}

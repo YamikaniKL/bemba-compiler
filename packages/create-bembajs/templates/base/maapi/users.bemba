@@ -1,0 +1,49 @@
+// API Route - Users endpoint
+pangaApi('users', {
+    method: 'GET',
+    
+    // API handler
+    handler: `
+        // Mock users data
+        const users = [
+            {
+                id: 1,
+                name: 'John Mwansa',
+                email: 'john@example.com',
+                role: 'Developer'
+            },
+            {
+                id: 2,
+                name: 'Mary Banda',
+                email: 'mary@example.com',
+                role: 'Designer'
+            },
+            {
+                id: 3,
+                name: 'Peter Chisanga',
+                email: 'peter@example.com',
+                role: 'Manager'
+            }
+        ];
+        
+        return {
+            status: 200,
+            data: {
+                users: users,
+                total: users.length,
+                message: 'Users retrieved successfully'
+            }
+        };
+    `,
+    
+    // API documentation
+    documentation: {
+        description: 'Returns a list of users',
+        parameters: [],
+        response: {
+            users: 'array',
+            total: 'number',
+            message: 'string'
+        }
+    }
+});
