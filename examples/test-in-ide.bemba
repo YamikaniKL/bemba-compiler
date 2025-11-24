@@ -1,0 +1,86 @@
+// Copy and paste this into the web IDE to test!
+// Visit http://localhost:3000 after running: npm run dev
+
+pangaWebusaiti("BembaJS Test", {
+    ifiputulwa: [
+        {
+            umutwe: "🎉 Mwaiseni ku BembaJS!",
+            ilyashi: "This is a test of the BembaJS compiler. Click the button below to see it in action!",
+            amabatani: [
+                { 
+                    ilembo: "Test Button 1", 
+                    pakuKlikisha: "londolola('Hello from BembaJS! The compiler is working!')" 
+                },
+                { 
+                    ilembo: "Test Button 2", 
+                    pakuKlikisha: "londolola('Mwashibukeni! (Good morning!)')" 
+                }
+            ]
+        },
+        {
+            umutwe: "✨ Features",
+            ilyashi: "BembaJS supports: Components, Hooks, Routing, SSR, API Routes, and more!",
+            amabatani: [
+                { 
+                    ilembo: "Learn More", 
+                    pakuKlikisha: "londolola('Check out the examples folder for more!')" 
+                }
+            ]
+        }
+    ],
+    imikalile: `
+        body { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .icipandwa { 
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            margin: 20px auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2 { 
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        p { 
+            color: #555;
+            font-size: 1.2em;
+            line-height: 1.6;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .ibatani { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .ibatani:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        .ibatani:active {
+            transform: translateY(0);
+        }
+    `
+});

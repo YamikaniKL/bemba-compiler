@@ -1,0 +1,45 @@
+{
+  "name": "pisha",
+  "version": "1.0.0",
+  "description": "Pisha - The Vite-based build tool for BembaJS",
+  "main": "./src/index.js",
+  "type": "module",
+  "bin": {
+    "pisha": "./bin/pisha.js"
+  },
+  "scripts": {
+    "dev": "node src/cli.js dev",
+    "build": "node src/cli.js build",
+    "preview": "node src/cli.js preview"
+  },
+  "keywords": [
+    "bembajs",
+    "vite",
+    "build-tool",
+    "pisha",
+    "compiler",
+    "react",
+    "bemba-language"
+  ],
+  "author": "Yamikani K Alonge",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YamikaniKL/bemba-compiler.git"
+  },
+  "dependencies": {
+    "vite": "^5.0.0",
+    "bembajs": "^1.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
+

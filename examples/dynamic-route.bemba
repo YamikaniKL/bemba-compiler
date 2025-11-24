@@ -1,0 +1,46 @@
+// Dynamic Route Example - amapeji/users/[id].bemba
+pangaIpepa({
+    ukwisulula: nokuti() {
+        // Access route parameters
+        const { id } = ici.ifyapilibula;
+        const { search } = ici.ukufunafuna;
+        
+        bwelela (
+            <icipandwa className="user-profile">
+                <umutwe_ukulu>User Profile</umutwe_ukulu>
+                <ukulondolola>User ID: {id}</ukulondolola>
+                {search && (
+                    <ukulondolola>Search query: {search}</ukulondolola>
+                )}
+                
+                <ibatani pakuKlikisha={() => ukuya('/users')}>
+                    Back to Users List
+                </ibatani>
+            </icipandwa>
+        )
+    },
+    ukutolaCifukwa: lombako nokuti() {
+        // Server-side data fetching
+        const { id } = ici.ifyapilibula;
+        
+        try {
+            const response = leka ukutuma(`/mafungulo/users/${id}`);
+            const user = leka response.json();
+            
+            bwelela {
+                ifyapangwa: {
+                    user: user,
+                    notFound: ukukana
+                }
+            }
+        } catch (error) {
+            ububi(`Failed to fetch user: ${error.message}`);
+            bwelela {
+                ifyapangwa: {
+                    user: takuli,
+                    notFound: ee
+                }
+            }
+        }
+    }
+});

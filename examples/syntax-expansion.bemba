@@ -1,0 +1,166 @@
+// BembaJS Syntax Expansion Examples
+// Demonstrates new conditional and loop syntax
+
+// Example 1: Conditional Rendering
+fyambaIcipanda('ConditionalComponent', {
+    ukusunga: {
+        wasalwa: true,
+        namba: 15,
+        izina: 'John'
+    },
+    ifiputulwa: {
+        // If-else statement
+        ngati (wasalwa) {
+            umutwe: 'Wasalwa!'
+        } kapena {
+            umutwe: 'Tawasalwa'
+        },
+        
+        // Nested conditionals
+        ngati (namba > 10) {
+            ilyashi: 'Namba ikulu: ' + namba
+        } kapena ngati (namba > 5) {
+            ilyashi: 'Namba ikalamba: ' + namba
+        } kapena {
+            ilyashi: 'Namba ikalamba katono: ' + namba
+        },
+        
+        // Conditional with ternary (in expressions)
+        amabatani: [
+            {
+                ilembo: ngati (wasalwa) ? 'Wasalwa' : 'Tawasalwa',
+                pakuKlikisha: 'ukuCinja("wasalwa", !wasalwa)'
+            }
+        ]
+    }
+});
+
+// Example 2: Loops with kwa
+fyambaIcipanda('ListComponent', {
+    ukusunga: {
+        abantu: [
+            { izina: 'John', umaka: 25 },
+            { izina: 'Jane', umaka: 30 },
+            { izina: 'Bob', umaka: 28 }
+        ],
+        amalembelo: ['Step 1', 'Step 2', 'Step 3']
+    },
+    ifiputulwa: {
+        umutwe: 'List of People',
+        
+        // Loop through array
+        amabatani: kwa (muntu mu abantu) {
+            {
+                ilembo: muntu.izina + ' (' + muntu.umaka + ')',
+                pakuKlikisha: `londolola('${muntu.izina}')`
+            }
+        },
+        
+        // Loop with list items
+        amalembelo: kwa (lembo mu amalembelo) {
+            {
+                ilembo: lemb
+            }
+        }
+    }
+});
+
+// Example 3: While Loop
+fyambaIcipanda('CounterComponent', {
+    ukusunga: {
+        namba: 0
+    },
+    ifiputulwa: {
+        umutwe: 'Counter',
+        ilyashi: 'Current count: ' + namba,
+        amabatani: [
+            {
+                ilembo: 'Start Counting',
+                pakuKlikisha: `
+                    pamene (namba < 10) {
+                        ukuCinja('namba', namba + 1);
+                        londolola('Count: ' + namba);
+                    }
+                `
+            }
+        ]
+    }
+});
+
+// Example 4: Try-Catch Error Handling
+fyambaIcipanda('ErrorHandlingComponent', {
+    ukusungaKabili: {
+        data: null,
+        error: null,
+        loading: true,
+        effect: lombako nokuti() {
+            linga {
+                const result = leka fetch('/api/data');
+                ngati (!result.ok) {
+                    throw new Error('Failed to fetch data');
+                }
+                const json = leka result.json();
+                ukuCinja('data', json);
+                ukuCinja('loading', false);
+            } kwata (error) {
+                ukuCinja('error', error.message);
+                ukuCinja('loading', false);
+                londololaError('Ifipushi: ' + error.message);
+            } paumalilo {
+                londolola('Cleanup complete');
+            }
+        }
+    },
+    ifiputulwa: {
+        ngati (loading) {
+            ilyashi: 'Loading...'
+        } kapena ngati (error) {
+            ilyashi: 'Error: ' + error
+        } kapena {
+            ilyashi: 'Data loaded: ' + JSON.stringify(data)
+        }
+    }
+});
+
+// Example 5: Mixed with Chakra UI
+ingisa { Button, Box, Stack } ukufuma '@chakra-ui/react'
+
+fyambaIcipanda('ChakraExample', {
+    ukusunga: {
+        items: ['Item 1', 'Item 2', 'Item 3']
+    },
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'Box',
+                library: 'chakra',
+                props: {
+                    p: 4,
+                    bg: 'blue.100',
+                    borderRadius: 'md'
+                },
+                ifika: [
+                    {
+                        name: 'Stack',
+                        library: 'chakra',
+                        props: {
+                            spacing: 4
+                        },
+                        ifika: kwa (item mu items) {
+                            {
+                                name: 'Button',
+                                library: 'chakra',
+                                props: {
+                                    pakuKlikisha: `londolola('${item}')`,
+                                    colorScheme: 'blue'
+                                },
+                                ifika: item
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+});
+

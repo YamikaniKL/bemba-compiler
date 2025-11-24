@@ -1,0 +1,52 @@
+// NPM Packages Integration Example
+ingisa React ukufuma 'react'
+ingisa { useState, useEffect } ukufuma 'react'
+ingisa axios ukufuma 'axios'
+ingisa dayjs ukufuma 'dayjs'
+ingisa { format } ukufuma 'date-fns'
+
+fyambaIcipanda('NpmPackagesExample', {
+    ukusungaKabili: {
+        data: [],
+        loading: true,
+        error: null,
+        currentTime: '',
+        effect: `
+            // Fetch data from API
+            axios.get('https://jsonplaceholder.typicode.com/posts')
+                .then(response => {
+                    ukuCinja('data', response.data.slice(0, 5));
+                    ukuCinja('loading', false);
+                })
+                .catch(error => {
+                    ukuCinja('error', error.message);
+                    ukuCinja('loading', false);
+                });
+            
+            // Update time every second
+            const interval = setInterval(() => {
+                ukuCinja('currentTime', dayjs().format('YYYY-MM-DD HH:mm:ss'));
+            }, 1000);
+            
+            return () => clearInterval(interval);
+        `
+    },
+    ifiputulwa: {
+        umutwe: 'NPM Packages Integration',
+        ilyashi: 'This component demonstrates using various npm packages with BembaJS',
+        ifikopo: [
+            {
+                umutwe: 'Current Time',
+                ilyashi: 'Time updated every second using dayjs: ' + currentTime
+            },
+            {
+                umutwe: 'API Data',
+                ilyashi: loading ? 'Loading...' : error ? 'Error: ' + error : 'Posts loaded successfully',
+                amalembelo: data.map(post => ({
+                    umutwe: post.title,
+                    ilyashi: post.body.substring(0, 100) + '...'
+                }))
+            }
+        ]
+    }
+});

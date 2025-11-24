@@ -1,0 +1,88 @@
+// Form Handling Example - Contact Form
+fyambaIcipanda('ContactForm', {
+    ifiputulwa: {
+        ukusunga: {
+            izina: '',
+            email: '',
+            message: '',
+            emailError: '',
+            isSubmitting: false
+        },
+        umutwe: 'Contact Form',
+        ilyashi: 'Fill out the form to get in touch',
+        forms: [
+            {
+                inputs: [
+                    {
+                        type: 'text',
+                        name: 'izina',
+                        placeholder: 'Lemba izina lyobe',
+                        pakuLemba: 'ukuCinja("izina", event.target.value)',
+                        required: true
+                    },
+                    {
+                        type: 'email',
+                        name: 'email',
+                        placeholder: 'Email yobe',
+                        pakuLemba: `
+                            ukuCinja('email', event.target.value);
+                            if (!event.target.value.includes('@')) {
+                                ukuCinja('emailError', 'Email yakufwile kuba na @');
+                            } else {
+                                ukuCinja('emailError', '');
+                            }
+                        `,
+                        required: true
+                    },
+                    {
+                        type: 'textarea',
+                        name: 'message',
+                        placeholder: 'Ubutumwa',
+                        pakuLemba: 'ukuCinja("message", event.target.value)'
+                    }
+                ],
+                pakuTumina: `
+                    event.preventDefault();
+                    
+                    // Validate
+                    if (!izina) {
+                        return londolola('Lemba izina lyobe!');
+                    }
+                    
+                    if (!email.includes('@')) {
+                        return londolola('Email yakufwile kuba na @');
+                    }
+                    
+                    // Submit
+                    ukuCinja('isSubmitting', true);
+                    fetch('/api/contact', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ izina, email, message })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        londolola('Form submitted successfully!');
+                        ukuCinja('izina', '');
+                        ukuCinja('email', '');
+                        ukuCinja('message', '');
+                        ukuCinja('isSubmitting', false);
+                    })
+                    .catch(error => {
+                        londololaError('Error submitting form:', error);
+                        ukuCinja('isSubmitting', false);
+                    });
+                `
+            }
+        ],
+        amabatani: [
+            {
+                ilembo: isSubmitting ? 'Submitting...' : 'Submit',
+                pakuKlikisha: 'document.querySelector("form").requestSubmit()',
+                disabled: isSubmitting
+            }
+        ]
+    }
+});

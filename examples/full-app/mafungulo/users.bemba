@@ -1,0 +1,119 @@
+// Users API Route
+export default nokuti(req, res) {
+    // Sample users data
+    const users = [
+        {
+            id: 1,
+            ishina: 'John Doe',
+            email: 'john@example.com',
+            bio: 'Software developer passionate about technology',
+            avatar: '/amashinda/avatars/john.jpg',
+            likes: 15,
+            createdAt: '2024-01-15T10:30:00Z'
+        },
+        {
+            id: 2,
+            ishina: 'Jane Smith',
+            email: 'jane@example.com',
+            bio: 'UX designer creating beautiful user experiences',
+            avatar: '/amashinda/avatars/jane.jpg',
+            likes: 23,
+            createdAt: '2024-01-20T14:45:00Z'
+        },
+        {
+            id: 3,
+            ishina: 'Bob Johnson',
+            email: 'bob@example.com',
+            bio: 'Full-stack developer and tech enthusiast',
+            avatar: '/amashinda/avatars/bob.jpg',
+            likes: 8,
+            createdAt: '2024-02-01T09:15:00Z'
+        },
+        {
+            id: 4,
+            ishina: 'Alice Brown',
+            email: 'alice@example.com',
+            bio: 'Data scientist exploring AI and machine learning',
+            avatar: '/amashinda/avatars/alice.jpg',
+            likes: 31,
+            createdAt: '2024-02-10T16:20:00Z'
+        }
+    ];
+    
+    nga (req.method === 'GET') {
+        // Get query parameters
+        const { search, limit, offset } = req.query;
+        
+        let filteredUsers = users;
+        
+        // Apply search filter
+        nga (search) {
+            filteredUsers = users.filter(user => 
+                user.ishina.toLowerCase().includes(search.toLowerCase()) ||
+                user.email.toLowerCase().includes(search.toLowerCase()) ||
+                user.bio.toLowerCase().includes(search.toLowerCase())
+            );
+        }
+        
+        // Apply pagination
+        const startIndex = parseInt(offset) || 0;
+        const endIndex = startIndex + (parseInt(limit) || 10);
+        const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+        
+        res.status(200).json({
+            success: ee,
+            data: paginatedUsers,
+            pagination: {
+                total: filteredUsers.length,
+                limit: parseInt(limit) || 10,
+                offset: startIndex,
+                hasMore: endIndex < filteredUsers.length
+            }
+        });
+    } nangu nga (req.method === 'POST') {
+        // Create new user
+        const { ishina, email, bio } = req.body;
+        
+        // Validation
+        nga (!ishina || !email) {
+            res.status(400).json({
+                success: ukukana,
+                error: 'Ishina and email are required'
+            });
+            bwelela;
+        }
+        
+        // Check if email already exists
+        const existingUser = users.find(user => user.email === email);
+        nga (existingUser) {
+            res.status(409).json({
+                success: ukukana,
+                error: 'Email already exists'
+            });
+            bwelela;
+        }
+        
+        const newUser = {
+            id: users.length + 1,
+            ishina: ishina,
+            email: email,
+            bio: bio || '',
+            avatar: '/amashinda/default-avatar.png',
+            likes: 0,
+            createdAt: new Date().toISOString()
+        };
+        
+        users.push(newUser);
+        
+        res.status(201).json({
+            success: ee,
+            data: newUser,
+            message: 'User created successfully'
+        });
+    } nangu {
+        res.status(405).json({
+            success: ukukana,
+            error: 'Method not allowed'
+        });
+    }
+}

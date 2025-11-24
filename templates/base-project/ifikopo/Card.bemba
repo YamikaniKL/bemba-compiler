@@ -1,0 +1,77 @@
+// Reusable Card component
+fyambaIcipanda('Card', {
+    // Component props
+    ifyapangwa: {
+        umutwe: 'Card Title',
+        ilyashi: 'Card content goes here',
+        umutindo: 'default'
+    },
+    
+    // Component state
+    ifyakubika: {
+        isHovered: false
+    },
+    
+    // Component render function
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa className={`card ${umutindo}`}>
+                <icipandwa className="card-header">
+                    <umutwe_ukulu className="card-title">{umutwe}</umutwe_ukulu>
+                </icipandwa>
+                <icipandwa className="card-content">
+                    {ilyashi}
+                </icipandwa>
+            </icipandwa>
+        )
+    },
+    
+    // Component styles
+    imikalile: `
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            margin-bottom: 16px;
+        }
+        
+        .card-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 8px 0;
+        }
+        
+        .card-content {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .card.primary {
+            border-left: 4px solid #667eea;
+        }
+        
+        .card.success {
+            border-left: 4px solid #28a745;
+        }
+        
+        .card.warning {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .card.danger {
+            border-left: 4px solid #dc3545;
+        }
+    `
+});

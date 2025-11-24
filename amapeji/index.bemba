@@ -1,0 +1,26 @@
+// Home page - Main entry point with new centered layout
+pangaIpepa('Home', {
+    umutwe: 'Panga BembaJS App',
+    ilyashi: 'Yapangwa na create bembajs app',
+    
+    // Page content - ordered list structure matching Next.js
+    ifiputulwa: [
+        {
+            amalembelo: [
+                'Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">amapeji/index.bemba</code>.',
+                'Bika na ukumona ifyakusendeka mwangu.'
+            ],
+            amabatani: [
+                {
+                    ilembo: 'Panga pa Vercel',
+                    pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
+                },
+                {
+                    ilembo: 'Soma amakalata yetu',
+                    pakuKlikisha: 'window.open("https://github.com/YamikaniKL/bemba-compiler", "_blank")'
+                }
+            ]
+        }
+    ]
+});
+

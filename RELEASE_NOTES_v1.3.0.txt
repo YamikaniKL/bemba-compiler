@@ -1,0 +1,215 @@
+BembaJS v1.3.0 "Syntax Expansion & Chakra UI" Release Notes
+
+Syntax Expansion & Developer Experience Release
+
+BembaJS v1.3.0 "Syntax Expansion & Chakra UI" introduces complete control flow syntax, error handling, enhanced async/await support, and Chakra UI component wrapper integration.
+
+What's New
+
+Control Flow Syntax
+- Conditional Statements - ngati (if), kapena (else) with full if-else-if support
+- Loop Statements - kwa (for-in), pamene (while) loops
+- Error Handling - linga (try), kwata (catch), paumalilo (finally) blocks
+- Enhanced Async/Await - Full lombako (async) and leka (await) support
+
+Component Wrappers
+- Chakra UI Support - Complete wrapper for Chakra UI components
+- 8 Components Supported - Button, Input, Box, Stack, Modal, Select, Text, Heading
+- Consistent API - Same pattern as Shadcn and MUI wrappers
+
+Developer Experience
+- Enhanced VS Code Support - All new keywords highlighted
+- Code Snippets - Snippets for all new syntax features
+- Better IntelliSense - Improved auto-completion
+
+Syntax Examples
+
+Conditional Statements
+```bemba
+fyambaIcipanda('ConditionalComponent', {
+    ukusunga: {
+        wasalwa: true,
+        namba: 15
+    },
+    ifiputulwa: {
+        ngati (wasalwa) {
+            umutwe: 'Wasalwa!'
+        } kapena {
+            umutwe: 'Tawasalwa'
+        },
+        
+        ngati (namba > 10) {
+            ilyashi: 'Namba ikulu'
+        } kapena ngati (namba > 5) {
+            ilyashi: 'Namba ikalamba'
+        } kapena {
+            ilyashi: 'Namba ikalamba katono'
+        }
+    }
+});
+```
+
+Loop Statements
+```bemba
+fyambaIcipanda('ListComponent', {
+    ukusunga: {
+        abantu: ['John', 'Jane', 'Bob']
+    },
+    ifiputulwa: {
+        amabatani: kwa (muntu mu abantu) {
+            {
+                ilembo: muntu,
+                pakuKlikisha: `londolola('${muntu}')`
+            }
+        }
+    }
+});
+```
+
+Error Handling
+```bemba
+fyambaIcipanda('ErrorHandlingComponent', {
+    ukusungaKabili: {
+        data: null,
+        error: null,
+        effect: lombako nokuti() {
+            linga {
+                const result = leka fetch('/api/data');
+                const json = leka result.json();
+                ukuCinja('data', json);
+            } kwata (error) {
+                ukuCinja('error', error.message);
+                londololaError('Ifipushi: ' + error.message);
+            } paumalilo {
+                londolola('Cleanup complete');
+            }
+        }
+    }
+});
+```
+
+Async/Await
+```bemba
+fyambaIcipanda('AsyncComponent', {
+    ukusungaKabili: {
+        data: null,
+        loading: true,
+        effect: lombako nokuti() {
+            const result = leka fetch('/api/data');
+            const json = leka result.json();
+            ukuCinja('data', json);
+            ukuCinja('loading', false);
+        }
+    }
+});
+```
+
+Chakra UI Integration
+```bemba
+ingisa { Button, Box, Stack } ukufuma '@chakra-ui/react'
+
+fyambaIcipanda('ChakraExample', {
+    ifiputulwa: {
+        ifikopo: [
+            {
+                name: 'Button',
+                library: 'chakra',
+                props: {
+                    pakuKlikisha: 'handleClick()',
+                    colorScheme: 'blue',
+                    variant: 'solid'
+                },
+                ifika: 'Click Me'
+            }
+        ]
+    }
+});
+```
+
+Technical Implementation
+
+Core Compiler Updates
+- packages/bembajs-core/src/constants.js - Added 15+ new keywords
+- packages/bembajs-core/src/lexer.js - Token recognition for new syntax
+- packages/bembajs-core/src/parser.js - Parsing logic for control flow
+- packages/bembajs-core/src/transformer.js - AST transformation
+- packages/bembajs-core/src/generator.js - Code generation
+
+Component Wrappers
+- packages/bembajs/src/wrappers/chakra-wrapper.js - New Chakra UI wrapper
+- packages/bembajs/src/wrappers/index.js - Registry update
+
+VS Code Extension
+- packages/bembajs-vscode-extension/syntaxes/bemba.tmLanguage.json - Syntax highlighting
+- packages/bembajs-vscode-extension/snippets/bemba.json - Code snippets
+
+New Keywords
+
+Control Flow
+- ngati - If statement
+- kapena - Else statement
+- kwa - For-in loop
+- pamene - While loop
+- linga - Try block
+- kwata - Catch block
+- paumalilo - Finally block
+
+Async Operations
+- lombako - Async function
+- leka - Await expression
+
+Chakra UI Components
+- Button, Input, Box, Stack, Modal, Select, Text, Heading
+
+VS Code Snippets
+
+New Snippets Added
+- ngati - Conditional statement
+- kwa - For loop
+- pamene - While loop
+- linga - Try-catch block
+- lombako - Async function
+- leka - Await expression
+- chakra - Chakra UI component
+- ngatiRender - Conditional rendering
+- kwaRender - Loop rendering
+
+Installation
+
+```bash
+# Update to latest version
+npm install -g bembajs@latest
+npm install -g bembajs-core@latest
+
+# Update VS Code extension
+# Search for "BembaJS Language Support" in VS Code Extensions
+# Click Update or Install if not already installed
+```
+
+Breaking Changes
+
+None. This is a minor version release with backward compatibility maintained.
+
+Migration Guide
+
+No migration required. All existing BembaJS code continues to work unchanged.
+
+New Features Available:
+- Use ngati/kapena for conditionals
+- Use kwa for loops
+- Use linga/kwata/paumalilo for error handling
+- Use lombako/leka for async operations
+- Use Chakra UI with library: 'chakra'
+
+What's Next
+
+- Navigation helpers (ukuya, ukubwelela)
+- Better error messages with code snippets
+- More component wrappers (Ant Design, Radix UI)
+- Advanced patterns (compound components, HOCs)
+- TypeScript definitions
+
+Full Changelog: https://github.com/YamikaniKL/bemba-compiler/compare/v1.2.0...v1.3.0
+
+This release represents a major step forward in making BembaJS a complete programming language. The addition of control flow syntax, error handling, and Chakra UI support makes it easier than ever to build complex applications while maintaining the beauty and expressiveness of the Bemba language.
+

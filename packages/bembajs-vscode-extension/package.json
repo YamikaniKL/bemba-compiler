@@ -1,0 +1,129 @@
+{
+  "name": "bembajs-language-support",
+  "displayName": "BembaJS Language Support",
+  "description": "Provides language support for BembaJS files (.bemba) with syntax highlighting, file icons, IntelliSense, React integration, and full control flow syntax (conditionals, loops, async/await)",
+  "version": "1.3.0",
+  "publisher": "bembajs",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Themes"
+  ],
+  "keywords": [
+    "bemba",
+    "bembajs",
+    "language",
+    "syntax",
+    "highlighting",
+    "zambia",
+    "african",
+    "programming",
+    "react",
+    "jsx",
+    "components",
+    "ui",
+    "framework"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YamikaniKL/bemba-compiler"
+  },
+  "homepage": "https://bembajs.dev",
+  "bugs": {
+    "url": "https://github.com/YamikaniKL/bemba-compiler/issues"
+  },
+  "license": "MIT",
+  "icon": "icon.png",
+  "galleryBanner": {
+    "color": "#1e40af",
+    "theme": "dark"
+  },
+  "contributes": {
+    "languages": [
+      {
+        "id": "bemba",
+        "aliases": ["BembaJS", "bemba", "Bemba"],
+        "extensions": [".bemba"],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./icons/bemba-light.svg",
+          "dark": "./icons/bemba-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bemba",
+        "scopeName": "source.bemba",
+        "path": "./syntaxes/bemba.tmLanguage.json"
+      }
+    ],
+    "snippets": [
+      {
+        "language": "bemba",
+        "path": "./snippets/bemba.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "bemba-icons",
+        "label": "BembaJS Icons",
+        "path": "./icons/icons.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "bembajs.createProject",
+        "title": "Create BembaJS Project",
+        "category": "BembaJS"
+      },
+      {
+        "command": "bembajs.startDevServer",
+        "title": "Start Dev Server",
+        "category": "BembaJS"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "bembajs.createProject",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "bembajs.startDevServer",
+          "when": "resourceExtname == .bemba",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "activationEvents": [
+    "onLanguage:bemba"
+  ],
+  "main": "./out/extension.js",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4",
+    "@vscode/test-electron": "^2.2.0",
+    "vsce": "^2.15.0"
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "Page Creation": {
+    "prefix": "pangaIpepa",
+    "body": [
+      "pangaIpepa('${1:Page Name}', {",
+      "    umutwe: '${2:Page Title}',",
+      "    ilyashi: '${3:Page Description}',",
+      "    ",
+      "    ifiputulwa: [",
+      "        {",
+      "            umutwe: '${4:Section Title}',",
+      "            ilyashi: '${5:Section Content}',",
+      "            amabatani: [",
+      "                {",
+      "                    ilembo: '${6:Button Text}',",
+      "                    pakuKlikisha: 'londolola(\"${7:Button Action}\")'",
+      "                }",
+      "            ]",
+      "        }",
+      "    ],",
+      "    ",
+      "    imikalile: `",
+      "        ${8:// Custom styles here}",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new BembaJS page"
+  },
+  "Component Creation": {
+    "prefix": "fyambaIcipanda",
+    "body": [
+      "fyambaIcipanda('${1:ComponentName}', {",
+      "    ifiputulwa: {",
+      "        ${2:// Component content}",
+      "    },",
+      "    imikalile: `",
+      "        ${3:// Component styles}",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new BembaJS component"
+  },
+  "API Route": {
+    "prefix": "pangaApi",
+    "body": [
+      "pangaApi('${1:route-name}', {",
+      "    method: '${2|GET,POST,PUT,DELETE|}',",
+      "    handler: `",
+      "        return {",
+      "            status: 200,",
+      "            data: { message: '${3:Hello from BembaJS API}' }",
+      "        };",
+      "    `",
+      "});"
+    ],
+    "description": "Create a new API route"
+  },
+  "Button": {
+    "prefix": "ibatani",
+    "body": [
+      "{",
+      "    ilembo: '${1:Button Text}',",
+      "    pakuKlikisha: 'londolola(\"${2:Button Action}\")'",
+      "}"
+    ],
+    "description": "Create a button"
+  },
+  "Section": {
+    "prefix": "icipandwa",
+    "body": [
+      "{",
+      "    umutwe: '${1:Section Title}',",
+      "    ilyashi: '${2:Section Content}',",
+      "    amabatani: [",
+      "        ${3:// buttons here}",
+      "    ]",
+      "}"
+    ],
+    "description": "Create a section"
+  },
+  "Styles": {
+    "prefix": "imikalile",
+    "body": [
+      "imikalile: `",
+      "    ${1:.class-name {",
+      "        ${2:// styles here}",
+      "    }}",
+      "`"
+    ],
+    "description": "Add custom styles"
+  },
+  "State Management": {
+    "prefix": "ukusunga",
+    "body": [
+      "ukusunga: {",
+      "    ${1:stateName}: ${2:initialValue},",
+      "    ${3:anotherState}: ${4:anotherValue}",
+      "}"
+    ],
+    "description": "Declare component state"
+  },
+  "State Update": {
+    "prefix": "ukuCinja",
+    "body": [
+      "ukuCinja('${1:stateName}', ${2:newValue})"
+    ],
+    "description": "Update state value"
+  },
+  "State with Effects": {
+    "prefix": "ukusungaKabili",
+    "body": [
+      "ukusungaKabili: {",
+      "    ${1:stateName}: ${2:initialValue},",
+      "    effect: `",
+      "        ${3:// side effect code here}",
+      "    `",
+      "}"
+    ],
+    "description": "State with side effects"
+  },
+  "Component Props": {
+    "prefix": "ificingilila",
+    "body": [
+      "ificingilila: {",
+      "    ${1:propName}: {",
+      "        type: '${2|string,number,boolean,array,object,function|}',",
+      "        required: ${3|true,false|},",
+      "        default: ${4:defaultValue}",
+      "    }",
+      "}"
+    ],
+    "description": "Define component props"
+  },
+  "Form Input": {
+    "prefix": "input",
+    "body": [
+      "{",
+      "    type: '${1|text,email,password,number,textarea|}',",
+      "    name: '${2:fieldName}',",
+      "    placeholder: '${3:Placeholder text}',",
+      "    pakuLemba: 'ukuCinja(\"${4:stateName}\", event.target.value)',",
+      "    required: ${5|true,false|}",
+      "}"
+    ],
+    "description": "Create form input"
+  },
+  "Form Submit": {
+    "prefix": "pakuTumina",
+    "body": [
+      "pakuTumina: `",
+      "    event.preventDefault();",
+      "    ${1:// form submission logic}",
+      "`"
+    ],
+    "description": "Form submit handler"
+  },
+  "Console Log": {
+    "prefix": "londolola",
+    "body": [
+      "londolola(${1:'message'})"
+    ],
+    "description": "Console log in Bemba"
+  },
+  "Import Statement": {
+    "prefix": "ingisa",
+    "body": [
+      "ingisa ${1:React} ukufuma '${2:react}'"
+    ],
+    "description": "Import statement in Bemba"
+  },
+  "Named Import": {
+    "prefix": "ingisaNamed",
+    "body": [
+      "ingisa { ${1:Button} } ukufuma '${2:@shadcn/ui}'"
+    ],
+    "description": "Named import in Bemba"
+  },
+  "Export Statement": {
+    "prefix": "fumya",
+    "body": [
+      "fumya chisangwa ${1:ComponentName}"
+    ],
+    "description": "Export statement in Bemba"
+  },
+  "React Component with Imports": {
+    "prefix": "reactComponent",
+    "body": [
+      "ingisa React ukufuma 'react'",
+      "ingisa { ${1:useState} } ukufuma 'react'",
+      "",
+      "fyambaIcipanda('${2:ComponentName}', {",
+      "    ukusunga: {",
+      "        ${3:stateName}: ${4:initialValue}",
+      "    },",
+      "    ifiputulwa: {",
+      "        umutwe: '${5:Component Title}',",
+      "        ilyashi: '${6:Component description}'",
+      "    }",
+      "});"
+    ],
+    "description": "React component with imports"
+  },
+  "Shadcn UI Component": {
+    "prefix": "shadcn",
+    "body": [
+      "{",
+      "    name: '${1:Button}',",
+      "    library: 'shadcn',",
+      "    props: {",
+      "        pakuKlikisha: 'londolola(\"${2:Clicked!}\")',",
+      "        imikalile: '${3:bg-blue-500 hover:bg-blue-700}'",
+      "    },",
+      "    ifika: '${4:Click Me}'",
+      "}"
+    ],
+    "description": "Shadcn/ui component wrapper"
+  },
+  "Material-UI Component": {
+    "prefix": "mui",
+    "body": [
+      "{",
+      "    name: '${1:Button}',",
+      "    library: 'mui',",
+      "    props: {",
+      "        variant: '${2|contained,outlined,text|}',",
+      "        pakuKlikisha: 'londolola(\"${3:Clicked!}\")'",
+      "    },",
+      "    ifika: '${4:Click Me}'",
+      "}"
+    ],
+    "description": "Material-UI component wrapper"
+  },
+  "NPM Package Import": {
+    "prefix": "npm",
+    "body": [
+      "ingisa ${1:axios} ukufuma '${2:axios}'",
+      "ingisa ${3:dayjs} ukufuma '${4:dayjs}'"
+    ],
+    "description": "Import NPM packages"
+  },
+  "Conditional Statement": {
+    "prefix": "ngati",
+    "body": [
+      "ngati (${1:condition}) {",
+      "    ${2:// code here}",
+      "} kapena {",
+      "    ${3:// else code here}",
+      "}"
+    ],
+    "description": "If-else statement in Bemba"
+  },
+  "For Loop": {
+    "prefix": "kwa",
+    "body": [
+      "kwa (${1:item} mu ${2:array}) {",
+      "    ${3:// loop body}",
+      "}"
+    ],
+    "description": "For-in loop in Bemba"
+  },
+  "While Loop": {
+    "prefix": "pamene",
+    "body": [
+      "pamene (${1:condition}) {",
+      "    ${2:// loop body}",
+      "}"
+    ],
+    "description": "While loop in Bemba"
+  },
+  "Try-Catch": {
+    "prefix": "linga",
+    "body": [
+      "linga {",
+      "    ${1:// code that might fail}",
+      "} kwata (${2:error}) {",
+      "    ${3:// handle error}",
+      "    londololaError('Ifipushi: ' + ${2:error}.message);",
+      "} paumalilo {",
+      "    ${4:// cleanup code}",
+      "}"
+    ],
+    "description": "Try-catch-finally block in Bemba"
+  },
+  "Async Function": {
+    "prefix": "lombako",
+    "body": [
+      "lombako nokuti ${1:functionName}() {",
+      "    const ${2:result} = leka ${3:asyncOperation}();",
+      "    bwelela ${2:result};",
+      "}"
+    ],
+    "description": "Async function in Bemba"
+  },
+  "Await Expression": {
+    "prefix": "leka",
+    "body": [
+      "leka ${1:asyncOperation}()"
+    ],
+    "description": "Await expression in Bemba"
+  },
+  "Chakra UI Component": {
+    "prefix": "chakra",
+    "body": [
+      "{",
+      "    name: '${1:Button}',",
+      "    library: 'chakra',",
+      "    props: {",
+      "        pakuKlikisha: 'londolola(\"${2:Clicked!}\")',",
+      "        colorScheme: '${3|blue,green,red,yellow,purple,pink|}',",
+      "        variant: '${4|solid,outline,ghost,link|}'",
+      "    },",
+      "    ifika: '${5:Click Me}'",
+      "}"
+    ],
+    "description": "Chakra UI component wrapper"
+  },
+  "Conditional Rendering": {
+    "prefix": "ngatiRender",
+    "body": [
+      "ngati (${1:condition}) {",
+      "    ${2:umutwe: 'Condition is true'}",
+      "} kapena {",
+      "    ${3:umutwe: 'Condition is false'}",
+      "}"
+    ],
+    "description": "Conditional rendering in component"
+  },
+  "Loop Rendering": {
+    "prefix": "kwaRender",
+    "body": [
+      "${1:amabatani}: kwa (${2:item} mu ${3:array}) {",
+      "    {",
+      "        ilembo: ${2:item}",
+      "    }",
+      "}"
+    ],
+    "description": "Loop rendering in component"
+  }
+}

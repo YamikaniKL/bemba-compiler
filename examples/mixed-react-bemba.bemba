@@ -1,0 +1,71 @@
+// Mixed React and BembaJS Example
+ingisa React ukufuma 'react'
+ingisa { useState } ukufuma 'react'
+ingisa { Button } ukufuma '@shadcn/ui'
+
+// Pure React component
+function ReactCounter({ initialCount = 0 }) {
+    const [count, setCount] = useState(initialCount);
+    
+    return (
+        <div className="p-4 border rounded-lg">
+            <h3 className="text-lg font-semibold mb-2">React Counter</h3>
+            <p className="mb-4">Count: {count}</p>
+            <Button 
+                onClick={() => setCount(count + 1)}
+                className="mr-2"
+            >
+                Increment
+            </Button>
+            <Button 
+                onClick={() => setCount(count - 1)}
+                variant="outline"
+            >
+                Decrement
+            </Button>
+        </div>
+    );
+}
+
+// BembaJS component that uses React component
+fyambaIcipanda('MixedExample', {
+    ukusunga: {
+        bembaCount: 0,
+        showReactCounter: true
+    },
+    ifiputulwa: {
+        umutwe: 'Mixed React & BembaJS',
+        ilyashi: 'This demonstrates mixing React components with BembaJS components',
+        ifikopo: [
+            {
+                name: 'ReactCounter',
+                props: {
+                    initialCount: bembaCount
+                }
+            },
+            {
+                umutwe: 'BembaJS Counter',
+                ilyashi: 'BembaJS counter: ' + bembaCount,
+                amabatani: [
+                    {
+                        ilembo: 'Onjela Bemba',
+                        pakuKlikisha: 'ukuCinja("bembaCount", bembaCount + 1)'
+                    },
+                    {
+                        ilembo: 'Cepula Bemba',
+                        pakuKlikisha: 'ukuCinja("bembaCount", bembaCount - 1)'
+                    }
+                ]
+            },
+            {
+                name: 'Button',
+                library: 'shadcn',
+                props: {
+                    pakuKlikisha: 'ukuCinja("showReactCounter", !showReactCounter)',
+                    variant: 'secondary'
+                },
+                ifika: showReactCounter ? 'Hide React Counter' : 'Show React Counter'
+            }
+        ]
+    }
+});

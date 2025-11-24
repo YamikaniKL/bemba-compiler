@@ -1,0 +1,46 @@
+{
+  "name": "bembajs-language-support",
+  "displayName": "BembaJS Language Support",
+  "description": "Language support for BembaJS .bemba files",
+  "version": "1.0.0",
+  "publisher": "bembajs",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bemba",
+        "aliases": [
+          "Bemba",
+          "BembaJS",
+          "bemba"
+        ],
+        "extensions": [
+          ".bemba"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bemba",
+        "scopeName": "source.bemba",
+        "path": "./bemba.tmLanguage.json"
+      }
+    ],
+    "iconThemes": [
+      {
+        "id": "bembajs-icons",
+        "label": "BembaJS Icons",
+        "path": "./icons.json"
+      }
+    ]
+  },
+  "activationEvents": [
+    "onLanguage:bemba"
+  ]
+}

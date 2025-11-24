@@ -1,0 +1,35 @@
+// Basic BembaJS Component Example
+fyambaIcipanda('HelloWorld', {
+    ifyapangwa: {
+        ishina: icishilano,
+        umutengo: impendwa
+    },
+    ifyakubika: {
+        count: 0,
+        visible: ee
+    },
+    ukupanga: nokuti() {
+        // Component initialization
+        monako('HelloWorld component initialized');
+    },
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa className="hello-world">
+                <umutwe_ukulu>Mwaiseni, {ici.ifyapangwa.ishina}!</umutwe_ukulu>
+                <ukulondolola>Umutengo: {ici.ifyapangwa.umutengo}</ukulondolola>
+                <ukulondolola>Count: {ici.ifyakubika.count}</ukulondolola>
+                <ibatani 
+                    pakuKlikisha={() => {
+                        ici.ifyakubika.count = ici.ifyakubika.count + 1;
+                        londolola('Count updated!');
+                    }}
+                >
+                    Increment
+                </ibatani>
+                {ici.ifyakubika.visible && (
+                    <ukulondolola>This is visible!</ukulondolola>
+                )}
+            </icipandwa>
+        )
+    }
+});

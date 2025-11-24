@@ -1,0 +1,13 @@
+{
+  "iconDefinitions": {
+    "bemba": {
+      "iconPath": "./bemba-icon.svg"
+    }
+  },
+  "fileExtensions": {
+    "bemba": "bemba"
+  },
+  "fileNames": {
+    "*.bemba": "bemba"
+  }
+}

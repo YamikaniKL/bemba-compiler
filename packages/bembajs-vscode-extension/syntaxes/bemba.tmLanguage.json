@@ -1,0 +1,130 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Bemba",
+  "patterns": [
+    {
+      "include": "#comments"
+    },
+    {
+      "include": "#strings"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#functions"
+    },
+    {
+      "include": "#properties"
+    }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.double-slash.bemba",
+          "begin": "//",
+          "end": "$"
+        },
+        {
+          "name": "comment.block.bemba",
+          "begin": "/\\*",
+          "end": "\\*/"
+        }
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {
+          "name": "string.quoted.double.bemba",
+          "begin": "\"",
+          "end": "\"",
+          "patterns": [
+            {
+              "name": "constant.character.escape.bemba",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.single.bemba",
+          "begin": "'",
+          "end": "'",
+          "patterns": [
+            {
+              "name": "constant.character.escape.bemba",
+              "match": "\\\\."
+            }
+          ]
+        },
+        {
+          "name": "string.quoted.template.bemba",
+          "begin": "`",
+          "end": "`",
+          "patterns": [
+            {
+              "name": "constant.character.escape.bemba",
+              "match": "\\\\."
+            }
+          ]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "name": "constant.numeric.bemba",
+          "match": "\\b\\d+(\\.\\d+)?\\b"
+        }
+      ]
+    },
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.bemba",
+          "match": "\\b(pangaIpepa|fyambaIcipanda|pangaApi|pangaWebusaiti|ngati|kapena|kwa|pamene|linga|kwata|paumalilo|sankha|case|default|bwelela|tambulukila)\\b"
+        },
+        {
+          "name": "keyword.state.bemba",
+          "match": "\\b(ukusunga|ukusungaKabili|ukuCinja)\\b"
+        },
+        {
+          "name": "keyword.events.bemba",
+          "match": "\\b(pakuKlikisha|pakuLemba|pakuTumina|pakuCinja|pakuIngia|pakuFuma|pakuKwesha|pakuSiya)\\b"
+        },
+        {
+          "name": "keyword.props.bemba",
+          "match": "\\b(ificingilila|type|required|default)\\b"
+        },
+        {
+          "name": "keyword.import.bemba",
+          "match": "\\b(ingisa|fumya|ukufuma|chisangwa|nga)\\b"
+        },
+        {
+          "name": "keyword.other.bemba",
+          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|imikalile|ifikopo|maapi|amapeji|maungu|mafungulo|mautils|mahooks|macontext|amalembelo|inputs|forms|selects|checkboxes|radios)\\b"
+        }
+      ]
+    },
+    "functions": {
+      "patterns": [
+        {
+          "name": "entity.name.function.bemba",
+          "match": "\\b(londolola|londololaError|londololaWarning|ukuPima|ukuPindula|ukuGawanya|ukuSanganya|ukuOnjela|ukuCotola|ukuSankha|ukuBalisha|ukuCepula|ukuCilisha|panga|fyamba|akha|tungulula|fumya|lint|format|test)\\b"
+        }
+      ]
+    },
+    "properties": {
+      "patterns": [
+        {
+          "name": "variable.other.property.bemba",
+          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|pakuKlikisha|imikalile|method|handler|target|output|port|host|hotReload|openBrowser|apiPort|ssg|ssr|optimize|routing|apiRoutes|components|hooks|context|styling)\\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.bemba"
+}
