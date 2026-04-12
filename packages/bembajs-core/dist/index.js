@@ -4,6 +4,7 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { BEMBA_KEYWORDS, BEMBA_FOLDERS } = require('./constants');
+const { version: CORE_VERSION } = require('../package.json');
 
 /**
  * Compile Bemba code to JavaScript/HTML
@@ -13,11 +14,40 @@ const { BEMBA_KEYWORDS, BEMBA_FOLDERS } = require('./constants');
  */
 function compile(code, options = {}) {
     const lexer = new BembaLexer();
-    const parser = new BembaParser(lexer);
+    const parser = new BembaParser();
+    const transformer = new BembaTransformer();
+    const generator = new BembaGenerator();
     
     try {
-        return parser.compile(code, options);
+        const tokens = lexer.tokenize(code);
+        const ast = parser.parse(tokens);
+        const transformed = transformer.transform(ast);
+        const generated = generator.generate(transformed);
+        
+        return {
+            success: true,
+            code: generated,
+            ...(options.includeAst ? { ast } : {}),
+            ...(options.includeTransformedAst ? { transformedAst: transformed } : {})
+        };
     } catch (error) {
+        // Backward compatibility for old syntax and demo templates.
+        if (options.legacyFallback !== false) {
+            try {
+                return {
+                    success: true,
+                    code: parser.compile(code, options),
+                    legacy: true
+                };
+            } catch (legacyError) {
+                return {
+                    success: false,
+                    error: legacyError.message,
+                    stack: legacyError.stack
+                };
+            }
+        }
+        
         return {
             success: false,
             error: error.message,
@@ -77,7 +107,7 @@ module.exports = {
     BEMBA_FOLDERS,
     
     // Version
-    version: '1.0.0'
+    version: CORE_VERSION
 };
 
 // ESM exports

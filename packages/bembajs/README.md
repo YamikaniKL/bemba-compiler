@@ -79,6 +79,12 @@ const result = compile(`
   });
 `);
 
+if (result.success) {
+  console.log(result.code);
+} else {
+  console.error(result.error);
+}
+
 // Start dev server
 const server = await createDevServer({
   port: 3000,

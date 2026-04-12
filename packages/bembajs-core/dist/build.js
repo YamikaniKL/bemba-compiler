@@ -6,6 +6,7 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
+const { version: CORE_VERSION } = require('../package.json');
 
 class BembaBuildSystem {
     constructor(options = {}) {
@@ -240,7 +241,7 @@ class BembaBuildSystem {
         console.log('📋 Generating build manifest...');
         
         const manifest = {
-            version: '1.0.0',
+            version: CORE_VERSION,
             buildTime: new Date().toISOString(),
             static: this.static,
             pages: Object.fromEntries(this.buildArtifacts.pages),
@@ -299,7 +300,7 @@ module.exports = nextConfig;`;
         
         const packageJson = {
             name: 'bemba-build',
-            version: '1.0.0',
+            version: CORE_VERSION,
             private: true,
             scripts: {
                 dev: 'next dev',

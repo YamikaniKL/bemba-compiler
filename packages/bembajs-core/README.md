@@ -16,7 +16,7 @@ npm install bembajs-core
 ```javascript
 const { compile, parse, transform, generate } = require('bembajs-core');
 
-// Compile Bemba code to HTML/JavaScript
+// Compile Bemba code with the full AST pipeline
 const result = compile(`
   pangaIpepa('Home', {
     umutwe: 'Mwaiseni ku BembaJS!',
@@ -24,24 +24,28 @@ const result = compile(`
   });
 `);
 
-console.log(result);
+if (result.success) {
+  console.log(result.code);
+} else {
+  console.error(result.error);
+}
 ```
 
 ## 🔧 API Reference
 
 ### `compile(code, options)`
 
-Compiles Bemba code to HTML/JavaScript.
+Compiles Bemba code using `tokenize -> parse -> transform -> generate`.
 
 **Parameters:**
 - `code` (string) - Bemba source code
 - `options` (object) - Compilation options
 
-**Returns:** Compiled HTML string
+**Returns:** Compile result object
 
 **Example:**
 ```javascript
-const html = compile(`
+const result = compile(`
   pangaWebusaiti("My App", {
     ifiputulwa: [{
       umutwe: "Welcome",
@@ -53,6 +57,25 @@ const html = compile(`
     }]
   });
 `);
+
+if (result.success) {
+  console.log(result.code);
+}
+```
+
+**Result shape:**
+
+```javascript
+{
+  success: true,
+  code: "generated output"
+}
+```
+
+`compile()` keeps a legacy fallback for old syntax by default. You can disable that with:
+
+```javascript
+const result = compile(code, { legacyFallback: false });
 ```
 
 ### `parse(code)`

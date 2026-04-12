@@ -12,7 +12,13 @@ class BembaTransformer {
             FunctionCall: this.transformFunctionCall.bind(this),
             Expression: this.transformExpression.bind(this),
             Import: this.transformImport.bind(this),
-            Export: this.transformExport.bind(this)
+            Export: this.transformExport.bind(this),
+            IfStatement: this.transformIfStatement.bind(this),
+            ForStatement: this.transformForStatement.bind(this),
+            WhileStatement: this.transformWhileStatement.bind(this),
+            TryStatement: this.transformTryStatement.bind(this),
+            AwaitExpression: this.transformAwaitExpression.bind(this),
+            FunctionDeclaration: this.transformFunctionDeclaration.bind(this)
         };
     }
     
@@ -362,6 +368,151 @@ class BembaTransformer {
             imports: project.imports,
             exports: project.exports,
             errors: project.errors
+        };
+    }
+    
+    // Control flow transformations
+    transformIfStatement(node) {
+        const test = this.transformNode(node.condition);
+        const consequent = Array.isArray(node.thenBranch) 
+            ? node.thenBranch.map(stmt => this.transformNode(stmt))
+            : this.transformNode(node.thenBranch);
+        
+        if (node.elseBranch) {
+            const alternate = Array.isArray(node.elseBranch)
+                ? node.elseBranch.map(stmt => this.transformNode(stmt))
+                : this.transformNode(node.elseBranch);
+            
+            // For JSX, use ternary operator
+            return {
+                type: 'ConditionalExpression',
+                test,
+                consequent,
+                alternate
+            };
+        }
+        
+        return {
+            type: 'IfStatement',
+            test,
+            consequent
+        };
+    }
+    
+    transformForStatement(node) {
+        const array = this.transformNode(node.iterable);
+        const body = Array.isArray(node.body)
+            ? node.body.map(stmt => this.transformNode(stmt))
+            : this.transformNode(node.body);
+        
+        // Transform to .map() call for React
+        return {
+            type: 'CallExpression',
+            callee: {
+                type: 'MemberExpression',
+                object: array,
+                property: {
+                    type: 'Identifier',
+                    name: 'map'
+                }
+            },
+            arguments: [{
+                type: 'ArrowFunctionExpression',
+                params: [{
+                    type: 'Identifier',
+                    name: node.variable
+                }],
+                body: {
+                    type: 'BlockStatement',
+                    body: Array.isArray(body) ? body : [body]
+                }
+            }]
+        };
+    }
+    
+    transformWhileStatement(node) {
+        const test = this.transformNode(node.condition);
+        const body = Array.isArray(node.body)
+            ? node.body.map(stmt => this.transformNode(stmt))
+            : this.transformNode(node.body);
+        
+        return {
+            type: 'WhileStatement',
+            test,
+            body: {
+                type: 'BlockStatement',
+                body: Array.isArray(body) ? body : [body]
+            }
+        };
+    }
+    
+    transformTryStatement(node) {
+        const tryBlock = Array.isArray(node.tryBlock)
+            ? node.tryBlock.map(stmt => this.transformNode(stmt))
+            : this.transformNode(node.tryBlock);
+        
+        let catchBlock = null;
+        if (node.catchBlock) {
+            catchBlock = {
+                param: {
+                    type: 'Identifier',
+                    name: node.catchBlock.error
+                },
+                body: {
+                    type: 'BlockStatement',
+                    body: Array.isArray(node.catchBlock.body)
+                        ? node.catchBlock.body.map(stmt => this.transformNode(stmt))
+                        : [this.transformNode(node.catchBlock.body)]
+                }
+            };
+        }
+        
+        let finallyBlock = null;
+        if (node.finallyBlock) {
+            finallyBlock = {
+                type: 'BlockStatement',
+                body: Array.isArray(node.finallyBlock)
+                    ? node.finallyBlock.map(stmt => this.transformNode(stmt))
+                    : [this.transformNode(node.finallyBlock)]
+            };
+        }
+        
+        return {
+            type: 'TryStatement',
+            block: {
+                type: 'BlockStatement',
+                body: Array.isArray(tryBlock) ? tryBlock : [tryBlock]
+            },
+            handler: catchBlock,
+            finalizer: finallyBlock
+        };
+    }
+    
+    transformAwaitExpression(node) {
+        return {
+            type: 'AwaitExpression',
+            argument: this.transformNode(node.argument)
+        };
+    }
+    
+    transformFunctionDeclaration(node) {
+        return {
+            type: 'FunctionDeclaration',
+            id: {
+                type: 'Identifier',
+                name: node.name
+            },
+            params: node.params.map(param => ({
+                type: 'Identifier',
+                name: param
+            })),
+            body: {
+                type: 'BlockStatement',
+                body: Array.isArray(node.body)
+                    ? node.body.map(stmt => this.transformNode(stmt))
+                    : [this.transformNode(node.body)]
+            },
+            async: node.async || false
         };
     }
 }

@@ -48,6 +48,23 @@ class BembaGenerator {
                 return this.generateProgram(node);
             case 'Module':
                 return this.generateModule(node);
+            case 'IfStatement':
+            case 'ConditionalExpression':
+                return this.generateIfStatement(node);
+            case 'ForStatement':
+            case 'CallExpression':
+                if (node.callee && node.callee.property && node.callee.property.name === 'map') {
+                    return this.generateForStatement(node);
+                }
+                return this.generateFunctionCall(node);
+            case 'WhileStatement':
+                return this.generateWhileStatement(node);
+            case 'TryStatement':
+                return this.generateTryStatement(node);
+            case 'AwaitExpression':
+                return this.generateAwaitExpression(node);
+            case 'FunctionDeclaration':
+                return this.generateFunctionDeclaration(node);
             default:
                 return this.generateGenericNode(node);
         }
@@ -504,6 +521,91 @@ module.exports = nextConfig`;
             
             return `<a class="${buttonClass}" href="#" onclick="${button.pakuKlikisha || 'return false;'}" target="_blank" rel="noopener noreferrer">${button.ilembo}</a>`;
         }).join('\n                ');
+    }
+    
+    // Control flow generation
+    generateIfStatement(node) {
+        if (node.type === 'ConditionalExpression') {
+            // Ternary operator for JSX
+            return `(${this.generateNode(node.test)} ? ${this.generateNode(node.consequent)} : ${this.generateNode(node.alternate)})`;
+        }
+        
+        // Regular if statement
+        let code = `if (${this.generateNode(node.test)}) {\n${this.increaseIndent()}`;
+        code += Array.isArray(node.consequent) 
+            ? node.consequent.map(stmt => this.generateNode(stmt)).join('\n')
+            : this.generateNode(node.consequent);
+        code += `\n${this.decreaseIndent()}}`;
+        
+        if (node.alternate) {
+            code += ` else {\n${this.increaseIndent()}`;
+            code += Array.isArray(node.alternate)
+                ? node.alternate.map(stmt => this.generateNode(stmt)).join('\n')
+                : this.generateNode(node.alternate);
+            code += `\n${this.decreaseIndent()}}`;
+        }
+        
+        return code;
+    }
+    
+    generateForStatement(node) {
+        // Transform to .map() for React
+        const array = this.generateNode(node.callee.object);
+        const param = node.arguments[0].params[0].name;
+        const body = this.generateNode(node.arguments[0].body);
+        
+        return `${array}.map((${param}) => ${body})`;
+    }
+    
+    generateWhileStatement(node) {
+        let code = `while (${this.generateNode(node.test)}) {\n${this.increaseIndent()}`;
+        code += Array.isArray(node.body.body)
+            ? node.body.body.map(stmt => this.generateNode(stmt)).join('\n')
+            : this.generateNode(node.body);
+        code += `\n${this.decreaseIndent()}}`;
+        return code;
+    }
+    
+    generateTryStatement(node) {
+        let code = `try {\n${this.increaseIndent()}`;
+        code += Array.isArray(node.block.body)
+            ? node.block.body.map(stmt => this.generateNode(stmt)).join('\n')
+            : this.generateNode(node.block);
+        code += `\n${this.decreaseIndent()}}`;
+        
+        if (node.handler) {
+            code += ` catch (${node.handler.param.name}) {\n${this.increaseIndent()}`;
+            code += Array.isArray(node.handler.body.body)
+                ? node.handler.body.body.map(stmt => this.generateNode(stmt)).join('\n')
+                : this.generateNode(node.handler.body);
+            code += `\n${this.decreaseIndent()}}`;
+        }
+        
+        if (node.finalizer) {
+            code += ` finally {\n${this.increaseIndent()}`;
+            code += Array.isArray(node.finalizer.body)
+                ? node.finalizer.body.map(stmt => this.generateNode(stmt)).join('\n')
+                : this.generateNode(node.finalizer);
+            code += `\n${this.decreaseIndent()}}`;
+        }
+        
+        return code;
+    }
+    
+    generateAwaitExpression(node) {
+        return `await ${this.generateNode(node.argument)}`;
+    }
+    
+    generateFunctionDeclaration(node) {
+        const asyncKeyword = node.async ? 'async ' : '';
+        let code = `${asyncKeyword}function ${node.id.name}(`;
+        code += node.params.map(p => p.name).join(', ');
+        code += `) {\n${this.increaseIndent()}`;
+        code += Array.isArray(node.body.body)
+            ? node.body.body.map(stmt => this.generateNode(stmt)).join('\n')
+            : this.generateNode(node.body);
+        code += `\n${this.decreaseIndent()}}`;
+        return code;
     }
 }
 

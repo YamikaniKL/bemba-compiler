@@ -133,7 +133,7 @@ pangaApi('hello', {
 });
 ```
 
-### New in v1.3.0: Control Flow Syntax
+### New in v1.3.1: Compiler Pipeline & Control Flow Syntax
 
 ```bemba
 // Conditionals

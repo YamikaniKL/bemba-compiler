@@ -5,6 +5,8 @@
 
 **create-bembajs** - Create BembaJS apps with one command (like create-next-app) 🇿🇲
 
+> Generates projects using the latest `bembajs` SDK line (`^1.3.1`).
+
 ## 🚀 Quick Start
 
 ### Using npm

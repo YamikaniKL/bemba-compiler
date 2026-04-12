@@ -57,6 +57,21 @@ const BEMBA_SYNTAX = {
     ASYNC: 'lombako',
     AWAIT: 'leka',
     THIS: 'ici',
+    IF: 'ngati',
+    ELSE: 'kapena',
+    ELSE_IF: 'kapena ngati',
+    FOR: 'kwa',
+    IN: 'mu',
+    WHILE: 'pamene',
+    DO: 'cita',
+    TRY: 'linga',
+    CATCH: 'kwata',
+    FINALLY: 'paumalilo',
+    SWITCH: 'sankha',
+    CASE: 'case',
+    DEFAULT: 'default',
+    BREAK: 'bwelela',
+    CONTINUE: 'tambulukila',
     
     // JSX elements (Bemba equivalents)
     JSX: {

@@ -9,6 +9,7 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
+const { version: CORE_VERSION } = require('../package.json');
 
 class BembaCLI {
     constructor() {
@@ -20,7 +21,7 @@ class BembaCLI {
         this.program
             .name('bemba')
             .description('BembaJS CLI - Build web applications with Bemba language')
-            .version('1.0.0');
+            .version(CORE_VERSION);
         
         // Create new project
         this.program
@@ -676,7 +677,7 @@ Visit [BembaJS Documentation](https://bembajs.dev) to learn more about the frame
     createPackageJson(projectPath, name, options) {
         const packageJson = {
             name: name,
-            version: '1.0.0',
+            version: '0.1.0',
             private: true,
             scripts: {
                 dev: 'bemba tungulula',
@@ -686,14 +687,14 @@ Visit [BembaJS Documentation](https://bembajs.dev) to learn more about the frame
                 lint: 'bemba lemba'
             },
             dependencies: {
-                'bemba-compiler': '^1.0.0',
+                'bembajs': `^${CORE_VERSION}`,
                 'express': '^4.21.2',
                 'react': '^18.0.0',
                 'react-dom': '^18.0.0',
                 'next': '^14.0.0'
             },
             devDependencies: {
-                'bemba-cli': '^1.0.0'
+                'bembajs-core': `^${CORE_VERSION}`
             }
         };
         
@@ -715,7 +716,7 @@ Visit [BembaJS Documentation](https://bembajs.dev) to learn more about the frame
             ...DEFAULT_CONFIG,
             project: {
                 name: path.basename(projectPath),
-                version: '1.0.0'
+                version: '0.1.0'
             }
         };
         
