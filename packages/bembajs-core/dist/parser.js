@@ -1259,9 +1259,15 @@ class BembaParser {
         const appName = this.extractAppNameFromNewSyntax(code);
         const sections = this.extractSectionsFromNewSyntax(code);
         const styles = this.extractStylesFromNewSyntax(code);
-        
-        // Generate the same modern layout as compileOldSyntax
-        return this.generateModernLayout(appName, sections, styles);
+        const siteName = this.extractSiteNameFromNewSyntax(code);
+        const navLinks = this.extractNavLinksFromNewSyntax(code);
+        const footerTagline = this.extractFooterTaglineFromNewSyntax(code);
+
+        return this.generateModernLayout(appName, sections, styles, {
+            siteName,
+            navLinks,
+            footerTagline
+        });
     }
     
     extractAppNameFromNewSyntax(code) {
@@ -1345,8 +1351,66 @@ class BembaParser {
         const q = code.match(/imikalile:\s*["']([\s\S]*?)["']/);
         return q ? q[1] : '';
     }
+
+    /** Optional site title shown in the top navbar (e.g. ishinaLyasite: 'My Demo'). */
+    extractSiteNameFromNewSyntax(code) {
+        const m = code.match(/ishinaLyasite:\s*["']([^"']*)["']/);
+        return m ? m[1].trim() : '';
+    }
+
+    /** Optional footer line under main content (e.g. copyright). */
+    extractFooterTaglineFromNewSyntax(code) {
+        const m = code.match(/ilyashiWaFuti:\s*["']([^"']*)["']/);
+        return m ? m[1] : '';
+    }
+
+    /**
+     * Optional navbar links: amalinkiNav: [ { ilembo: 'Home', indashi: '/' }, ... ]
+     * `indashi` is the path (href), e.g. /about
+     */
+    extractArrayBlockAfterKey(code, key) {
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const re = new RegExp(escaped + ':\\s*\\[');
+        const m = re.exec(code);
+        if (!m) return null;
+        const openBracket = m.index + m[0].length - 1;
+        let depth = 0;
+        let i = openBracket;
+        for (; i < code.length; i++) {
+            const c = code[i];
+            if (c === '[') depth++;
+            else if (c === ']') {
+                depth--;
+                if (depth === 0) {
+                    i++;
+                    break;
+                }
+            }
+        }
+        return code.slice(openBracket + 1, i - 1);
+    }
+
+    extractNavLinksFromNewSyntax(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'amalinkiNav');
+        if (!inner) return [];
+        const links = [];
+        const patIlemboFirst =
+            /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*indashi:\s*(["'])([^"']*)\3\s*\}/g;
+        let m;
+        while ((m = patIlemboFirst.exec(inner)) !== null) {
+            links.push({ label: m[2], href: m[4] });
+        }
+        if (links.length > 0) return links;
+        const patIndashiFirst =
+            /\{\s*indashi:\s*(["'])([^"']*)\1\s*,\s*ilembo:\s*(["'])([^"']*)\3\s*\}/g;
+        while ((m = patIndashiFirst.exec(inner)) !== null) {
+            links.push({ label: m[4], href: m[2] });
+        }
+        return links;
+    }
     
-    generateModernLayout(appName, sections, styles) {
+    generateModernLayout(appName, sections, styles, layoutOpts = {}) {
+        const { siteName = '', navLinks = [], footerTagline = '' } = layoutOpts;
         const escapeHtml = (s) => {
             if (s == null || s === '') return '';
             return String(s)
@@ -1375,6 +1439,29 @@ class BembaParser {
         } else if (!s0) {
             leadHtml = `<p class="page-lead">Get started by editing <code>amapeji/index.bemba</code>. Save the file and refresh this page.</p>`;
         }
+
+        const brandName = siteName || 'BembaJS';
+        const showInnerBrand = navLinks.length === 0;
+        const navBlock =
+            navLinks.length > 0
+                ? `<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="nav-brand">${escapeHtml(brandName)}</a>
+        <nav class="site-nav" aria-label="Main">
+            ${navLinks
+                .map(
+                    (l) =>
+                        `<a href="${escapeHtml(l.href)}" class="nav-link">${escapeHtml(l.label)}</a>`
+                )
+                .join('')}
+        </nav>
+    </div>
+</header>`
+                : '';
+        const footerLead =
+            footerTagline && String(footerTagline).trim()
+                ? `<p class="footer-tagline">${escapeHtml(String(footerTagline).trim())}</p>`
+                : '';
 
         return `<!DOCTYPE html>
 <html lang="en">
@@ -1412,6 +1499,8 @@ class BembaParser {
         body {
             margin: 0;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
             background: var(--bg);
             color: var(--text);
@@ -1419,12 +1508,71 @@ class BembaParser {
             -webkit-font-smoothing: antialiased;
         }
 
-        .grid {
-            min-height: 100vh;
+        .page-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .layout-grid {
+            flex: 1;
             display: grid;
             grid-template-rows: 1fr auto;
             padding: clamp(1.25rem, 4vw, 2.5rem);
             gap: 2rem;
+            min-height: 0;
+        }
+
+        .site-header {
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface) 90%, transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .site-header-inner {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 0.65rem clamp(1rem, 4vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-brand:hover {
+            color: var(--accent);
+        }
+
+        .site-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.5rem;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .nav-link {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 0.4rem 0.65rem;
+            border-radius: 0.375rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: color-mix(in srgb, var(--text) 6%, transparent);
         }
 
         main {
@@ -1537,11 +1685,26 @@ class BembaParser {
 
         footer {
             display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-tagline {
+            margin: 0;
+            font-size: 0.8125rem;
+            color: var(--muted);
+            text-align: center;
+            max-width: 40rem;
+        }
+
+        .footer-links {
+            display: flex;
             flex-wrap: wrap;
             gap: 1.25rem;
             align-items: center;
             justify-content: center;
-            padding-bottom: 0.5rem;
         }
 
         .footer-link {
@@ -1569,13 +1732,19 @@ class BembaParser {
     </style>
 </head>
 <body class="antialiased">
-    <div class="grid">
+${navBlock}
+<div class="page-wrap">
+    <div class="layout-grid">
         <main>
             <div class="shell">
-                <div class="brand" aria-hidden="true">
+                ${
+                    showInnerBrand
+                        ? `<div class="brand" aria-hidden="true">
                     <span class="brand-mark"></span>
-                    <span class="brand-name">BembaJS</span>
-                </div>
+                    <span class="brand-name">${escapeHtml(brandName)}</span>
+                </div>`
+                        : ''
+                }
                 <section class="hero" aria-labelledby="page-heading">
                     <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
                     ${leadHtml}
@@ -1590,6 +1759,8 @@ class BembaParser {
             </div>
         </main>
         <footer>
+            ${footerLead}
+            <div class="footer-links">
             <a href="https://bembajs.dev" class="footer-link" target="_blank" rel="noopener noreferrer">
                 <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -1602,8 +1773,10 @@ class BembaParser {
                 </svg>
                 GitHub
             </a>
+            </div>
         </footer>
     </div>
+</div>
     <script>
         // BembaJS runtime functions
         function londolola(message) {
