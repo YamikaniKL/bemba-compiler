@@ -573,6 +573,25 @@ pangaIpepa('Home', {
     start() {
         const server = this.app.listen(this.port, () => {
             console.log(`🚀 BembaJS Development Server running at http://localhost:${this.port}`);
+            try {
+                const chokidar = require('chokidar');
+                const dirs = ['amapeji', 'maapi', 'ifikopo']
+                    .map((d) => path.join(this.projectRoot, d))
+                    .filter((d) => fs.existsSync(d));
+                if (dirs.length > 0) {
+                    chokidar
+                        .watch(dirs, { ignoreInitial: true })
+                        .on('all', (evt, filePath) => {
+                            if (typeof filePath === 'string' && filePath.endsWith('.bemba')) {
+                                const rel = path.relative(this.projectRoot, filePath);
+                                console.log(`♻️  ${rel} changed — refresh the browser to see updates.`);
+                            }
+                        });
+                    console.log('👀 Watching .bemba files under amapeji/, maapi/, ifikopo/');
+                }
+            } catch (_) {
+                /* chokidar optional */
+            }
         });
 
         server.on('error', (err) => {

@@ -73,7 +73,7 @@ class BembaGenerator {
     // React Component generation
     generateReactComponent(node) {
         const imports = this.generateReactImports();
-        const hooks = node.hooks.map(hook => this.generateReactHook(hook)).join('\n');
+        const hooks = (node.hooks || []).map(hook => this.generateReactHook(hook)).join('\n');
         const methods = this.generateMethods(node.methods);
         const render = this.generateJSXReturn(node.render);
         
@@ -127,6 +127,56 @@ export default ${node.name};`;
 ${getServerSideProps}
 ${getStaticProps}
 ${getStaticPaths}`;
+    }
+
+    /** App Router / pages router default export — same bundle shape as NextJSPage today */
+    generateReactPage(node) {
+        return this.generateNextJSPage(node);
+    }
+
+    apiHandlerBodySource(handler) {
+        if (handler == null) {
+            return 'return { status: 501, data: { message: "No handler body" } };';
+        }
+        if (typeof handler === 'string') {
+            return handler;
+        }
+        if (handler.type === 'STRING') {
+            return handler.literal != null ? handler.literal : (handler.value || '');
+        }
+        return `return { status: 500, data: { error: "Unsupported handler AST" } };`;
+    }
+
+    generateApiHandler(node) {
+        const method = String(node.method || 'GET').toUpperCase();
+        const body = this.apiHandlerBodySource(node.handler);
+        const indented = body
+            .split('\n')
+            .map((line) => (line ? `    ${line}` : line))
+            .join('\n');
+
+        return `/**
+ * API route: ${node.path || 'api'} (${method})
+ * Generated from BembaJS
+ */
+export default async function handler(req, res) {
+  if (req.method !== '${method}') {
+    res.setHeader('Allow', '${method}');
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+  try {
+    const result = await (async () => {
+${indented}
+    })();
+    const status = (result && result.status) || 200;
+    const payload = (result && result.data) !== undefined ? result.data : result;
+    res.status(status).json(payload);
+  } catch (e) {
+    res.status(500).json({ error: e && e.message ? e.message : String(e) });
+  }
+}
+`;
     }
     
     generateGetServerSideProps(handler) {

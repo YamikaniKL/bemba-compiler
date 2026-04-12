@@ -127,9 +127,19 @@ class BembaParser {
         while (true) {
             this.skipTrivia();
             if (this.isAtEnd()) break;
+            // Skip empty statements and ASI-style terminators
+            while (this.match('SEMICOLON')) {
+                this.skipTrivia();
+            }
+            if (this.isAtEnd()) break;
+
             const statement = this.parseStatement();
             if (statement) {
                 statements.push(statement);
+            }
+            this.skipTrivia();
+            while (this.match('SEMICOLON')) {
+                this.skipTrivia();
             }
         }
         
@@ -157,9 +167,45 @@ class BembaParser {
             return this.parseVariableDeclaration();
         } else if (this.check('ASYNC') || this.check('FUNCTION')) {
             return this.parseFunctionDeclaration();
+        } else if (this.check('IDENTIFIER') && this.peek().literal === 'pangaApi') {
+            return this.parseApiRoute();
         } else {
             return this.parseExpression();
         }
+    }
+
+    parseApiRoute() {
+        this.advance(); // pangaApi
+        this.consume('LEFT_PAREN', 'Expected ( after pangaApi');
+
+        if (!this.check('STRING') && !this.check('IDENTIFIER')) {
+            throw new Error('Expected API route path string');
+        }
+        const pathTok = this.advance();
+        const routePath = pathTok.literal != null ? String(pathTok.literal) : pathTok.lexeme;
+
+        this.consume('COMMA', 'Expected , after API path');
+        const config = this.parseObject();
+        this.consume('RIGHT_PAREN', 'Expected ) after pangaApi config');
+        if (this.match('SEMICOLON')) {
+            // optional
+        }
+
+        let method = 'GET';
+        let handler = null;
+        if (config.properties) {
+            const m = config.properties.method;
+            if (m != null) {
+                if (typeof m === 'string') {
+                    method = m.replace(/^['"]|['"]$/g, '').toUpperCase() || 'GET';
+                } else if (m.type === 'STRING') {
+                    method = String(m.literal != null ? m.literal : m.value || 'GET').toUpperCase();
+                }
+            }
+            handler = config.properties.handler != null ? config.properties.handler : null;
+        }
+
+        return new ApiRouteNode(routePath, method, handler);
     }
     
     // Component parsing

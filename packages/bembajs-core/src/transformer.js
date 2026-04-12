@@ -54,15 +54,16 @@ class BembaTransformer {
     
     // Component transformation
     transformComponent(node) {
+        const hooks = node.hooks || [];
         const reactComponent = {
             type: 'ReactComponent',
             name: node.name,
             props: this.transformProps(node.props),
             state: this.transformState(node.state),
-            hooks: node.hooks.map(hook => this.transformHook(hook)),
-            lifecycle: this.transformLifecycle(node.lifecycle),
+            hooks: hooks.map(hook => this.transformHook(hook)),
+            lifecycle: this.transformLifecycle(node.lifecycle || {}),
             methods: this.transformMethods(node.methods),
-            render: this.transformRender(node.lifecycle.render)
+            render: this.transformRender(node.lifecycle && node.lifecycle.render)
         };
         
         return reactComponent;
@@ -154,10 +155,28 @@ class BembaTransformer {
     
     // Page transformation
     transformPage(node) {
+        let comp = node.component;
+        if (!comp) {
+            const rawName =
+                node.metadata && node.metadata.name != null && node.metadata.name !== '' ?
+                    String(node.metadata.name) :
+                    'Page';
+            const safeName = rawName.replace(/[^a-zA-Z0-9_$]/g, '_') || 'Page';
+            comp = {
+                type: 'Component',
+                name: safeName,
+                props: {},
+                state: {},
+                methods: {},
+                hooks: [],
+                lifecycle: {}
+            };
+        }
+
         const reactPage = {
             type: 'ReactPage',
             path: node.path,
-            component: this.transformComponent(node.component),
+            component: this.transformComponent(comp),
             dataFetching: node.dataFetching ? this.transformDataFetching(node.dataFetching) : null,
             isDynamic: node.isDynamic,
             metadata: node.metadata
@@ -168,11 +187,17 @@ class BembaTransformer {
     
     // API Route transformation
     transformApiRoute(node) {
+        const h = node.handler;
+        const handlerOut =
+            !h || typeof h !== 'object' ? h :
+            h.type === 'STRING' ? h :
+            this.transformNode(h);
+
         return {
             type: 'ApiHandler',
             path: node.path,
             method: node.method,
-            handler: this.transformNode(node.handler)
+            handler: handlerOut
         };
     }
     
