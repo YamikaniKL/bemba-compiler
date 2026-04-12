@@ -21,6 +21,11 @@ const { BEMBA_SYNTAX, BEMBA_FOLDERS } = require('./constants');
 const fs = require('fs');
 const path = require('path');
 
+/** For onclick="..." — HTML does not treat \\" as an escape; use entities so the handler stays valid. */
+function encodeJsForHtmlDoubleQuotedAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
 class BembaParser {
     constructor() {
         this.lexer = new BembaLexer();
@@ -1157,7 +1162,7 @@ class BembaParser {
                 const isSecondary = index > 0;
                 const buttonClass = isSecondary ? 'ibatani secondary' : 'ibatani';
                 html += `
-                <button class="${buttonClass}" onclick="${onClick}">${button.ilembo || 'Button'}</button>`;
+                <button class="${buttonClass}" onclick="${encodeJsForHtmlDoubleQuotedAttr(onClick)}">${button.ilembo || 'Button'}</button>`;
             });
         } else {
             html += `
@@ -1543,7 +1548,7 @@ class BembaParser {
             </ol>
             <div class="button-container">
                 ${buttons.map((button, index) => `
-                    <button type="button" class="ibatani ${index === 1 ? 'secondary' : ''}" onclick=${JSON.stringify(button.onClick)}>
+                    <button type="button" class="ibatani ${index === 1 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
                         ${escapeHtml(button.label)}
                     </button>
                 `).join('')}

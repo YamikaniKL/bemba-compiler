@@ -77,7 +77,8 @@ function renderLegacyDevButton(btnText, btnAction, index) {
         return `<a class="${buttonClass}" href="${escHref(href)}"${target}>${buttonContent}</a>`;
     }
 
-    return `<button type="button" class="${buttonClass}" onclick=${JSON.stringify(btnAction)}>${buttonContent}</button>`;
+    const enc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+    return `<button type="button" class="${buttonClass}" onclick="${enc(btnAction)}">${buttonContent}</button>`;
 }
 
 // Enhanced Bemba compiler for development server

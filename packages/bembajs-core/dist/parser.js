@@ -21,6 +21,11 @@ const { BEMBA_SYNTAX, BEMBA_FOLDERS } = require('./constants');
 const fs = require('fs');
 const path = require('path');
 
+/** For onclick="..." — HTML does not treat \\" as an escape; use entities so the handler stays valid. */
+function encodeJsForHtmlDoubleQuotedAttr(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
 class BembaParser {
     constructor() {
         this.lexer = new BembaLexer();
@@ -1157,7 +1162,7 @@ class BembaParser {
                 const isSecondary = index > 0;
                 const buttonClass = isSecondary ? 'ibatani secondary' : 'ibatani';
                 html += `
-                <button class="${buttonClass}" onclick="${onClick}">${button.ilembo || 'Button'}</button>`;
+                <button class="${buttonClass}" onclick="${encodeJsForHtmlDoubleQuotedAttr(onClick)}">${button.ilembo || 'Button'}</button>`;
             });
         } else {
             html += `
@@ -1238,22 +1243,53 @@ class BembaParser {
     
     extractButtonsFromNewSyntax(code) {
         const buttons = [];
-        
-        // Look for amabatani array in ifiputulwa
-        const buttonMatches = code.match(/amabatani:\s*\[([\s\S]*?)\]/);
-        if (buttonMatches) {
-            const buttonContent = buttonMatches[1];
-            const buttonRegex = /\{\s*ilembo:\s*["']([^"']+)["']\s*,\s*pakuKlikisha:\s*["']([^"']+)["']\s*\}/g;
-            let match;
-            
-            while ((match = buttonRegex.exec(buttonContent)) !== null) {
-                buttons.push({
-                    label: match[1],
-                    onClick: match[2]
-                });
+
+        // Look for amabatani array in ifiputulwa (match full bracket span)
+        const start = code.search(/amabatani:\s*\[/);
+        if (start === -1) return buttons;
+        const openBracket = code.indexOf('[', start);
+        if (openBracket === -1) return buttons;
+        let depth = 0;
+        let i = openBracket;
+        for (; i < code.length; i++) {
+            const c = code[i];
+            if (c === '[') depth++;
+            else if (c === ']') {
+                depth--;
+                if (depth === 0) {
+                    i++;
+                    break;
+                }
             }
         }
-        
+        const buttonContent = code.slice(openBracket + 1, i - 1);
+
+        // pakuKlikisha may contain the other quote kind, e.g. 'londolola("hi")'
+        const btnBlock = /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*pakuKlikisha:\s*(["'])/g;
+        let m;
+        while ((m = btnBlock.exec(buttonContent)) !== null) {
+            const label = m[2];
+            const q = m[3];
+            const valueStart = m.index + m[0].length;
+            let j = valueStart;
+            let out = '';
+            while (j < buttonContent.length) {
+                const ch = buttonContent[j];
+                if (ch === '\\' && j + 1 < buttonContent.length) {
+                    out += ch + buttonContent[j + 1];
+                    j += 2;
+                    continue;
+                }
+                if (ch === q) break;
+                out += ch;
+                j++;
+            }
+            buttons.push({ label, onClick: out });
+            let k = j + 1;
+            while (k < buttonContent.length && buttonContent[k] !== '}') k++;
+            btnBlock.lastIndex = k < buttonContent.length ? k + 1 : buttonContent.length;
+        }
+
         return buttons;
     }
     
@@ -1263,20 +1299,39 @@ class BembaParser {
     }
     
     generateModernLayout(appName, sections, styles) {
+        const escapeHtml = (s) => {
+            if (s == null || s === '') return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        };
+
         // Use the same modern layout generation as compileOldSyntax
         const defaultButtons = [
             { label: 'Deploy now', onClick: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")' },
             { label: 'Read our docs', onClick: 'window.open("https://bembajs.dev/docs", "_blank")' }
         ];
         
-        const buttons = sections.length > 0 && sections[0].buttons ? sections[0].buttons : defaultButtons;
+        const buttons = sections.length > 0 && sections[0].buttons && sections[0].buttons.length > 0
+            ? sections[0].buttons
+            : defaultButtons;
+
+        const s0 = sections.length > 0 ? sections[0] : null;
+        const docTitle = (s0 && s0.title) ? s0.title : appName;
+        const olInner = s0 && (s0.title || s0.content)
+            ? `<li>${escapeHtml(s0.title || '')}</li>
+                <li>${escapeHtml(s0.content || '')}</li>`
+            : `<li>Get started by editing <code>app/page.bemba</code>.</li>
+                <li>Save and see your changes instantly.</li>`;
         
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${appName}</title>
+    <title>${escapeHtml(docTitle)}</title>
     <style>
         * {
             box-sizing: border-box;
@@ -1489,13 +1544,12 @@ class BembaParser {
         <main>
             <div class="bemba-logo">BembaJS</div>
             <ol>
-                <li>Get started by editing <code>app/page.bemba</code>.</li>
-                <li>Save and see your changes instantly.</li>
+                ${olInner}
             </ol>
             <div class="button-container">
                 ${buttons.map((button, index) => `
-                    <button class="ibatani ${index === 1 ? 'secondary' : ''}" onclick="${button.onClick}">
-                        ${button.label}
+                    <button type="button" class="ibatani ${index === 1 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
+                        ${escapeHtml(button.label)}
                     </button>
                 `).join('')}
             </div>
