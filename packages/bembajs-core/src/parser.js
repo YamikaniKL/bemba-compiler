@@ -1259,11 +1259,13 @@ class BembaParser {
         const appName = this.extractAppNameFromNewSyntax(code);
         const sections = this.extractSectionsFromNewSyntax(code);
         const styles = this.extractStylesFromNewSyntax(code);
-        const siteName = this.extractSiteNameFromNewSyntax(code);
-        const navLinks = this.extractNavLinksFromNewSyntax(code);
-        const footerTagline = this.extractFooterTaglineFromNewSyntax(code);
+        const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
+        const siteName = siteLayout ? this.extractSiteNameFromNewSyntax(code) : '';
+        const navLinks = siteLayout ? this.extractNavLinksFromNewSyntax(code) : [];
+        const footerTagline = siteLayout ? this.extractFooterTaglineFromNewSyntax(code) : '';
 
         return this.generateModernLayout(appName, sections, styles, {
+            siteLayout,
             siteName,
             navLinks,
             footerTagline
@@ -1352,21 +1354,29 @@ class BembaParser {
         return q ? q[1] : '';
     }
 
-    /** Optional site title shown in the top navbar (e.g. ishinaLyasite: 'My Demo'). */
+    /**
+     * Full site chrome (navbar, flat hero, footer bar) is opt-in so the compiler default stays minimal.
+     * Use icapaba: 'site' in pangaIpepa — then ishinaLyasite, amalinkiNav, ilyashiWaFuti apply.
+     */
+    extractSiteLayoutFromNewSyntax(code) {
+        return /icapaba:\s*['"]site['"]/.test(code) || /icapaba:\s*site\b/.test(code);
+    }
+
+    /** Optional site title shown in the top navbar (e.g. ishinaLyasite: 'My Demo'). Site layout only. */
     extractSiteNameFromNewSyntax(code) {
         const m = code.match(/ishinaLyasite:\s*["']([^"']*)["']/);
         return m ? m[1].trim() : '';
     }
 
-    /** Optional footer line under main content (e.g. copyright). */
+    /** Optional footer line (e.g. copyright). Site layout only. */
     extractFooterTaglineFromNewSyntax(code) {
         const m = code.match(/ilyashiWaFuti:\s*["']([^"']*)["']/);
         return m ? m[1] : '';
     }
 
     /**
-     * Optional navbar links: amalinkiNav: [ { ilembo: 'Home', indashi: '/' }, ... ]
-     * `indashi` is the path (href), e.g. /about
+     * Navbar links when using site layout (icapaba: 'site'):
+     * amalinkiNav: [ { ilembo: 'Home', indashi: '/' }, ... ]
      */
     extractArrayBlockAfterKey(code, key) {
         const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1410,7 +1420,12 @@ class BembaParser {
     }
     
     generateModernLayout(appName, sections, styles, layoutOpts = {}) {
-        const { siteName = '', navLinks = [], footerTagline = '' } = layoutOpts;
+        const {
+            siteLayout = false,
+            siteName = '',
+            navLinks = [],
+            footerTagline = ''
+        } = layoutOpts;
         const escapeHtml = (s) => {
             if (s == null || s === '') return '';
             return String(s)
@@ -1440,30 +1455,31 @@ class BembaParser {
             leadHtml = `<p class="page-lead">Get started by editing <code>amapeji/index.bemba</code>. Save the file and refresh this page.</p>`;
         }
 
-        const brandName = siteName || 'BembaJS';
-        const showInnerBrand = navLinks.length === 0;
-        const navBlock =
-            navLinks.length > 0
-                ? `<header class="site-header">
-    <div class="site-header-inner">
-        <a href="/" class="nav-brand">${escapeHtml(brandName)}</a>
-        <nav class="site-nav" aria-label="Main">
-            ${navLinks
-                .map(
-                    (l) =>
-                        `<a href="${escapeHtml(l.href)}" class="nav-link">${escapeHtml(l.label)}</a>`
-                )
-                .join('')}
-        </nav>
-    </div>
-</header>`
-                : '';
-        const footerLead =
-            footerTagline && String(footerTagline).trim()
-                ? `<p class="footer-tagline">${escapeHtml(String(footerTagline).trim())}</p>`
-                : '';
+        const buttonHtml = buttons
+            .map(
+                (button, index) => `
+                    <button type="button" class="ibatani ${index > 0 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
+                        ${escapeHtml(button.label)}
+                    </button>`
+            )
+            .join('');
 
-        return `<!DOCTYPE html>
+        const footerAnchors = `
+            <a href="https://bembajs.dev" class="footer-link" target="_blank" rel="noopener noreferrer">
+                <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                </svg>
+                BembaJS
+            </a>
+            <a href="https://github.com/bembajs/bembajs" class="footer-link" target="_blank" rel="noopener noreferrer">
+                <svg class="footer-icon" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+                GitHub
+            </a>`;
+
+        if (!siteLayout) {
+            return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1499,8 +1515,6 @@ class BembaParser {
         body {
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
             background: var(--bg);
             color: var(--text);
@@ -1508,71 +1522,12 @@ class BembaParser {
             -webkit-font-smoothing: antialiased;
         }
 
-        .page-wrap {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-height: 0;
-        }
-
-        .layout-grid {
-            flex: 1;
+        .grid {
+            min-height: 100vh;
             display: grid;
             grid-template-rows: 1fr auto;
             padding: clamp(1.25rem, 4vw, 2.5rem);
             gap: 2rem;
-            min-height: 0;
-        }
-
-        .site-header {
-            flex-shrink: 0;
-            border-bottom: 1px solid var(--border);
-            background: color-mix(in srgb, var(--surface) 90%, transparent);
-            backdrop-filter: blur(10px);
-        }
-
-        .site-header-inner {
-            max-width: 56rem;
-            margin: 0 auto;
-            padding: 0.65rem clamp(1rem, 4vw, 1.5rem);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .nav-brand {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: var(--text);
-            text-decoration: none;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-brand:hover {
-            color: var(--accent);
-        }
-
-        .site-nav {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem 0.5rem;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .nav-link {
-            font-size: 0.8125rem;
-            font-weight: 600;
-            color: var(--muted);
-            text-decoration: none;
-            padding: 0.4rem 0.65rem;
-            border-radius: 0.375rem;
-        }
-
-        .nav-link:hover {
-            color: var(--text);
-            background: color-mix(in srgb, var(--text) 6%, transparent);
         }
 
         main {
@@ -1685,24 +1640,333 @@ class BembaParser {
 
         footer {
             display: flex;
+            flex-wrap: wrap;
+            gap: 1.25rem;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 0.5rem;
+        }
+
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .footer-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        ${styles}
+    </style>
+</head>
+<body class="antialiased">
+    <div class="grid">
+        <main>
+            <div class="shell">
+                <div class="brand" aria-hidden="true">
+                    <span class="brand-mark"></span>
+                    <span class="brand-name">BembaJS</span>
+                </div>
+                <section class="hero" aria-labelledby="page-heading">
+                    <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
+                    ${leadHtml}
+                </section>
+                <div class="button-container">${buttonHtml}</div>
+            </div>
+        </main>
+        <footer>${footerAnchors}</footer>
+    </div>
+    <script>
+        function londolola(message) {
+            alert(message);
+        }
+        function pangaIpepa(title, content) {
+            console.log('Page:', title, content);
+        }
+        function fyambaIcipanda(name, props) {
+            console.log('Component:', name, props);
+        }
+    </script>
+</body>
+</html>`;
+        }
+
+        const brandName = siteName || 'BembaJS';
+        const showInnerBrand = navLinks.length === 0;
+        const navBlock =
+            navLinks.length > 0
+                ? `<header class="site-header">
+    <div class="site-header-inner">
+        <a href="/" class="nav-brand">${escapeHtml(brandName)}</a>
+        <nav class="site-nav" aria-label="Main">
+            ${navLinks
+                .map(
+                    (l) =>
+                        `<a href="${escapeHtml(l.href)}" class="nav-link">${escapeHtml(l.label)}</a>`
+                )
+                .join('')}
+        </nav>
+    </div>
+</header>`
+                : '';
+        const footerLead =
+            footerTagline && String(footerTagline).trim()
+                ? `<p class="footer-tagline">${escapeHtml(String(footerTagline).trim())}</p>`
+                : '';
+
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${escapeHtml(docTitle)}</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #f4f4f5;
+            --surface: #ffffff;
+            --text: #18181b;
+            --muted: #71717a;
+            --border: rgba(24, 24, 27, 0.12);
+            --accent: #3b2e8c;
+            --accent-hover: #2d2269;
+            --shadow: 0 1px 3px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.04);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #09090b;
+                --surface: #18181b;
+                --text: #fafafa;
+                --muted: #a1a1aa;
+                --border: rgba(250, 250, 250, 0.12);
+                --accent: #8b7ce8;
+                --accent-hover: #a89df0;
+                --shadow: 0 1px 3px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.35);
+            }
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .page-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 0;
+            padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2rem);
+        }
+
+        .site-header {
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface) 90%, transparent);
+            backdrop-filter: blur(10px);
+        }
+
+        .site-header-inner {
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 0.65rem clamp(1rem, 4vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-brand:hover {
+            color: var(--accent);
+        }
+
+        .site-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem 0.5rem;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .nav-link {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            padding: 0.4rem 0.65rem;
+            border-radius: 0.375rem;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            background: color-mix(in srgb, var(--text) 6%, transparent);
+        }
+
+        .hero-section {
+            width: 100%;
+            max-width: 40rem;
+            text-align: left;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .brand-mark {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #c026d3 100%);
+            box-shadow: 0 2px 8px rgba(59, 46, 140, 0.35);
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .page-title {
+            margin: 0 0 0.85rem;
+            font-size: clamp(2rem, 5vw, 2.75rem);
+            font-weight: 700;
+            letter-spacing: -0.035em;
+            line-height: 1.15;
+            color: var(--text);
+        }
+
+        .page-lead {
+            margin: 0;
+            font-size: 1.0625rem;
+            color: var(--muted);
+            max-width: 36rem;
+            line-height: 1.65;
+        }
+
+        .page-lead code {
+            font-size: 0.875em;
+        }
+
+        code {
+            font-family: ui-monospace, "Cascadia Code", "SF Mono", Monaco, Consolas, monospace;
+            background: color-mix(in srgb, var(--text) 6%, transparent);
+            padding: 0.15em 0.4em;
+            border-radius: 0.35rem;
+            font-weight: 500;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 1.75rem;
+        }
+
+        .ibatani {
+            border-radius: 9999px;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 2.75rem;
+            padding: 0 1.15rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .ibatani:hover {
+            background: var(--accent-hover);
+        }
+
+        .ibatani:active {
+            transform: scale(0.98);
+        }
+
+        .ibatani.secondary {
+            background: transparent;
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .ibatani.secondary:hover {
+            background: color-mix(in srgb, var(--text) 6%, transparent);
+        }
+
+        .site-footer {
+            flex-shrink: 0;
+            margin-top: auto;
+            border-top: 1px solid var(--border);
+            background: color-mix(in srgb, var(--surface) 75%, var(--bg));
+            padding: 1.25rem clamp(1.25rem, 4vw, 2rem) 1.75rem;
+        }
+
+        .site-footer-inner {
+            max-width: 56rem;
+            margin: 0 auto;
+            display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.75rem;
-            padding-bottom: 0.5rem;
+            gap: 1rem;
+            text-align: center;
         }
 
         .footer-tagline {
             margin: 0;
             font-size: 0.8125rem;
             color: var(--muted);
-            text-align: center;
-            max-width: 40rem;
+            line-height: 1.5;
+            max-width: 42rem;
         }
 
         .footer-links {
             display: flex;
             flex-wrap: wrap;
-            gap: 1.25rem;
+            gap: 1rem 1.5rem;
             align-items: center;
             justify-content: center;
         }
@@ -1734,48 +1998,27 @@ class BembaParser {
 <body class="antialiased">
 ${navBlock}
 <div class="page-wrap">
-    <div class="layout-grid">
-        <main>
-            <div class="shell">
-                ${
-                    showInnerBrand
-                        ? `<div class="brand" aria-hidden="true">
-                    <span class="brand-mark"></span>
-                    <span class="brand-name">${escapeHtml(brandName)}</span>
-                </div>`
-                        : ''
-                }
-                <section class="hero" aria-labelledby="page-heading">
-                    <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
-                    ${leadHtml}
-                </section>
-                <div class="button-container">
-                ${buttons.map((button, index) => `
-                    <button type="button" class="ibatani ${index > 0 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
-                        ${escapeHtml(button.label)}
-                    </button>
-                `).join('')}
-                </div>
-            </div>
-        </main>
-        <footer>
+    <main class="page-main">
+        <section class="hero-section" aria-labelledby="page-heading">
+            ${
+                showInnerBrand
+                    ? `<div class="brand" aria-hidden="true">
+                <span class="brand-mark"></span>
+                <span class="brand-name">${escapeHtml(brandName)}</span>
+            </div>`
+                    : ''
+            }
+            <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
+            ${leadHtml}
+            <div class="button-container">${buttonHtml}</div>
+        </section>
+    </main>
+    <footer class="site-footer">
+        <div class="site-footer-inner">
             ${footerLead}
-            <div class="footer-links">
-            <a href="https://bembajs.dev" class="footer-link" target="_blank" rel="noopener noreferrer">
-                <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                </svg>
-                BembaJS
-            </a>
-            <a href="https://github.com/bembajs/bembajs" class="footer-link" target="_blank" rel="noopener noreferrer">
-                <svg class="footer-icon" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                </svg>
-                GitHub
-            </a>
-            </div>
-        </footer>
-    </div>
+            <div class="footer-links">${footerAnchors}</div>
+        </div>
+    </footer>
 </div>
     <script>
         // BembaJS runtime functions
