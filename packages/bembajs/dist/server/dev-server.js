@@ -9,8 +9,90 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 
+let coreCompile = null;
+try {
+    coreCompile = require('bembajs-core').compile;
+} catch (_) {
+    /* bembajs-core may be unavailable in some installs */
+}
+
+function isHtmlString(str) {
+    if (typeof str !== 'string') return false;
+    const t = str.trimStart();
+    return t.startsWith('<!DOCTYPE') || t.startsWith('<html');
+}
+
+/** Slice inner content of the first `key: [ ... ]` array with proper bracket depth. */
+function sliceBracketArray(source, key) {
+    const re = new RegExp(`\\b${key}:\\s*\\[`);
+    const km = source.match(re);
+    if (!km) return null;
+    const openBracket = source.indexOf('[', km.index);
+    if (openBracket === -1) return null;
+    let depth = 0;
+    for (let i = openBracket; i < source.length; i++) {
+        const c = source[i];
+        if (c === '[') depth++;
+        else if (c === ']') {
+            depth--;
+            if (depth === 0) {
+                return source.slice(openBracket + 1, i);
+            }
+        }
+    }
+    return null;
+}
+
+/** Legacy dev-server button: same-tab for in-app routes; no forced _blank for window.location. */
+function renderLegacyDevButton(btnText, btnAction, index) {
+    const isPrimary = index === 0;
+    const buttonClass = isPrimary
+        ? 'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:min-w-[158px] whitespace-nowrap'
+        : 'flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-6 py-3 text-sm font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:w-auto sm:min-w-[158px] whitespace-nowrap';
+    const vercelIcon = '<svg width="20" height="20" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark:invert"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor"/></svg>';
+    const buttonContent = isPrimary ? `${vercelIcon}<span>${btnText}</span>` : `<span>${btnText}</span>`;
+    const escHref = (u) => String(u).replace(/"/g, '&quot;');
+
+    let href = null;
+    let openNewTab = false;
+
+    const locAssign =
+        btnAction.match(/window\.location\.href\s*=\s*["']([^"']+)["']/) ||
+        btnAction.match(/window\.location\.href\s*=\s*`([^`]+)`/) ||
+        btnAction.match(/window\.location\.assign\s*\(\s*["']([^"']+)["']\s*\)/);
+
+    if (locAssign) {
+        href = locAssign[1];
+    } else if (btnAction.includes('window.open(')) {
+        const urlMatch = btnAction.match(/window\.open\s*\(\s*["']([^"']+)["']/);
+        if (urlMatch) {
+            href = urlMatch[1];
+            openNewTab = /\b_blank\b/.test(btnAction) || /^https?:\/\//i.test(href);
+        }
+    }
+
+    if (href && !/^javascript:/i.test(href) && !/^data:/i.test(href)) {
+        const external = /^https?:\/\//i.test(href);
+        const target = external && openNewTab ? ' target="_blank" rel="noopener noreferrer"' : '';
+        return `<a class="${buttonClass}" href="${escHref(href)}"${target}>${buttonContent}</a>`;
+    }
+
+    return `<button type="button" class="${buttonClass}" onclick=${JSON.stringify(btnAction)}>${buttonContent}</button>`;
+}
+
 // Enhanced Bemba compiler for development server
 function compileBemba(code) {
+    try {
+        if (typeof coreCompile === 'function') {
+            const result = coreCompile(code, { legacyFallback: true });
+            if (result && result.success && isHtmlString(result.code)) {
+                return result.code;
+            }
+        }
+    } catch (_) {
+        /* fall through to legacy template compiler */
+    }
+
     try {
         // Basic Bemba to HTML compilation
         if (code.includes('pangaIpepa')) {
@@ -31,9 +113,8 @@ function compileBemba(code) {
                 let sections = '';
                 let sectionSteps = '';
                 
-                const sectionsMatch = pageData.match(/ifiputulwa:\s*\[([\s\S]*?)\]/);
-                if (sectionsMatch) {
-                    const sectionsData = sectionsMatch[1];
+                const sectionsData = sliceBracketArray(pageData, 'ifiputulwa');
+                if (sectionsData) {
                     
                     // Extract amalembelo (steps) array
                     const stepsMatch = sectionsData.match(/amalembelo:\s*\[([\s\S]*?)\]/);
@@ -98,32 +179,10 @@ function compileBemba(code) {
                     if (buttonMatches) {
                         sections = buttonMatches.map((btn, index) => {
                             const btnText = btn.match(/['"`]([^'"`]+)['"`]/)[1];
-                            const btnAction = buttonActions && buttonActions[index] ? 
-                                buttonActions[index] : 
+                            const btnAction = buttonActions && buttonActions[index] ?
+                                buttonActions[index] :
                                 `alert('${btnText} clicked!')`;
-                            
-                            // Extract URL from window.open("URL", "_blank") pattern
-                            let href = '#';
-                            if (btnAction.includes('window.open(')) {
-                                const urlMatch = btnAction.match(/window\.open\(['"`]([^'"`]+)['"`]/);
-                                if (urlMatch) {
-                                    href = urlMatch[1];
-                                }
-                            }
-                            
-                            // First button is primary (Deploy Now), second is secondary (Documentation)
-                            const isPrimary = index === 0;
-                            const buttonClass = isPrimary ? 
-                                'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:min-w-[158px] whitespace-nowrap' :
-                                'flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-6 py-3 text-sm font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:w-auto sm:min-w-[158px] whitespace-nowrap';
-                            
-                            const vercelIcon = `<svg width="20" height="20" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark:invert"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor"/></svg>`;
-                            
-                            const buttonContent = isPrimary ? 
-                                `${vercelIcon}<span>${btnText}</span>` :
-                                `<span>${btnText}</span>`;
-                            
-                            return `<a class="${buttonClass}" href="${href}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
+                            return renderLegacyDevButton(btnText, btnAction, index);
                         }).join('');
                     }
                 }
