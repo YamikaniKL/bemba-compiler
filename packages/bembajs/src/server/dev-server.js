@@ -26,11 +26,11 @@ function isHtmlString(str) {
 }
 
 /** Full AST compile returns JS; browser preview needs HTML for simple pangaIpepa pages. */
-function compilePangaIpepaHtmlViaParser(code) {
+function compilePangaIpepaHtmlViaParser(code, compileOpts = {}) {
     if (!BembaParserClass || !code.includes('pangaIpepa')) return null;
     try {
         const parser = new BembaParserClass();
-        const html = parser.compile(code, {});
+        const html = parser.compile(code, compileOpts);
         return isHtmlString(html) ? html : null;
     } catch (_) {
         return null;
@@ -98,10 +98,10 @@ function renderLegacyDevButton(btnText, btnAction, index) {
  * Compile .bemba to HTML for the dev server preview.
  * Parser HTML first for pangaIpepa (matches bembajs-core layout); no Tailwind CDN.
  */
-function compileBembaToHtml(code) {
+function compileBembaToHtml(code, compileOpts = {}) {
     try {
         if (code.includes('pangaIpepa')) {
-            const parserHtml = compilePangaIpepaHtmlViaParser(code);
+            const parserHtml = compilePangaIpepaHtmlViaParser(code, compileOpts);
             if (parserHtml) {
                 return parserHtml;
             }
@@ -469,8 +469,13 @@ class BembaDevServer {
         return html.replace('</body>', `${snippet}</body>`);
     }
 
-    compileBemba(code) {
-        return this.wrapDevHtml(compileBembaToHtml(code));
+    compileBemba(code, currentPath = '/') {
+        return this.wrapDevHtml(
+            compileBembaToHtml(code, {
+                projectRoot: this.projectRoot,
+                currentPath: currentPath || '/'
+            })
+        );
     }
 
     sendNoCacheHtml(res, html) {
@@ -580,7 +585,11 @@ class BembaDevServer {
                     return res.status(400).json({ error: 'No code provided' });
                 }
 
-                const result = compileBembaToHtml(code);
+                const currentPath = typeof req.body?.currentPath === 'string' ? req.body.currentPath : '/';
+                const result = compileBembaToHtml(code, {
+                    projectRoot: this.projectRoot,
+                    currentPath
+                });
                 res.json({ 
                     success: true, 
                     result: result,
@@ -620,12 +629,20 @@ class BembaDevServer {
         // Serve pages from amapeji/ directory
         this.app.get('/:page', (req, res) => {
             const pageName = req.params.page;
+            if (pageName === 'umusango') {
+                return res
+                    .status(404)
+                    .type('html')
+                    .send(
+                        '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Not a page</title></head><body><p><code>umusango.bemba</code> is the shared site shell (navbar and footer). Open <a href="/">/</a> or another route.</p></body></html>'
+                    );
+            }
             const pagePath = path.join(this.projectRoot, 'amapeji', `${pageName}.bemba`);
             
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = this.compileBemba(code);
+                    const html = this.compileBemba(code, req.path);
                     this.sendNoCacheHtml(res, html);
                 } catch (error) {
                     res.status(500).send(`Error compiling page: ${error.message}`);
@@ -666,7 +683,7 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = this.compileBemba(code);
+                const html = this.compileBemba(code, '/');
                 this.sendNoCacheHtml(res, html);
             } catch (error) {
                 res.status(500).send(`Error compiling home page: ${error.message}`);

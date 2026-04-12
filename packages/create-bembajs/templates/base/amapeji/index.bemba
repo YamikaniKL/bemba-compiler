@@ -1,5 +1,6 @@
 // Home page - Main entry point with new centered layout
 pangaIpepa('Home', {
+    umusangoSite: ee,
     umutwe: 'Panga BembaJS App',
     ilyashi: 'Yapangwa na create bembajs app',
     

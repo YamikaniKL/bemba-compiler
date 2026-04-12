@@ -26,6 +26,47 @@
     ],
     "description": "Create a new BembaJS page"
   },
+  "Site layout page": {
+    "prefix": "pangaIpepaSite",
+    "body": [
+      "pangaIpepa('${1:Page Name}', {",
+      "    umusangoSite: ee,",
+      "    umutwe: '${2:Hero title}',",
+      "    ilyashi: '${3:Hero subtitle}',",
+      "    ",
+      "    ifiputulwa: [",
+      "        {",
+      "            umutwe: '${4:Section title}',",
+      "            ilyashi: '${5:Section body}',",
+      "            amabatani: [",
+      "                {",
+      "                    ilembo: '${6:Button}',",
+      "                    pakuKlikisha: 'londolola(\"${7:Action}\")'",
+      "                }",
+      "            ]",
+      "        }",
+      "    ],",
+      "    ",
+      "    imikalile: `",
+      "        ${8:// Per-page styles (shared nav/footer: amapeji/umusango.bemba)}",
+      "    `",
+      "});"
+    ],
+    "description": "Site page (shell from amapeji/umusango.bemba)"
+  },
+  "Site shell file": {
+    "prefix": "pangaUmusango",
+    "body": [
+      "pangaUmusango({",
+      "    ishinaLyabusite: '${1:Site name}',",
+      "    ilyashiPaMusule: '${2:Footer tagline}',",
+      "    inshilaNav: [",
+      "        { ilembo: '${3:Home}', inshila: '/' }",
+      "    ]",
+      "});"
+    ],
+    "description": "Shared navbar + footer (amapeji/umusango.bemba)"
+  },
   "Component Creation": {
     "prefix": "fyambaIcipanda",
     "body": [

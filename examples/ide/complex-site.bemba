@@ -1,5 +1,13 @@
-// Complex Website Example - Multi-section site
+// Complex Website Example - Multi-section site (umusangoSite = full chrome: nav, hero banner, footer)
 pangaIpepa('Complex Website', {
+    umusangoSite: ee,
+    ishinaLyabusite: 'BembaJS Platform',
+    ilyashiPaMusule: '© BembaJS — built in Bemba',
+    inshilaNav: [
+        { ilembo: 'Home', inshila: '/' },
+        { ilembo: 'Start', inshila: '#start' },
+        { ilembo: 'Learn', inshila: '#learn' },
+    ],
     umutwe: '🚀 Welcome to Our Platform',
     ilyashi: 'Build amazing applications with BembaJS. Fast, modern, and in your native language.',
     

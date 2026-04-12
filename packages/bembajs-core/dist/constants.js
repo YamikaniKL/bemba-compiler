@@ -9,6 +9,12 @@ const BEMBA_FOLDERS = {
     CONFIG: 'bemba.config.js'  // Framework configuration
 };
 
+/** Reserved filenames (inside folder paths like amapeji/). */
+const BEMBA_FILES = {
+    /** Shared navbar + footer + optional shell CSS; merged when a page uses umusangoSite: ee. */
+    SITE_SHELL: 'umusango.bemba'
+};
+
 // Bemba file extensions
 const BEMBA_EXTENSIONS = {
     COMPONENT: '.bemba',
@@ -23,6 +29,7 @@ const BEMBA_SYNTAX = {
     // Component definition
     COMPONENT_DEF: 'fyambaIcipanda',
     PAGE_DEF: 'pangaIpepa',
+    SITE_SHELL_DEF: 'pangaUmusango',
     
     // Component properties
     PROPS: 'ifyapangwa',
@@ -109,6 +116,7 @@ const DEFAULT_CONFIG = {
 
 module.exports = {
     BEMBA_FOLDERS,
+    BEMBA_FILES,
     BEMBA_EXTENSIONS,
     BEMBA_SYNTAX,
     DEFAULT_CONFIG

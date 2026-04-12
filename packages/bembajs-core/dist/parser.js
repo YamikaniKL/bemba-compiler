@@ -17,13 +17,35 @@ const {
     ExportNode,
     ASTUtils
 } = require('./ast');
-const { BEMBA_SYNTAX, BEMBA_FOLDERS } = require('./constants');
+const { BEMBA_SYNTAX, BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
 const fs = require('fs');
 const path = require('path');
 
 /** For onclick="..." — HTML does not treat \\" as an escape; use entities so the handler stays valid. */
 function encodeJsForHtmlDoubleQuotedAttr(s) {
     return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+}
+
+function normalizeNavPath(p) {
+    if (p == null || p === '') return '/';
+    let x = String(p).trim();
+    const qi = x.indexOf('?');
+    if (qi >= 0) x = x.slice(0, qi);
+    const hi = x.indexOf('#');
+    if (hi >= 0) x = x.slice(0, hi);
+    if (x.length > 1 && x.endsWith('/')) x = x.slice(0, -1);
+    return x === '' ? '/' : x;
+}
+
+/** True when this nav item should show as the current page (path routes only; not #anchors). */
+function navHrefIsActive(href, currentPath) {
+    const h = String(href || '').trim();
+    if (!h || h.startsWith('#')) return false;
+    if (/^https?:\/\//i.test(h)) return false;
+    const c = normalizeNavPath(currentPath);
+    const hn = normalizeNavPath(h);
+    if (hn === '/' || hn === '') return c === '/' || c === '';
+    return c === hn;
 }
 
 class BembaParser {
@@ -959,14 +981,14 @@ class BembaParser {
     }
     
     // Backward compatibility method for old syntax
-    compile(code) {
+    compile(code, options = {}) {
         try {
             // Simple compilation for pangaWebusaiti syntax
             if (code.includes('pangaWebusaiti')) {
                 return this.compileOldSyntax(code);
             } else {
                 // For new syntax, use the full pipeline
-                return this.compileNewSyntax(code);
+                return this.compileNewSyntax(code, options);
             }
         } catch (error) {
             throw new Error(`Compilation error: ${error.message}`);
@@ -1254,24 +1276,40 @@ class BembaParser {
         return html;
     }
     
-    compileNewSyntax(code) {
-        // Extract page configuration from pangaIpepa syntax
+    compileNewSyntax(code, options = {}) {
+        const projectRoot = options.projectRoot;
+        let layoutCode = options.layoutCode;
+        if (layoutCode == null && projectRoot) {
+            const layoutPath = path.join(projectRoot, BEMBA_FOLDERS.PAGES, BEMBA_FILES.SITE_SHELL);
+            if (fs.existsSync(layoutPath)) {
+                layoutCode = fs.readFileSync(layoutPath, 'utf8');
+            }
+        }
+
+        const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
+        const useSharedShell = Boolean(siteLayout && layoutCode);
+        const shellSource = useSharedShell ? layoutCode : code;
+
+        const siteName = siteLayout ? this.extractSiteNameFromNewSyntax(shellSource) : '';
+        const navLinks = siteLayout ? this.extractNavLinksFromNewSyntax(shellSource) : [];
+        const footerTagline = siteLayout ? this.extractFooterTaglineFromNewSyntax(shellSource) : '';
+
+        const pageStyles = this.extractStylesFromNewSyntax(code);
+        const layoutStyles = useSharedShell ? this.extractStylesFromNewSyntax(layoutCode) : '';
+        const styles = [layoutStyles, pageStyles].filter(Boolean).join('\n\n');
+
         const appName = this.extractAppNameFromNewSyntax(code);
         const sections = this.extractSectionsFromNewSyntax(code, appName);
-        const styles = this.extractStylesFromNewSyntax(code);
-        const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
-        const siteName = siteLayout ? this.extractSiteNameFromNewSyntax(code) : '';
-        const navLinks = siteLayout ? this.extractNavLinksFromNewSyntax(code) : [];
-        const footerTagline = siteLayout ? this.extractFooterTaglineFromNewSyntax(code) : '';
-
         const bodyBlocks = this.extractIfiputulwaBlocks(code);
+        const activePath = options.currentPath != null ? String(options.currentPath) : '';
 
         return this.generateModernLayout(appName, sections, styles, {
             siteLayout,
             siteName,
             navLinks,
             footerTagline,
-            bodyBlocks
+            bodyBlocks,
+            activePath
         });
     }
     
@@ -1541,7 +1579,8 @@ class BembaParser {
             siteName = '',
             navLinks = [],
             footerTagline = '',
-            bodyBlocks = []
+            bodyBlocks = [],
+            activePath = ''
         } = layoutOpts;
         const escapeHtml = (s) => {
             if (s == null || s === '') return '';
@@ -1893,10 +1932,12 @@ class BembaParser {
         <a href="/" class="nav-brand">${escapeHtml(brandName)}</a>
         <nav class="site-nav" aria-label="Main">
             ${navLinks
-                .map(
-                    (l) =>
-                        `<a href="${escapeHtml(l.href)}" class="nav-link">${escapeHtml(l.label)}</a>`
-                )
+                .map((l) => {
+                    const active = navHrefIsActive(l.href, activePath);
+                    const cls = active ? 'nav-link is-active' : 'nav-link';
+                    const cur = active ? ' aria-current="page"' : '';
+                    return `<a href="${escapeHtml(l.href)}" class="${cls}"${cur}>${escapeHtml(l.label)}</a>`;
+                })
                 .join('')}
         </nav>
     </div>
@@ -2021,6 +2062,12 @@ class BembaParser {
         .nav-link:hover {
             color: var(--text);
             background: color-mix(in srgb, var(--text) 6%, transparent);
+        }
+
+        .nav-link.is-active {
+            color: var(--text);
+            background: color-mix(in srgb, var(--accent) 14%, transparent);
+            font-weight: 650;
         }
 
         .hero-banner {

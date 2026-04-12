@@ -105,7 +105,7 @@
         },
         {
           "name": "keyword.other.bemba",
-          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|imikalile|ifikopo|maapi|amapeji|maungu|mafungulo|mautils|mahooks|macontext|amalembelo|inputs|forms|selects|checkboxes|radios)\\b"
+          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|imikalile|umusangoSite|ishinaLyabusite|ilyashiPaMusule|inshilaNav|inshila|ifikopo|maapi|amapeji|maungu|mafungulo|mautils|mahooks|macontext|amalembelo|inputs|forms|selects|checkboxes|radios)\\b"
         }
       ]
     },
@@ -113,7 +113,7 @@
       "patterns": [
         {
           "name": "entity.name.function.bemba",
-          "match": "\\b(londolola|londololaError|londololaWarning|ukuPima|ukuPindula|ukuGawanya|ukuSanganya|ukuOnjela|ukuCotola|ukuSankha|ukuBalisha|ukuCepula|ukuCilisha|panga|fyamba|akha|tungulula|fumya|lint|format|test)\\b"
+          "match": "\\b(londolola|londololaError|londololaWarning|ukuPima|ukuPindula|ukuGawanya|ukuSanganya|ukuOnjela|ukuCotola|ukuSankha|ukuBalisha|ukuCepula|ukuCilisha|panga|pangaUmusango|fyamba|akha|tungulula|fumya|lint|format|test)\\b"
         }
       ]
     },
@@ -121,7 +121,7 @@
       "patterns": [
         {
           "name": "variable.other.property.bemba",
-          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|pakuKlikisha|imikalile|method|handler|target|output|port|host|hotReload|openBrowser|apiPort|ssg|ssr|optimize|routing|apiRoutes|components|hooks|context|styling)\\b"
+          "match": "\\b(umutwe|ilyashi|ifiputulwa|amabatani|ilembo|pakuKlikisha|imikalile|umusangoSite|ishinaLyabusite|ilyashiPaMusule|inshilaNav|inshila|method|handler|target|output|port|host|hotReload|openBrowser|apiPort|ssg|ssr|optimize|routing|apiRoutes|components|hooks|context|styling)\\b"
         }
       ]
     }

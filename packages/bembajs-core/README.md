@@ -78,6 +78,23 @@ if (result.success) {
 const result = compile(code, { legacyFallback: false });
 ```
 
+### Static HTML site layout (`pangaIpepa`)
+
+**Per page:** set `umusangoSite: ee` and author `umutwe`, `ilyashi`, `ifiputulwa`, and optional `imikalile` as usual.
+
+**Shared shell (one place):** create `amapeji/umusango.bemba` with `ishinaLyabusite`, `ilyashiPaMusule`, `inshilaNav`, and optional `imikalile` for shell-only CSS. When that file exists, the compiler reads nav and footer from it so every site page stays aligned. Wrap the object in `pangaUmusango({ ... })` for clarity (the call is documentation; fields are what matter).
+
+| Location | Fields |
+|----------|--------|
+| Each page | `umusangoSite: ee` only (plus page content) |
+| `amapeji/umusango.bemba` | `ishinaLyabusite`, `ilyashiPaMusule`, `inshilaNav`: `[{ ilembo, inshila }, …]` |
+
+If `umusango.bemba` is missing, shell fields must live on the same page as `umusangoSite: ee` (single-file demos).
+
+Compile with `projectRoot` so the parser can resolve `amapeji/umusango.bemba`; pass `currentPath` (e.g. request path) for active nav styling.
+
+Hero copy uses top-level `umutwe` / `ilyashi` before `ifiputulwa`; body sections use `ifiputulwa` as usual.
+
 ### `parse(code)`
 
 Parses Bemba code into an Abstract Syntax Tree (AST).

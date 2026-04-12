@@ -1,0 +1,6 @@
+// Shared site shell for pages with umusangoSite: ee
+pangaUmusango({
+    ishinaLyabusite: 'My BembaJS App',
+    ilyashiPaMusule: 'Built with BembaJS',
+    inshilaNav: [{ ilembo: 'Home', inshila: '/' }]
+});

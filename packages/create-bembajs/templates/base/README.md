@@ -99,6 +99,34 @@ pangaIpepa('Home', {
 });
 ```
 
+### Site layout (static HTML pages)
+
+**Shared chrome:** edit `amapeji/umusango.bemba` once (navbar brand, footer line, `inshilaNav`). Use `pangaUmusango({ ... })` around the object.
+
+**Each page:** set `umusangoSite: ee` and only page-specific fields (`umutwe`, `ilyashi`, `ifiputulwa`, optional `imikalile`).
+
+```bemba
+// amapeji/umusango.bemba
+pangaUmusango({
+    ishinaLyabusite: 'My Site',
+    ilyashiPaMusule: '© 2026',
+    inshilaNav: [
+        { ilembo: 'Home', inshila: '/' },
+        { ilembo: 'About', inshila: '/about' }
+    ]
+});
+
+// amapeji/index.bemba
+pangaIpepa('Home', {
+    umusangoSite: ee,
+    umutwe: 'Hero title',
+    ilyashi: 'Hero subtitle',
+    ifiputulwa: [ /* body sections */ ]
+});
+```
+
+If you delete `umusango.bemba`, you can put the same three keys on each page instead (not recommended for multi-page sites).
+
 ### Creating Components
 
 ```bemba
