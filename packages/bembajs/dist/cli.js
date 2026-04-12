@@ -69,9 +69,7 @@ program
     .description('Start development server')
     .action(() => {
         console.log('Starting BembaJS development server...');
-        console.log('Server will be available at: http://localhost:3000');
-        console.log('Hot reload enabled');
-        console.log('Press Ctrl+C to stop');
+        console.log('Hot reload on; press Ctrl+C to stop.');
 
         try {
             const BembaDevServer = loadDevServerModule();
