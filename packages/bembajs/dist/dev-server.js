@@ -10,8 +10,11 @@ const path = require('path');
 const fs = require('fs');
 
 let coreCompile = null;
+let BembaParserClass = null;
 try {
-    coreCompile = require('bembajs-core').compile;
+    const core = require('bembajs-core');
+    coreCompile = core.compile;
+    BembaParserClass = core.BembaParser;
 } catch (_) {
     /* bembajs-core may be unavailable in some installs */
 }
@@ -20,6 +23,18 @@ function isHtmlString(str) {
     if (typeof str !== 'string') return false;
     const t = str.trimStart();
     return t.startsWith('<!DOCTYPE') || t.startsWith('<html');
+}
+
+/** Full AST compile returns JS; browser preview needs HTML for simple pangaIpepa pages. */
+function compilePangaIpepaHtmlViaParser(code) {
+    if (!BembaParserClass || !code.includes('pangaIpepa')) return null;
+    try {
+        const parser = new BembaParserClass();
+        const html = parser.compile(code, {});
+        return isHtmlString(html) ? html : null;
+    } catch (_) {
+        return null;
+    }
 }
 
 /** Slice inner content of the first `key: [ ... ]` array with proper bracket depth. */
@@ -43,12 +58,10 @@ function sliceBracketArray(source, key) {
     return null;
 }
 
-/** Legacy dev-server button: same-tab for in-app routes; no forced _blank for window.location. */
+/** Legacy fallback buttons (no Tailwind — plain CSS classes .bemba-l-btn). */
 function renderLegacyDevButton(btnText, btnAction, index) {
     const isPrimary = index === 0;
-    const buttonClass = isPrimary
-        ? 'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:min-w-[158px] whitespace-nowrap'
-        : 'flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-6 py-3 text-sm font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:w-auto sm:min-w-[158px] whitespace-nowrap';
+    const buttonClass = isPrimary ? 'bemba-l-btn bemba-l-btn--primary' : 'bemba-l-btn bemba-l-btn--secondary';
     const vercelIcon = '<svg width="20" height="20" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark:invert"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor"/></svg>';
     const buttonContent = isPrimary ? `${vercelIcon}<span>${btnText}</span>` : `<span>${btnText}</span>`;
     const escHref = (u) => String(u).replace(/"/g, '&quot;');
@@ -81,9 +94,19 @@ function renderLegacyDevButton(btnText, btnAction, index) {
     return `<button type="button" class="${buttonClass}" onclick="${enc(btnAction)}">${buttonContent}</button>`;
 }
 
-// Enhanced Bemba compiler for development server
-function compileBemba(code) {
+/**
+ * Compile .bemba to HTML for the dev server preview.
+ * Parser HTML first for pangaIpepa (matches bembajs-core layout); no Tailwind CDN.
+ */
+function compileBembaToHtml(code) {
     try {
+        if (code.includes('pangaIpepa')) {
+            const parserHtml = compilePangaIpepaHtmlViaParser(code);
+            if (parserHtml) {
+                return parserHtml;
+            }
+        }
+
         if (typeof coreCompile === 'function') {
             const result = coreCompile(code, { legacyFallback: true });
             if (result && result.success && isHtmlString(result.code)) {
@@ -91,11 +114,11 @@ function compileBemba(code) {
             }
         }
     } catch (_) {
-        /* fall through to legacy template compiler */
+        /* fall through */
     }
 
     try {
-        // Basic Bemba to HTML compilation
+        // Regex fallback (no external CSS frameworks)
         if (code.includes('pangaIpepa')) {
             // Extract page data with better regex to handle complex objects
             const pageMatch = code.match(/pangaIpepa\s*\(\s*['"`]([^'"`]+)['"`]\s*,\s*\{([\s\S]*)\}\s*\)/);
@@ -206,23 +229,6 @@ function compileBemba(code) {
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        background: 'hsl(var(--background))',
-                        foreground: 'hsl(var(--foreground))',
-                    },
-                    fontFamily: {
-                        sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
-                        mono: ['var(--font-geist-mono)', 'SF Mono', 'Monaco', 'monospace'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         :root {
             --background: 0 0% 100%;
@@ -244,27 +250,129 @@ function compileBemba(code) {
             font-family: var(--font-geist-sans);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            margin: 0;
+        }
+
+        .bemba-l-shell {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fafafa;
+        }
+        @media (prefers-color-scheme: dark) {
+            .bemba-l-shell { background: #0a0a0a; }
+        }
+        .bemba-l-main {
+            width: 100%;
+            max-width: 48rem;
+            min-height: 100vh;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            background: hsl(var(--background));
+        }
+        @media (min-width: 640px) {
+            .bemba-l-main { align-items: flex-start; }
+        }
+        .bemba-l-logo {
+            display: block;
+        }
+        @media (prefers-color-scheme: dark) {
+            .bemba-l-logo { filter: invert(1); }
+        }
+        .bemba-l-steps-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        @media (min-width: 640px) {
+            .bemba-l-steps-wrap { align-items: flex-start; text-align: left; }
+        }
+        .bemba-l-steps {
+            margin: 0;
+            padding-left: 1.25rem;
+            list-style: decimal;
+            font-family: var(--font-geist-mono);
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        .bemba-l-btn-row {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 2rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        @media (min-width: 640px) {
+            .bemba-l-btn-row { flex-direction: row; flex-wrap: wrap; }
+        }
+        .bemba-l-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            min-height: 3rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
+            white-space: nowrap;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .bemba-l-btn { width: auto; min-width: 158px; }
+        }
+        .bemba-l-btn--primary {
+            background: hsl(var(--foreground));
+            color: hsl(var(--background));
+        }
+        .bemba-l-btn--primary:hover {
+            opacity: 0.9;
+        }
+        .bemba-l-btn--secondary {
+            background: transparent;
+            color: hsl(var(--foreground));
+            border: 1px solid rgba(0,0,0,0.12);
+        }
+        @media (prefers-color-scheme: dark) {
+            .bemba-l-btn--secondary { border-color: rgba(255,255,255,0.15); }
+        }
+        .bemba-l-btn--secondary:hover {
+            background: rgba(0,0,0,0.04);
+        }
+        @media (prefers-color-scheme: dark) {
+            .bemba-l-btn--secondary:hover { background: rgba(255,255,255,0.06); }
         }
         
         ${customStyles}
     </style>
 </head>
-<body class="antialiased">
-    <div class="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black sm:items-start">
+<body>
+    <div class="bemba-l-shell">
+        <main class="bemba-l-main">
             <img
+                class="bemba-l-logo"
                 src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350"
                 alt="BembaJS logo"
                 width="180"
                 height="38"
-                class="dark:invert"
             />
-            <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left mt-8">
-                <ol class="list-inside list-decimal text-sm font-[family-name:var(--font-geist-mono)]">
+            <div class="bemba-l-steps-wrap">
+                <ol class="bemba-l-steps">
                     ${sectionSteps}
                 </ol>
             </div>
-            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row mt-8">
+            <div class="bemba-l-btn-row">
                 ${sections}
             </div>
         </main>
@@ -334,8 +442,43 @@ class BembaDevServer {
         this.port = options.port || 3000;
         this.app = express();
         this.projectRoot = process.cwd();
+        /** @type {Set<import('http').ServerResponse>} */
+        this._liveClients = new Set();
         this.setupMiddleware();
         this.setupRoutes();
+    }
+
+    /** Push a lightweight event so open dev tabs recompile on save (SSE). */
+    notifyLiveClients() {
+        const payload = `data: ${Date.now()}\n\n`;
+        for (const client of this._liveClients) {
+            try {
+                client.write(payload);
+            } catch (_) {
+                this._liveClients.delete(client);
+            }
+        }
+    }
+
+    wrapDevHtml(html) {
+        if (typeof html !== 'string' || !html.includes('</body>')) {
+            return html;
+        }
+        const snippet =
+            '<script data-bemba-live>(function(){try{var s=new EventSource("/__bemba_live");s.onmessage=function(){location.reload()};}catch(e){}})();</script>';
+        return html.replace('</body>', `${snippet}</body>`);
+    }
+
+    compileBemba(code) {
+        return this.wrapDevHtml(compileBembaToHtml(code));
+    }
+
+    sendNoCacheHtml(res, html) {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.type('html');
+        res.send(html);
     }
 
     setupMiddleware() {
@@ -369,6 +512,21 @@ class BembaDevServer {
     }
 
     setupRoutes() {
+        // Dev live reload (SSE) — register before /:page so this path is not treated as a page name
+        this.app.get('/__bemba_live', (req, res) => {
+            res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+            res.setHeader('Cache-Control', 'no-cache, no-transform');
+            res.setHeader('Connection', 'keep-alive');
+            if (typeof res.flushHeaders === 'function') {
+                res.flushHeaders();
+            }
+            res.write(': bem\n\n');
+            this._liveClients.add(res);
+            req.on('close', () => {
+                this._liveClients.delete(res);
+            });
+        });
+
         // Serve project home page or IDE
         this.app.get('/', (req, res) => {
             // First, try to serve the project's home page
@@ -422,7 +580,7 @@ class BembaDevServer {
                     return res.status(400).json({ error: 'No code provided' });
                 }
 
-                const result = compileBemba(code);
+                const result = compileBembaToHtml(code);
                 res.json({ 
                     success: true, 
                     result: result,
@@ -467,8 +625,8 @@ class BembaDevServer {
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = compileBemba(code);
-                    res.send(html);
+                    const html = this.compileBemba(code);
+                    this.sendNoCacheHtml(res, html);
                 } catch (error) {
                     res.status(500).send(`Error compiling page: ${error.message}`);
                 }
@@ -508,8 +666,8 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = compileBemba(code);
-                res.send(html);
+                const html = this.compileBemba(code);
+                this.sendNoCacheHtml(res, html);
             } catch (error) {
                 res.status(500).send(`Error compiling home page: ${error.message}`);
             }
@@ -584,7 +742,8 @@ pangaIpepa('Home', {
                         .on('all', (evt, filePath) => {
                             if (typeof filePath === 'string' && filePath.endsWith('.bemba')) {
                                 const rel = path.relative(this.projectRoot, filePath);
-                                console.log(`♻️  ${rel} changed — refresh the browser to see updates.`);
+                                console.log(`♻️  ${rel} changed — reloading open tabs.`);
+                                this.notifyLiveClients();
                             }
                         });
                     console.log('👀 Watching .bemba files under amapeji/, maapi/, ifikopo/');

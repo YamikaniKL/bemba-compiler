@@ -2,7 +2,7 @@
   "name": "bembajs-language-support",
   "displayName": "BembaJS Language Support",
   "description": "Provides language support for BembaJS files (.bemba) with syntax highlighting, file icons, IntelliSense, React integration, and full control flow syntax (conditionals, loops, async/await)",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "publisher": "bembajs",
   "engines": {
     "vscode": "^1.80.0"
