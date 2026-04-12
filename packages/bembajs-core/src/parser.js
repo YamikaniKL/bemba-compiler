@@ -1257,18 +1257,21 @@ class BembaParser {
     compileNewSyntax(code) {
         // Extract page configuration from pangaIpepa syntax
         const appName = this.extractAppNameFromNewSyntax(code);
-        const sections = this.extractSectionsFromNewSyntax(code);
+        const sections = this.extractSectionsFromNewSyntax(code, appName);
         const styles = this.extractStylesFromNewSyntax(code);
         const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
         const siteName = siteLayout ? this.extractSiteNameFromNewSyntax(code) : '';
         const navLinks = siteLayout ? this.extractNavLinksFromNewSyntax(code) : [];
         const footerTagline = siteLayout ? this.extractFooterTaglineFromNewSyntax(code) : '';
 
+        const bodyBlocks = this.extractIfiputulwaBlocks(code);
+
         return this.generateModernLayout(appName, sections, styles, {
             siteLayout,
             siteName,
             navLinks,
-            footerTagline
+            footerTagline,
+            bodyBlocks
         });
     }
     
@@ -1277,22 +1280,133 @@ class BembaParser {
         return match ? match[1] : 'BembaJS App';
     }
     
-    extractSectionsFromNewSyntax(code) {
+    extractSectionsFromNewSyntax(code, appName = 'BembaJS App') {
         const sections = [];
-        
-        // Extract title and content from pangaIpepa
-        const titleMatch = code.match(/umutwe:\s*["']([^"']*)["']/);
-        const descMatch = code.match(/ilyashi:\s*["']([^"']*)["']/);
-        
-        if (titleMatch || descMatch) {
+        const idx = code.indexOf('ifiputulwa:');
+        const heroSlice = idx >= 0 ? code.slice(0, idx) : code;
+
+        const titleMatch = heroSlice.match(/umutwe:\s*["']([^"']*)["']/);
+        const leadFromField = this.extractQuotedField(heroSlice, 'ilyashi');
+        const blocks = this.extractIfiputulwaBlocks(code);
+
+        let heroButtons = [];
+        if (blocks.length > 0 && blocks[0].buttons.length > 0) {
+            heroButtons = blocks[0].buttons;
+        } else {
+            heroButtons = this.extractButtonsFromNewSyntax(code);
+        }
+
+        const title = titleMatch ? titleMatch[1] : '';
+        const content =
+            leadFromField ||
+            (idx < 0 ? (code.match(/ilyashi:\s*["']([^"']*)["']/) || [])[1] : '') ||
+            '';
+
+        if (title || content || heroButtons.length) {
             sections.push({
-                title: titleMatch ? titleMatch[1] : 'Get started by editing',
-                content: descMatch ? descMatch[1] : 'Save and see your changes instantly.',
-                buttons: this.extractButtonsFromNewSyntax(code)
+                title: title || 'Get started by editing',
+                content:
+                    content ||
+                    (title ? '' : 'Save and see your changes instantly.'),
+                buttons: heroButtons
+            });
+        } else if (blocks.length > 0) {
+            sections.push({
+                title: appName,
+                content: '',
+                buttons: heroButtons
             });
         }
-        
+
         return sections;
+    }
+
+    /** Read ilyashi / long strings with `'` inside using "..." or '...' with escapes. */
+    extractQuotedField(source, key) {
+        const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const sq = new RegExp(esc + ":\\s*'((?:\\\\.|[^'\\\\])*)'", 's');
+        const dq = new RegExp(esc + ':\\s*"((?:\\\\.|[^"\\\\])*)"', 's');
+        let m = source.match(sq);
+        if (m) {
+            return m[1].replace(/\\(.)/g, (_, ch) => (ch === 'n' ? '\n' : ch));
+        }
+        m = source.match(dq);
+        if (m) {
+            return m[1].replace(/\\(.)/g, (_, ch) => (ch === 'n' ? '\n' : ch));
+        }
+        return '';
+    }
+
+    /** Split top-level `{ ... }` objects inside an array body (handles nested `amabatani: [ { } ]`). */
+    splitTopLevelBraceObjects(inner) {
+        const objs = [];
+        let i = 0;
+        const s = inner;
+        while (i < s.length) {
+            while (i < s.length && /\s/.test(s[i])) {
+                i++;
+            }
+            if (i >= s.length) break;
+            if (s[i] !== '{') {
+                i++;
+                continue;
+            }
+            let depth = 0;
+            const start = i;
+            let inStr = false;
+            let q = '';
+            let esc = false;
+            for (; i < s.length; i++) {
+                const c = s[i];
+                if (inStr) {
+                    if (esc) {
+                        esc = false;
+                        continue;
+                    }
+                    if (c === '\\') {
+                        esc = true;
+                        continue;
+                    }
+                    if (c === q) {
+                        inStr = false;
+                    }
+                    continue;
+                }
+                if (c === '"' || c === "'" || c === '`') {
+                    inStr = true;
+                    q = c;
+                    continue;
+                }
+                if (c === '{') depth++;
+                else if (c === '}') {
+                    depth--;
+                    if (depth === 0) {
+                        objs.push(s.slice(start, i + 1));
+                        i++;
+                        break;
+                    }
+                }
+            }
+        }
+        return objs;
+    }
+
+    /** Each ifiputulwa entry → { title, content, buttons } for page body sections. */
+    extractIfiputulwaBlocks(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'ifiputulwa');
+        if (!inner) return [];
+        const chunks = this.splitTopLevelBraceObjects(inner);
+        const out = [];
+        for (const obj of chunks) {
+            const t = this.extractQuotedField(obj, 'umutwe') || obj.match(/umutwe:\s*["']([^"']*)["']/)?.[1] || '';
+            const c =
+                this.extractQuotedField(obj, 'ilyashi') || obj.match(/ilyashi:\s*["']([^"']*)["']/)?.[1] || '';
+            const buttons = this.extractButtonsFromNewSyntax(obj);
+            if (t || c || buttons.length) {
+                out.push({ title: t, content: c, buttons });
+            }
+        }
+        return out;
     }
     
     extractButtonsFromNewSyntax(code) {
@@ -1424,7 +1538,8 @@ class BembaParser {
             siteLayout = false,
             siteName = '',
             navLinks = [],
-            footerTagline = ''
+            footerTagline = '',
+            bodyBlocks = []
         } = layoutOpts;
         const escapeHtml = (s) => {
             if (s == null || s === '') return '';
@@ -1441,27 +1556,56 @@ class BembaParser {
             { label: 'Read our docs', onClick: 'window.open("https://bembajs.dev/docs", "_blank")' }
         ];
         
-        const buttons = sections.length > 0 && sections[0].buttons && sections[0].buttons.length > 0
-            ? sections[0].buttons
-            : defaultButtons;
+        let s0 = sections.length > 0 ? sections[0] : null;
+        if (!s0) {
+            s0 = {
+                title: appName,
+                content: 'Get started by editing amapeji/*.bemba.',
+                buttons: defaultButtons
+            };
+        }
 
-        const s0 = sections.length > 0 ? sections[0] : null;
-        const docTitle = (s0 && s0.title) ? s0.title : appName;
-        const headline = (s0 && s0.title) ? s0.title : appName;
+        const buttons =
+            s0.buttons && s0.buttons.length > 0 ? s0.buttons : defaultButtons;
+
+        const docTitle = s0.title ? s0.title : appName;
+        const headline = s0.title ? s0.title : appName;
         let leadHtml = '';
-        if (s0 && s0.content) {
+        if (s0.content) {
             leadHtml = `<p class="page-lead">${escapeHtml(s0.content)}</p>`;
-        } else if (!s0) {
+        } else if (sections.length === 0) {
             leadHtml = `<p class="page-lead">Get started by editing <code>amapeji/index.bemba</code>. Save the file and refresh this page.</p>`;
         }
 
-        const buttonHtml = buttons
-            .map(
-                (button, index) => `
+        const rowHtml = (list) =>
+            list
+                .map(
+                    (button, index) => `
                     <button type="button" class="ibatani ${index > 0 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
                         ${escapeHtml(button.label)}
                     </button>`
-            )
+                )
+                .join('');
+
+        const buttonHtml = rowHtml(buttons);
+
+        const bodySectionsHtml = (bodyBlocks || [])
+            .map((block, i) => {
+                const hasText = !!(block.title || block.content);
+                const secButtons =
+                    i > 0 && block.buttons && block.buttons.length ? rowHtml(block.buttons) : '';
+                if (!hasText && !secButtons) return '';
+                const h = block.title
+                    ? `<h2 class="body-section-title">${escapeHtml(block.title)}</h2>`
+                    : '';
+                const p = block.content
+                    ? `<p class="body-section-lead">${escapeHtml(block.content)}</p>`
+                    : '';
+                const act = secButtons
+                    ? `<div class="button-container body-section-actions">${secButtons}</div>`
+                    : '';
+                return `<article class="body-section">${h}${p}${act}</article>`;
+            })
             .join('');
 
         const footerAnchors = `
@@ -1638,6 +1782,36 @@ class BembaParser {
             background: color-mix(in srgb, var(--text) 6%, transparent);
         }
 
+        .shell .site-body {
+            width: 100%;
+            margin-top: 0.25rem;
+        }
+
+        .shell .body-section {
+            border-top: 1px solid var(--border);
+            padding-top: 1.25rem;
+            margin-top: 1.35rem;
+        }
+
+        .shell .body-section-title {
+            font-size: 1.1rem;
+            font-weight: 650;
+            margin: 0 0 0.5rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .shell .body-section-lead {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .shell .body-section-actions {
+            margin-top: 1rem;
+        }
+
         footer {
             display: flex;
             flex-wrap: wrap;
@@ -1684,6 +1858,11 @@ class BembaParser {
                     ${leadHtml}
                 </section>
                 <div class="button-container">${buttonHtml}</div>
+                ${
+                    bodySectionsHtml
+                        ? `<div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div>`
+                        : ''
+                }
             </div>
         </main>
         <footer>${footerAnchors}</footer>
@@ -1782,10 +1961,14 @@ class BembaParser {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            justify-content: flex-start;
+            align-items: stretch;
             min-height: 0;
-            padding: clamp(2rem, 5vw, 4rem) clamp(1.25rem, 4vw, 2rem);
+            padding: clamp(2rem, 5vw, 3rem) clamp(1.25rem, 4vw, 2rem) 2.5rem;
+            width: 100%;
+            max-width: 56rem;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .site-header {
@@ -1843,6 +2026,41 @@ class BembaParser {
             width: 100%;
             max-width: 40rem;
             text-align: left;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .site-body {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            margin-top: 0.5rem;
+        }
+
+        .body-section {
+            border-top: 1px solid var(--border);
+            padding-top: 1.75rem;
+            margin-top: 2rem;
+        }
+
+        .body-section-title {
+            font-size: 1.2rem;
+            font-weight: 650;
+            margin: 0 0 0.65rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .body-section-lead {
+            margin: 0;
+            font-size: 0.95rem;
+            color: var(--muted);
+            line-height: 1.65;
+            max-width: 40rem;
+        }
+
+        .body-section-actions {
+            margin-top: 1.2rem;
         }
 
         .brand {
@@ -2012,6 +2230,11 @@ ${navBlock}
             ${leadHtml}
             <div class="button-container">${buttonHtml}</div>
         </section>
+        ${
+            bodySectionsHtml
+                ? `<div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div>`
+                : ''
+        }
     </main>
     <footer class="site-footer">
         <div class="site-footer-inner">
