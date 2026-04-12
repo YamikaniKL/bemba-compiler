@@ -1469,28 +1469,30 @@ class BembaParser {
     }
 
     /**
-     * Full site chrome (navbar, flat hero, footer bar) is opt-in so the compiler default stays minimal.
-     * Use icapaba: 'site' in pangaIpepa — then ishinaLyasite, amalinkiNav, ilyashiWaFuti apply.
+     * Site chrome is opt-in (Bemba keys only):
+     * - umusangoSite: ee
+     * - ishinaLyabusite (navbar title)
+     * - ilyashiPaMusule (footer line)
+     * - inshilaNav: [ { ilembo, inshila }, ... ]
      */
     extractSiteLayoutFromNewSyntax(code) {
-        return /icapaba:\s*['"]site['"]/.test(code) || /icapaba:\s*site\b/.test(code);
+        return /\bumusangoSite:\s*ee\b/i.test(code);
     }
 
-    /** Optional site title shown in the top navbar (e.g. ishinaLyasite: 'My Demo'). Site layout only. */
+    /** Navbar brand (ishinaLyabusite only). */
     extractSiteNameFromNewSyntax(code) {
-        const m = code.match(/ishinaLyasite:\s*["']([^"']*)["']/);
+        const m = code.match(/ishinaLyabusite:\s*["']([^"']*)["']/);
         return m ? m[1].trim() : '';
     }
 
-    /** Optional footer line (e.g. copyright). Site layout only. */
+    /** Footer tagline (ilyashiPaMusule only). */
     extractFooterTaglineFromNewSyntax(code) {
-        const m = code.match(/ilyashiWaFuti:\s*["']([^"']*)["']/);
+        const m = code.match(/ilyashiPaMusule:\s*["']([^"']*)["']/);
         return m ? m[1] : '';
     }
 
     /**
-     * Navbar links when using site layout (icapaba: 'site'):
-     * amalinkiNav: [ { ilembo: 'Home', indashi: '/' }, ... ]
+     * Navbar: inshilaNav only. Each link uses ilembo + inshila.
      */
     extractArrayBlockAfterKey(code, key) {
         const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1515,19 +1517,19 @@ class BembaParser {
     }
 
     extractNavLinksFromNewSyntax(code) {
-        const inner = this.extractArrayBlockAfterKey(code, 'amalinkiNav');
+        const inner = this.extractArrayBlockAfterKey(code, 'inshilaNav');
         if (!inner) return [];
         const links = [];
         const patIlemboFirst =
-            /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*indashi:\s*(["'])([^"']*)\3\s*\}/g;
+            /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*inshila:\s*(["'])([^"']*)\3\s*\}/g;
         let m;
         while ((m = patIlemboFirst.exec(inner)) !== null) {
             links.push({ label: m[2], href: m[4] });
         }
         if (links.length > 0) return links;
-        const patIndashiFirst =
-            /\{\s*indashi:\s*(["'])([^"']*)\1\s*,\s*ilembo:\s*(["'])([^"']*)\3\s*\}/g;
-        while ((m = patIndashiFirst.exec(inner)) !== null) {
+        const patInshilaFirst =
+            /\{\s*inshila:\s*(["'])([^"']*)\1\s*,\s*ilembo:\s*(["'])([^"']*)\3\s*\}/g;
+        while ((m = patInshilaFirst.exec(inner)) !== null) {
             links.push({ label: m[4], href: m[2] });
         }
         return links;
@@ -1964,11 +1966,10 @@ class BembaParser {
             justify-content: flex-start;
             align-items: stretch;
             min-height: 0;
-            padding: clamp(2rem, 5vw, 3rem) clamp(1.25rem, 4vw, 2rem) 2.5rem;
             width: 100%;
-            max-width: 56rem;
-            margin-left: auto;
-            margin-right: auto;
+            max-width: none;
+            margin: 0;
+            padding: 0;
         }
 
         .site-header {
@@ -2022,12 +2023,80 @@ class BembaParser {
             background: color-mix(in srgb, var(--text) 6%, transparent);
         }
 
-        .hero-section {
+        .hero-banner {
+            position: relative;
             width: 100%;
-            max-width: 40rem;
-            text-align: left;
-            margin-left: auto;
-            margin-right: auto;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-banner__backdrop {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 55%),
+                radial-gradient(55% 90% at 100% 15%, color-mix(in srgb, #c026d3 16%, transparent), transparent 50%),
+                linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, var(--bg)) 0%, var(--bg) 100%);
+            pointer-events: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .hero-banner__backdrop {
+                background:
+                    radial-gradient(80% 120% at 0% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%),
+                    radial-gradient(55% 90% at 100% 15%, rgba(192, 38, 211, 0.12), transparent 50%),
+                    linear-gradient(180deg, color-mix(in srgb, var(--surface) 40%, var(--bg)) 0%, var(--bg) 100%);
+            }
+        }
+
+        .hero-banner__inner {
+            position: relative;
+            z-index: 1;
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: clamp(3rem, 10vw, 5.25rem) clamp(1.5rem, 4vw, 2rem) clamp(2.5rem, 7vw, 4rem);
+        }
+
+        .hero-banner__content {
+            max-width: 42rem;
+        }
+
+        .hero-banner .brand {
+            margin-bottom: 1.35rem;
+        }
+
+        .hero-title {
+            margin: 0 0 1rem;
+            font-size: clamp(2.35rem, 6.5vw, 3.45rem);
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            line-height: 1.06;
+            color: var(--text);
+        }
+
+        .hero-lead {
+            margin: 0;
+            font-size: clamp(1.02rem, 2.4vw, 1.1875rem);
+            color: var(--muted);
+            line-height: 1.68;
+            max-width: 38rem;
+        }
+
+        .hero-actions {
+            margin-top: 2rem;
+        }
+
+        .hero-actions .ibatani {
+            min-height: 3rem;
+            padding: 0 1.5rem;
+            font-size: 1rem;
+        }
+
+        .site-body-wrap {
+            width: 100%;
+            max-width: 56rem;
+            margin: 0 auto;
+            padding: 0 clamp(1.25rem, 4vw, 2rem) 2.5rem;
         }
 
         .site-body {
@@ -2217,7 +2286,10 @@ class BembaParser {
 ${navBlock}
 <div class="page-wrap">
     <main class="page-main">
-        <section class="hero-section" aria-labelledby="page-heading">
+        <section class="hero-banner" aria-labelledby="page-heading">
+            <div class="hero-banner__backdrop" aria-hidden="true"></div>
+            <div class="hero-banner__inner">
+                <div class="hero-banner__content">
             ${
                 showInnerBrand
                     ? `<div class="brand" aria-hidden="true">
@@ -2226,13 +2298,15 @@ ${navBlock}
             </div>`
                     : ''
             }
-            <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
-            ${leadHtml}
-            <div class="button-container">${buttonHtml}</div>
+            <h1 id="page-heading" class="hero-title">${escapeHtml(headline)}</h1>
+            ${leadHtml ? leadHtml.replace('class="page-lead"', 'class="page-lead hero-lead"') : ''}
+            <div class="button-container hero-actions">${buttonHtml}</div>
+                </div>
+            </div>
         </section>
         ${
             bodySectionsHtml
-                ? `<div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div>`
+                ? `<div class="site-body-wrap"><div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div></div>`
                 : ''
         }
     </main>
