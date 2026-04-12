@@ -5,7 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('🔨 Building bembajs...');
+console.log('Building bembajs...');
 
 // Create dist directory
 const distDir = path.join(__dirname, 'dist');
@@ -28,7 +28,7 @@ function copyRecursive(src, dest) {
         });
     } else if (src.endsWith('.js')) {
         fs.copyFileSync(src, dest);
-        console.log(`  ✓ Copied ${path.relative(__dirname, src)}`);
+        console.log(`  copied ${path.relative(__dirname, src)}`);
     }
 }
 
@@ -39,7 +39,7 @@ const updatedDevServer = path.join(srcDir, 'server', 'dev-server.js');
 const distDevServer = path.join(distDir, 'dev-server.js');
 if (fs.existsSync(updatedDevServer)) {
     fs.copyFileSync(updatedDevServer, distDevServer);
-    console.log('  ✓ Copied src/server/dev-server.js to dist/dev-server.js');
+    console.log('  copied src/server/dev-server.js to dist/dev-server.js');
 }
 
-console.log('✅ bembajs built successfully!');
+console.log('bembajs built successfully.');

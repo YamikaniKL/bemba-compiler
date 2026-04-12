@@ -402,7 +402,7 @@ function compileBembaToHtml(code) {
 </head>
 <body>
     <div class="container">
-        <h1>🇿🇲 BembaJS Page</h1>
+        <h1>BembaJS Page</h1>
         <p>Your Bemba code has been compiled successfully!</p>
         <pre>${code}</pre>
     </div>
@@ -428,7 +428,7 @@ function compileBembaToHtml(code) {
 </head>
 <body>
     <div class="container">
-        <h1>❌ BembaJS Compilation Error</h1>
+        <h1>BembaJS compilation error</h1>
         <p>There was an error compiling your Bemba code:</p>
         <pre>${error.message}</pre>
     </div>
@@ -690,12 +690,12 @@ class BembaDevServer {
                 <body>
                     <div class="container">
                         <div class="header">
-                            <h1>🇿🇲 Welcome to BembaJS!</h1>
+                            <h1>Welcome to BembaJS!</h1>
                             <p>Your BembaJS project is running successfully.</p>
                         </div>
                         
                         <div class="feature">
-                            <h3>📁 Project Structure</h3>
+                            <h3>Project structure</h3>
                             <p>Create files in these directories:</p>
                             <ul>
                                 <li><code>amapeji/</code> - Pages (like Next.js pages/)</li>
@@ -706,7 +706,7 @@ class BembaDevServer {
                         </div>
                         
                         <div class="feature">
-                            <h3>🚀 Getting Started</h3>
+                            <h3>Getting started</h3>
                             <p>Create your first page:</p>
                             <pre><code>// amapeji/index.bemba
 pangaIpepa('Home', {
@@ -716,7 +716,7 @@ pangaIpepa('Home', {
                         </div>
                         
                         <div class="feature">
-                            <h3>🛠️ Development</h3>
+                            <h3>Development</h3>
                             <p>Your development server is running at <code>http://localhost:${this.port}</code></p>
                             <p>Hot reload is enabled - changes will be reflected automatically!</p>
                         </div>
@@ -730,7 +730,7 @@ pangaIpepa('Home', {
 
     start() {
         const server = this.app.listen(this.port, () => {
-            console.log(`🚀 BembaJS Development Server running at http://localhost:${this.port}`);
+            console.log(`BembaJS development server running at http://localhost:${this.port}`);
             try {
                 const chokidar = require('chokidar');
                 const dirs = ['amapeji', 'maapi', 'ifikopo']
@@ -742,11 +742,11 @@ pangaIpepa('Home', {
                         .on('all', (evt, filePath) => {
                             if (typeof filePath === 'string' && filePath.endsWith('.bemba')) {
                                 const rel = path.relative(this.projectRoot, filePath);
-                                console.log(`♻️  ${rel} changed — reloading open tabs.`);
+                                console.log(`${rel} changed — reloading open tabs.`);
                                 this.notifyLiveClients();
                             }
                         });
-                    console.log('👀 Watching .bemba files under amapeji/, maapi/, ifikopo/');
+                    console.log('Watching .bemba files under amapeji/, maapi/, ifikopo/');
                 }
             } catch (_) {
                 /* chokidar optional */
@@ -755,11 +755,11 @@ pangaIpepa('Home', {
 
         server.on('error', (err) => {
             if (err.code === 'EADDRINUSE') {
-                console.log(`⚠️  Port ${this.port} is already in use. Trying port ${this.port + 1}...`);
+                console.log(`Port ${this.port} is already in use. Trying port ${this.port + 1}...`);
                 this.port += 1;
                 this.start();
             } else {
-                console.error('❌ Server error:', err.message);
+                console.error('Server error:', err.message);
                 process.exit(1);
             }
         });

@@ -11,7 +11,7 @@ const runtime = isBun ? 'bun' : 'node';
 
 // Display runtime info in debug mode
 if (process.env.DEBUG) {
-    console.log(`🚀 BembaJS CLI running on ${runtime}`);
+    console.log(`BembaJS CLI running on ${runtime}`);
 }
 
 // Load appropriate entry point
