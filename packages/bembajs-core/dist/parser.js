@@ -1294,8 +1294,10 @@ class BembaParser {
     }
     
     extractStylesFromNewSyntax(code) {
-        const styleMatch = code.match(/imikalile:\s*["']([\s\S]*?)["']/);
-        return styleMatch ? styleMatch[1] : '';
+        const tick = code.match(/imikalile:\s*`([\s\S]*?)`/);
+        if (tick) return tick[1];
+        const q = code.match(/imikalile:\s*["']([\s\S]*?)["']/);
+        return q ? q[1] : '';
     }
     
     generateModernLayout(appName, sections, styles) {
@@ -1320,12 +1322,14 @@ class BembaParser {
 
         const s0 = sections.length > 0 ? sections[0] : null;
         const docTitle = (s0 && s0.title) ? s0.title : appName;
-        const olInner = s0 && (s0.title || s0.content)
-            ? `<li>${escapeHtml(s0.title || '')}</li>
-                <li>${escapeHtml(s0.content || '')}</li>`
-            : `<li>Get started by editing <code>app/page.bemba</code>.</li>
-                <li>Save and see your changes instantly.</li>`;
-        
+        const headline = (s0 && s0.title) ? s0.title : appName;
+        let leadHtml = '';
+        if (s0 && s0.content) {
+            leadHtml = `<p class="page-lead">${escapeHtml(s0.content)}</p>`;
+        } else if (!s0) {
+            leadHtml = `<p class="page-lead">Get started by editing <code>amapeji/index.bemba</code>. Save the file and refresh this page.</p>`;
+        }
+
         return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1333,225 +1337,210 @@ class BembaParser {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${escapeHtml(docTitle)}</title>
     <style>
-        * {
-            box-sizing: border-box;
+        * { box-sizing: border-box; }
+
+        :root {
+            --bg: #f4f4f5;
+            --surface: #ffffff;
+            --text: #18181b;
+            --muted: #71717a;
+            --border: rgba(24, 24, 27, 0.12);
+            --accent: #3b2e8c;
+            --accent-hover: #2d2269;
+            --shadow: 0 1px 3px rgba(0,0,0,.06), 0 12px 32px rgba(0,0,0,.04);
         }
-        
-        body { 
-            background: #fafafa;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            color: #171717;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-rows: 20px 1fr 20px;
-            align-items: center;
-            justify-items: center;
-            min-height: 100vh;
-            padding: 2rem;
-            padding-bottom: 5rem;
-            gap: 4rem;
-        }
-        
-        @media (min-width: 640px) {
-            .grid {
-                padding: 5rem;
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #09090b;
+                --surface: #18181b;
+                --text: #fafafa;
+                --muted: #a1a1aa;
+                --border: rgba(250, 250, 250, 0.12);
+                --accent: #8b7ce8;
+                --accent-hover: #a89df0;
+                --shadow: 0 1px 3px rgba(0,0,0,.4), 0 12px 40px rgba(0,0,0,.35);
             }
         }
-        
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, Cantarell, "Noto Sans", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .grid {
+            min-height: 100vh;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            padding: clamp(1.25rem, 4vw, 2.5rem);
+            gap: 2rem;
+        }
+
         main {
             display: flex;
             flex-direction: column;
-            gap: 2rem;
-            grid-row-start: 2;
-            align-items: center;
-        }
-        
-        @media (min-width: 640px) {
-            main {
-                align-items: flex-start;
-            }
-        }
-        
-        .bemba-logo {
-            width: 180px;
-            height: 38px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 4px;
-            display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
         }
-        
-        ol {
-            list-style: decimal;
-            list-style-position: inside;
-            text-align: center;
-            font-size: 0.875rem;
-            line-height: 1.5rem;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+
+        .shell {
+            width: 100%;
+            max-width: 36rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: clamp(1.5rem, 4vw, 2.25rem);
+            box-shadow: var(--shadow);
         }
-        
-        @media (min-width: 640px) {
-            ol {
-                text-align: left;
-            }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
         }
-        
-        li {
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.01em;
+
+        .brand-mark {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 0.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #c026d3 100%);
+            box-shadow: 0 2px 8px rgba(59, 46, 140, 0.35);
         }
-        
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 0.95rem;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .page-title {
+            margin: 0 0 0.75rem;
+            font-size: clamp(1.5rem, 4vw, 1.875rem);
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            line-height: 1.2;
+            color: var(--text);
+        }
+
+        .page-lead {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--muted);
+            max-width: 32rem;
+        }
+
+        .page-lead code {
+            font-size: 0.875em;
+        }
+
         code {
-            background: rgba(0, 0, 0, 0.05);
-            padding: 0.125rem 0.25rem;
-            border-radius: 0.25rem;
-            font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-            font-weight: 600;
+            font-family: ui-monospace, "Cascadia Code", "SF Mono", Monaco, Consolas, monospace;
+            background: color-mix(in srgb, var(--text) 6%, transparent);
+            padding: 0.15em 0.4em;
+            border-radius: 0.35rem;
+            font-weight: 500;
         }
-        
-        @media (prefers-color-scheme: dark) {
-            code {
-                background: rgba(255, 255, 255, 0.06);
-            }
-        }
-        
+
         .button-container {
             display: flex;
-            gap: 1rem;
-            align-items: center;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            margin-top: 1.5rem;
         }
-        
-        @media (min-width: 640px) {
-            .button-container {
-                flex-direction: row;
-            }
-        }
-        
+
         .ibatani {
             border-radius: 9999px;
             border: 1px solid transparent;
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            background-color: #000000;
-            color: #fafafa;
-            gap: 0.5rem;
-            font-weight: 500;
-            font-size: 0.875rem;
-            line-height: 1.25rem;
-            height: 2.5rem;
-            padding-left: 1rem;
-            padding-right: 1rem;
+            min-height: 2.75rem;
+            padding: 0 1.15rem;
+            font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
+            transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+            background: var(--accent);
+            color: #fff;
         }
-        
+
         .ibatani:hover {
-            background: #404040;
+            background: var(--accent-hover);
         }
-        
+
+        .ibatani:active {
+            transform: scale(0.98);
+        }
+
         .ibatani.secondary {
             background: transparent;
-            color: #000000;
-            border-color: rgba(0, 0, 0, 0.08);
+            color: var(--text);
+            border-color: var(--border);
         }
-        
+
         .ibatani.secondary:hover {
-            background: #f2f2f2;
-            border-color: transparent;
+            background: color-mix(in srgb, var(--text) 6%, transparent);
         }
-        
-        @media (min-width: 640px) {
-            .ibatani {
-                font-size: 1rem;
-                line-height: 1.5rem;
-                height: 3rem;
-                padding-left: 1.25rem;
-                padding-right: 1.25rem;
-            }
-            
-            .ibatani.secondary {
-                width: 100%;
-            }
-        }
-        
-        @media (min-width: 768px) {
-            .ibatani.secondary {
-                width: 158px;
-            }
-        }
-        
-        @media (prefers-color-scheme: dark) {
-            .ibatani:hover {
-                background: #cccccc;
-            }
-            
-            .ibatani.secondary {
-                border-color: rgba(255, 255, 255, 0.145);
-            }
-            
-            .ibatani.secondary:hover {
-                background: #1a1a1a;
-            }
-        }
-        
+
         footer {
-            grid-row-start: 3;
             display: flex;
-            gap: 1.5rem;
             flex-wrap: wrap;
+            gap: 1.25rem;
             align-items: center;
             justify-content: center;
+            padding-bottom: 0.5rem;
         }
-        
+
         .footer-link {
-            display: flex;
+            display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            color: #171717;
+            gap: 0.4rem;
+            font-size: 0.875rem;
+            color: var(--muted);
             text-decoration: none;
         }
-        
+
         .footer-link:hover {
+            color: var(--text);
             text-decoration: underline;
-            text-underline-offset: 4px;
+            text-underline-offset: 3px;
         }
-        
+
         .footer-icon {
             width: 16px;
             height: 16px;
+            flex-shrink: 0;
         }
-        
+
         ${styles}
     </style>
 </head>
 <body class="antialiased">
     <div class="grid">
         <main>
-            <div class="bemba-logo">BembaJS</div>
-            <ol>
-                ${olInner}
-            </ol>
-            <div class="button-container">
+            <div class="shell">
+                <div class="brand" aria-hidden="true">
+                    <span class="brand-mark"></span>
+                    <span class="brand-name">BembaJS</span>
+                </div>
+                <section class="hero" aria-labelledby="page-heading">
+                    <h1 id="page-heading" class="page-title">${escapeHtml(headline)}</h1>
+                    ${leadHtml}
+                </section>
+                <div class="button-container">
                 ${buttons.map((button, index) => `
-                    <button type="button" class="ibatani ${index === 1 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
+                    <button type="button" class="ibatani ${index > 0 ? 'secondary' : ''}" onclick="${encodeJsForHtmlDoubleQuotedAttr(button.onClick)}">
                         ${escapeHtml(button.label)}
                     </button>
                 `).join('')}
+                </div>
             </div>
         </main>
         <footer>
