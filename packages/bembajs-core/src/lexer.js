@@ -8,6 +8,8 @@ class BembaLexer {
         this.source = '';
         this.line = 1;
         this.column = 1;
+        this.start = 0;
+        this.startColumn = 1;
         
         // Token types
         this.TOKEN_TYPES = {
@@ -71,6 +73,11 @@ class BembaLexer {
             MULTIPLY: 'MULTIPLY',
             DIVIDE: 'DIVIDE',
             MODULO: 'MODULO',
+            AND: 'AND',
+            OR: 'OR',
+            BANG: 'BANG',
+            LESS_EQUAL: 'LESS_EQUAL',
+            GREATER_EQUAL: 'GREATER_EQUAL',
             
             // Punctuation
             LEFT_PAREN: 'LEFT_PAREN',
@@ -156,6 +163,8 @@ class BembaLexer {
         this.current = 0;
         this.line = 1;
         this.column = 1;
+        this.start = 0;
+        this.startColumn = 1;
         
         while (!this.isAtEnd()) {
             this.scanToken();
@@ -166,6 +175,8 @@ class BembaLexer {
     }
     
     scanToken() {
+        this.start = this.current;
+        this.startColumn = this.column;
         const char = this.advance();
         
         switch (char) {
@@ -238,11 +249,11 @@ class BembaLexer {
                 this.addToken(this.match('=') ? this.TOKEN_TYPES.EQUALS : this.TOKEN_TYPES.ASSIGN);
                 break;
             case '!':
-                this.addToken(this.match('=') ? this.TOKEN_TYPES.NOT_EQUALS : 'BANG');
+                this.addToken(this.match('=') ? this.TOKEN_TYPES.NOT_EQUALS : this.TOKEN_TYPES.BANG);
                 break;
             case '<':
                 if (this.match('=')) {
-                    this.addToken('LESS_EQUAL');
+                    this.addToken(this.TOKEN_TYPES.LESS_EQUAL);
                 } else if (this.match('/')) {
                     // JSX closing tag
                     this.addToken(this.TOKEN_TYPES.JSX_CLOSE);
@@ -252,13 +263,28 @@ class BembaLexer {
                 break;
             case '>':
                 if (this.match('=')) {
-                    this.addToken('GREATER_EQUAL');
+                    this.addToken(this.TOKEN_TYPES.GREATER_EQUAL);
                 } else {
                     this.addToken(this.TOKEN_TYPES.GREATER_THAN);
                 }
                 break;
+            case '&':
+                if (this.match('&')) {
+                    this.addToken(this.TOKEN_TYPES.AND);
+                } else {
+                    throw new Error(`Unexpected character: ${char} at line ${this.line}, column ${this.column}`);
+                }
+                break;
+            case '|':
+                if (this.match('|')) {
+                    this.addToken(this.TOKEN_TYPES.OR);
+                } else {
+                    throw new Error(`Unexpected character: ${char} at line ${this.line}, column ${this.column}`);
+                }
+                break;
             case '"':
             case "'":
+            case '`':
                 this.string(char);
                 break;
             case ' ':
@@ -273,9 +299,9 @@ class BembaLexer {
                 break;
             default:
                 if (this.isDigit(char)) {
-                    this.number();
+                    this.number(char);
                 } else if (this.isAlpha(char)) {
-                    this.identifier();
+                    this.identifier(char);
                 } else {
                     throw new Error(`Unexpected character: ${char} at line ${this.line}, column ${this.column}`);
                 }
@@ -302,8 +328,8 @@ class BembaLexer {
         this.addToken(this.TOKEN_TYPES.STRING, value);
     }
     
-    number() {
-        let value = '';
+    number(firstChar) {
+        let value = firstChar;
         
         while (this.isDigit(this.peek())) {
             value += this.advance();
@@ -319,8 +345,8 @@ class BembaLexer {
         this.addToken(this.TOKEN_TYPES.NUMBER, parseFloat(value));
     }
     
-    identifier() {
-        let value = '';
+    identifier(firstChar) {
+        let value = firstChar;
         
         while (this.isAlphaNumeric(this.peek())) {
             value += this.advance();
@@ -334,9 +360,9 @@ class BembaLexer {
         const token = {
             type,
             literal,
-            lexeme: this.source.substring(this.current - (literal ? literal.toString().length : 1), this.current),
+            lexeme: this.source.substring(this.start, this.current),
             line: this.line,
-            column: this.column
+            column: this.startColumn
         };
         this.tokens.push(token);
     }

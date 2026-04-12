@@ -41,17 +41,7 @@ class BembaParser {
         this.tokens = tokens;
         this.current = 0;
         this.errors = [];
-        
-        const program = new ProgramNode();
-        
-        while (!this.isAtEnd()) {
-            const statement = this.parseStatement();
-            if (statement) {
-                program.body.push(statement);
-            }
-        }
-        
-        return program;
+        return this.parseProgram();
     }
     
     parseProject(projectRoot) {
@@ -129,7 +119,9 @@ class BembaParser {
     parseProgram() {
         const statements = [];
         
-        while (!this.isAtEnd()) {
+        while (true) {
+            this.skipTrivia();
+            if (this.isAtEnd()) break;
             const statement = this.parseStatement();
             if (statement) {
                 statements.push(statement);
@@ -140,25 +132,25 @@ class BembaParser {
     }
     
     parseStatement() {
-        if (this.check(BEMBA_SYNTAX.IF)) {
+        if (this.check('IF')) {
             return this.parseIfStatement();
-        } else if (this.check(BEMBA_SYNTAX.FOR)) {
+        } else if (this.check('FOR')) {
             return this.parseForStatement();
-        } else if (this.check(BEMBA_SYNTAX.WHILE)) {
+        } else if (this.check('WHILE')) {
             return this.parseWhileStatement();
-        } else if (this.check(BEMBA_SYNTAX.TRY)) {
+        } else if (this.check('TRY')) {
             return this.parseTryStatement();
-        } else if (this.check(BEMBA_SYNTAX.COMPONENT_DEF)) {
+        } else if (this.check('COMPONENT_DEF')) {
             return this.parseComponent();
-        } else if (this.check(BEMBA_SYNTAX.PAGE_DEF)) {
+        } else if (this.check('PAGE_DEF')) {
             return this.parsePage();
-        } else if (this.check('import')) {
+        } else if (this.checkKeyword('import')) {
             return this.parseImport();
-        } else if (this.check('export')) {
+        } else if (this.checkKeyword('export')) {
             return this.parseExport();
-        } else if (this.check('let') || this.check('const') || this.check('var')) {
+        } else if (this.checkKeyword('let') || this.checkKeyword('const') || this.checkKeyword('var')) {
             return this.parseVariableDeclaration();
-        } else if (this.check(BEMBA_SYNTAX.FUNCTION)) {
+        } else if (this.check('ASYNC') || this.check('FUNCTION')) {
             return this.parseFunctionDeclaration();
         } else {
             return this.parseExpression();
@@ -168,12 +160,15 @@ class BembaParser {
     // Component parsing
     parseComponent() {
         this.advance(); // consume 'fyambaIcipanda'
+        this.consume('LEFT_PAREN', 'Expected ( after fyambaIcipanda');
         
         // Parse component name
-        const name = this.consume('IDENTIFIER', 'Expected component name').literal;
-        
-        // Parse opening parenthesis
-        this.consume('LEFT_PAREN', 'Expected ( after component name');
+        if (!this.check('STRING') && !this.check('IDENTIFIER')) {
+            throw new Error('Expected component name');
+        }
+        const nameToken = this.advance();
+        const name = nameToken.literal || nameToken.value;
+        this.consume('COMMA', 'Expected , after component name');
         
         // Parse component configuration
         const config = this.parseObject();
@@ -223,6 +218,13 @@ class BembaParser {
         
         // Parse opening parenthesis
         this.consume('LEFT_PAREN', 'Expected ( after pangaIpepa');
+        let pageName = '';
+        
+        if (this.check('STRING') || this.check('IDENTIFIER')) {
+            const nameToken = this.advance();
+            pageName = nameToken.literal || nameToken.value || '';
+            this.consume('COMMA', 'Expected , after page name');
+        }
         
         // Parse page configuration
         const config = this.parseObject();
@@ -236,6 +238,7 @@ class BembaParser {
         }
         
         const page = new PageNode('', null);
+        page.metadata = { name: pageName };
         
         // Extract page properties
         if (config.properties) {
@@ -265,11 +268,24 @@ class BembaParser {
         
         if (!this.check('RIGHT_BRACE')) {
             do {
-                const key = this.parseExpression();
+                let key = null;
+                if (this.check('STRING') || this.check('IDENTIFIER') || this.isKeywordToken(this.peek().type)) {
+                    key = this.advance();
+                } else {
+                    key = this.parseExpression();
+                }
                 this.consume('COLON', 'Expected : after property key');
-                const value = this.parseExpression();
+                const valueStart = this.current;
+                let value;
+                try {
+                    value = this.parseExpression();
+                } catch (error) {
+                    // Recover for complex syntaxes (JSX/function bodies) we don't fully parse yet.
+                    this.current = valueStart;
+                    value = this.parseLooseValueUntilBoundary();
+                }
                 
-                if (key.type === 'STRING' || key.type === 'IDENTIFIER') {
+                if (key && (key.type === 'STRING' || key.type === 'IDENTIFIER' || this.isKeywordToken(key.type))) {
                     properties[key.literal || key.value] = value;
                 }
             } while (this.match('COMMA'));
@@ -375,7 +391,7 @@ class BembaParser {
             return new ExpressionNode(operator.type, right);
         }
         
-        if (this.check(BEMBA_SYNTAX.AWAIT)) {
+        if (this.check('AWAIT')) {
             return this.parseAwaitExpression();
         }
         
@@ -414,10 +430,20 @@ class BembaParser {
     }
     
     parsePrimary() {
-        if (this.match('FALSE')) return { type: 'BOOLEAN', value: false };
-        if (this.match('TRUE')) return { type: 'BOOLEAN', value: true };
+        if (this.match('BOOLEAN')) {
+            const value = this.previous().literal;
+            return { type: 'BOOLEAN', value: value === 'ee' };
+        }
         if (this.match('NUMBER', 'STRING')) return this.previous();
         if (this.match('IDENTIFIER')) return this.previous();
+        
+        if (this.check('LEFT_BRACE')) {
+            return this.parseInlineObject();
+        }
+        
+        if (this.check('LEFT_BRACKET')) {
+            return this.parseInlineArray();
+        }
         
         if (this.match('LEFT_PAREN')) {
             const expr = this.parseExpression();
@@ -447,7 +473,7 @@ class BembaParser {
     
     // Import/Export parsing
     parseImport() {
-        this.advance(); // consume 'import'
+        this.consumeKeyword('import', 'Expected import');
         
         const specifiers = [];
         let source = '';
@@ -466,16 +492,16 @@ class BembaParser {
             specifiers.push({ name, alias: null, isDefault: true });
         }
         
-        this.consume('from', 'Expected from after import');
+        this.consumeKeyword('from', 'Expected from after import');
         source = this.consume('STRING', 'Expected import source').literal;
         
         return new ImportNode(source, specifiers);
     }
     
     parseExport() {
-        this.advance(); // consume 'export'
+        this.consumeKeyword('export', 'Expected export');
         
-        const isDefault = this.match('default');
+        const isDefault = this.matchKeyword('default');
         const declaration = this.parseStatement();
         
         return new ExportNode(declaration, isDefault);
@@ -483,7 +509,8 @@ class BembaParser {
     
     // Variable declaration parsing
     parseVariableDeclaration() {
-        const kind = this.previous().type;
+        const kindToken = this.advance();
+        const kind = kindToken.literal || kindToken.type;
         const name = this.consume('IDENTIFIER', 'Expected variable name').literal;
         
         let initializer = null;
@@ -496,12 +523,12 @@ class BembaParser {
     
     // Function declaration parsing
     parseFunctionDeclaration() {
-        const isAsync = this.check(BEMBA_SYNTAX.ASYNC);
+        const isAsync = this.check('ASYNC');
         if (isAsync) {
-            this.advance(); // consume 'lombako'
+            this.advance(); // consume async keyword
         }
         
-        this.advance(); // consume 'nokuti'
+        this.consume('FUNCTION', 'Expected function keyword');
         
         const name = this.consume('IDENTIFIER', 'Expected function name').literal;
         this.consume('LEFT_PAREN', 'Expected ( after function name');
@@ -529,7 +556,7 @@ class BembaParser {
     
     // Await expression parsing
     parseAwaitExpression() {
-        this.advance(); // consume 'leka'
+        this.consume('AWAIT', 'Expected await keyword');
         const argument = this.parseExpression();
         return {
             type: 'AwaitExpression',
@@ -541,7 +568,18 @@ class BembaParser {
         const statements = [];
         
         while (!this.check('RIGHT_BRACE') && !this.isAtEnd()) {
-            statements.push(this.parseStatement());
+            const statementStart = this.current;
+            try {
+                statements.push(this.parseStatement());
+            } catch (error) {
+                this.current = statementStart;
+                const raw = this.parseLooseStatementUntilBoundary();
+                if (raw) {
+                    statements.push(raw);
+                } else if (this.current === statementStart) {
+                    this.advance();
+                }
+            }
         }
         
         this.consume('RIGHT_BRACE', 'Expected } after block');
@@ -559,9 +597,9 @@ class BembaParser {
         const thenBranch = this.parseBlock();
         let elseBranch = null;
         
-        if (this.check(BEMBA_SYNTAX.ELSE)) {
+        if (this.check('ELSE')) {
             this.advance(); // consume 'kapena'
-            if (this.check(BEMBA_SYNTAX.IF)) {
+            if (this.check('IF')) {
                 // else if
                 elseBranch = this.parseIfStatement();
             } else {
@@ -583,7 +621,7 @@ class BembaParser {
         this.consume('LEFT_PAREN', 'Expected ( after kwa');
         
         const variable = this.consume('IDENTIFIER', 'Expected variable name');
-        this.consume(BEMBA_SYNTAX.IN, 'Expected mu');
+        this.consume('IN', 'Expected mu');
         const iterable = this.parseExpression();
         
         this.consume('RIGHT_PAREN', 'Expected ) after for loop');
@@ -623,7 +661,7 @@ class BembaParser {
         let catchBlock = null;
         let finallyBlock = null;
         
-        if (this.check(BEMBA_SYNTAX.CATCH)) {
+        if (this.check('CATCH')) {
             this.advance(); // consume 'kwata'
             this.consume('LEFT_PAREN', 'Expected ( after kwata');
             const errorVar = this.consume('IDENTIFIER', 'Expected error variable name');
@@ -635,7 +673,7 @@ class BembaParser {
             };
         }
         
-        if (this.check(BEMBA_SYNTAX.FINALLY)) {
+        if (this.check('FINALLY')) {
             this.advance(); // consume 'paumalilo'
             this.consume('LEFT_BRACE', 'Expected { after paumalilo');
             finallyBlock = this.parseBlock();
@@ -689,6 +727,7 @@ class BembaParser {
     }
     
     check(type) {
+        this.skipTrivia();
         if (this.isAtEnd()) return false;
         return this.peek().type === type;
     }
@@ -713,6 +752,159 @@ class BembaParser {
     consume(type, message) {
         if (this.check(type)) return this.advance();
         throw new Error(message);
+    }
+    
+    checkKeyword(keyword) {
+        this.skipTrivia();
+        if (this.isAtEnd()) return false;
+        const token = this.peek();
+        return token.type === 'IDENTIFIER' && token.literal === keyword;
+    }
+    
+    matchKeyword(keyword) {
+        if (this.checkKeyword(keyword)) {
+            this.advance();
+            return true;
+        }
+        return false;
+    }
+    
+    consumeKeyword(keyword, message) {
+        if (this.checkKeyword(keyword)) return this.advance();
+        throw new Error(message);
+    }
+    
+    parseInlineObject() {
+        this.consume('LEFT_BRACE', 'Expected {');
+        const properties = {};
+        let rawPropertyIndex = 0;
+        
+        if (!this.check('RIGHT_BRACE')) {
+            do {
+                let keyToken;
+                if (this.check('STRING') || this.check('IDENTIFIER') || this.isKeywordToken(this.peek().type)) {
+                    keyToken = this.advance();
+                } else {
+                    keyToken = { literal: this.tokenToSource(this.advance()) };
+                }
+                
+                if (!this.match('COLON')) {
+                    this.current = Math.max(0, this.current - 1);
+                    const raw = this.parseLooseValueUntilBoundary();
+                    properties[`__raw_${rawPropertyIndex++}`] = raw;
+                    continue;
+                }
+                
+                const valueStart = this.current;
+                let value;
+                try {
+                    value = this.parseExpression();
+                } catch (error) {
+                    this.current = valueStart;
+                    value = this.parseLooseValueUntilBoundary();
+                }
+                
+                properties[keyToken.literal || keyToken.value] = value;
+            } while (this.match('COMMA'));
+        }
+        
+        this.consume('RIGHT_BRACE', 'Expected }');
+        return { type: 'ObjectLiteral', properties };
+    }
+    
+    parseInlineArray() {
+        this.consume('LEFT_BRACKET', 'Expected [');
+        const elements = [];
+        
+        if (!this.check('RIGHT_BRACKET')) {
+            do {
+                const valueStart = this.current;
+                let value;
+                try {
+                    value = this.parseExpression();
+                } catch (error) {
+                    this.current = valueStart;
+                    value = this.parseLooseValueUntilBoundary(['COMMA', 'RIGHT_BRACKET']);
+                }
+                elements.push(value);
+            } while (this.match('COMMA'));
+        }
+        
+        this.consume('RIGHT_BRACKET', 'Expected ]');
+        return { type: 'ArrayLiteral', elements };
+    }
+    
+    parseLooseValueUntilBoundary(boundaryTypes = ['COMMA', 'RIGHT_BRACE']) {
+        const start = this.current;
+        let parenDepth = 0;
+        let braceDepth = 0;
+        let bracketDepth = 0;
+        
+        while (!this.isAtEnd()) {
+            const token = this.peek();
+            if (
+                parenDepth === 0 &&
+                braceDepth === 0 &&
+                bracketDepth === 0 &&
+                boundaryTypes.includes(token.type)
+            ) {
+                break;
+            }
+            
+            if (token.type === 'LEFT_PAREN') parenDepth++;
+            else if (token.type === 'RIGHT_PAREN' && parenDepth > 0) parenDepth--;
+            else if (token.type === 'LEFT_BRACE') braceDepth++;
+            else if (token.type === 'RIGHT_BRACE') {
+                if (braceDepth === 0 && boundaryTypes.includes('RIGHT_BRACE')) break;
+                if (braceDepth > 0) braceDepth--;
+            } else if (token.type === 'LEFT_BRACKET') bracketDepth++;
+            else if (token.type === 'RIGHT_BRACKET' && bracketDepth > 0) bracketDepth--;
+            
+            this.advance();
+        }
+        
+        const rawTokens = this.tokens.slice(start, this.current);
+        const raw = rawTokens.map((token) => this.tokenToSource(token)).join(' ').trim();
+        return { type: 'RawValue', raw };
+    }
+    
+    parseLooseStatementUntilBoundary() {
+        const start = this.current;
+        while (!this.isAtEnd() && !this.check('RIGHT_BRACE') && !this.check('SEMICOLON') && !this.check('NEWLINE')) {
+            this.advance();
+        }
+        
+        if (this.check('SEMICOLON')) this.advance();
+        const rawTokens = this.tokens.slice(start, this.current);
+        if (rawTokens.length === 0) return null;
+        
+        return {
+            type: 'RawStatement',
+            raw: rawTokens.map((token) => this.tokenToSource(token)).join(' ').trim()
+        };
+    }
+    
+    tokenToSource(token) {
+        if (!token) return '';
+        if (token.lexeme && token.lexeme.length > 0) return token.lexeme;
+        if (token.literal !== null && token.literal !== undefined) return String(token.literal);
+        return '';
+    }
+    
+    isKeywordToken(type) {
+        const keywordTokenTypes = new Set([
+            'COMPONENT_DEF', 'PAGE_DEF', 'PROPS', 'STATE', 'CONSTRUCTOR', 'RENDER',
+            'DATA_FETCHING', 'RETURN', 'FUNCTION', 'ASYNC', 'AWAIT', 'THIS',
+            'IF', 'ELSE', 'FOR', 'IN', 'WHILE', 'DO', 'TRY', 'CATCH', 'FINALLY',
+            'SWITCH', 'CASE', 'BREAK', 'CONTINUE'
+        ]);
+        return keywordTokenTypes.has(type);
+    }
+    
+    skipTrivia() {
+        while (!this.isAtEnd() && this.peek().type === 'NEWLINE') {
+            this.current++;
+        }
     }
     
     // Backward compatibility method for old syntax

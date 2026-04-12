@@ -20,18 +20,48 @@ function compileBemba(code) {
                 const pageName = pageMatch[1];
                 const pageData = pageMatch[2];
                 
-                // Extract title and content
-                const titleMatch = pageData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
-                const contentMatch = pageData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
+                // Extract title and content from page level
+                const pageTitleMatch = pageData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
+                const pageContentMatch = pageData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
                 
-                const title = titleMatch ? titleMatch[1] : pageName;
-                const content = contentMatch ? contentMatch[1] : 'Welcome to BembaJS!';
+                const pageTitle = pageTitleMatch ? pageTitleMatch[1] : pageName;
+                const pageContent = pageContentMatch ? pageContentMatch[1] : 'Welcome to BembaJS!';
                 
                 // Extract sections (ifiputulwa) - improved parsing
                 let sections = '';
+                let sectionSteps = '';
+                
                 const sectionsMatch = pageData.match(/ifiputulwa:\s*\[([\s\S]*?)\]/);
                 if (sectionsMatch) {
                     const sectionsData = sectionsMatch[1];
+                    
+                    // Extract amalembelo (steps) array
+                    const stepsMatch = sectionsData.match(/amalembelo:\s*\[([\s\S]*?)\]/);
+                    if (stepsMatch) {
+                        const stepsData = stepsMatch[1];
+                        // Extract individual steps - handle both single and double quotes
+                        const stepMatches = stepsData.match(/['"`]([^'"`]+)['"`]/g);
+                        if (stepMatches) {
+                            sectionSteps = stepMatches.map((step, index) => {
+                                const stepText = step.replace(/^['"`]|['"`]$/g, '');
+                                const isLast = index === stepMatches.length - 1;
+                                const marginClass = isLast ? '' : ' mb-2';
+                                return `<li class="tracking-[-0.01em]${marginClass}">${stepText}</li>`;
+                            }).join('\n                ');
+                        }
+                    }
+                    
+                    // Fallback: if no amalembelo found, use umutwe and ilyashi
+                    if (!sectionSteps) {
+                        const sectionTitleMatch = sectionsData.match(/umutwe:\s*['"`]([^'"`]+)['"`]/);
+                        const sectionContentMatch = sectionsData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
+                        
+                        if (sectionTitleMatch || sectionContentMatch) {
+                            const title = sectionTitleMatch ? sectionTitleMatch[1] : '';
+                            const content = sectionContentMatch ? sectionContentMatch[1] : '';
+                            sectionSteps = `<li class="tracking-[-0.01em] mb-2">${title}</li><li class="tracking-[-0.01em]">${content}</li>`;
+                        }
+                    }
                     
                     // Look for buttons directly in the sections data - improved parsing
                     const buttonMatches = sectionsData.match(/ilembo:\s*['"`]([^'"`]+)['"`]/g);
@@ -84,12 +114,14 @@ function compileBemba(code) {
                             // First button is primary (Deploy Now), second is secondary (Documentation)
                             const isPrimary = index === 0;
                             const buttonClass = isPrimary ? 
-                                'ibatani' :
-                                'ibatani secondary';
+                                'flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3 text-sm font-medium text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] sm:w-auto sm:min-w-[158px] whitespace-nowrap' :
+                                'flex h-12 w-full items-center justify-center gap-2 rounded-full border border-solid border-black/[.08] px-6 py-3 text-sm font-medium transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] sm:w-auto sm:min-w-[158px] whitespace-nowrap';
+                            
+                            const vercelIcon = `<svg width="20" height="20" viewBox="0 0 76 65" fill="none" xmlns="http://www.w3.org/2000/svg" class="dark:invert"><path d="M37.5274 0L75.0548 65H0L37.5274 0Z" fill="currentColor"/></svg>`;
                             
                             const buttonContent = isPrimary ? 
-                                `<img alt="Vercel logomark" loading="lazy" width="16" height="16" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/vercel.svg">${btnText}` :
-                                btnText;
+                                `${vercelIcon}<span>${btnText}</span>` :
+                                `<span>${btnText}</span>`;
                             
                             return `<a class="${buttonClass}" href="${href}" target="_blank" rel="noopener noreferrer">${buttonContent}</a>`;
                         }).join('');
@@ -109,17 +141,46 @@ function compileBemba(code) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${title}</title>
+    <title>${pageTitle}</title>
+    <meta name="description" content="${pageContent}">
     <link rel="icon" type="image/png" href="/favicon.png">
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="apple-touch-icon" href="/favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: 'hsl(var(--background))',
+                        foreground: 'hsl(var(--foreground))',
+                    },
+                    fontFamily: {
+                        sans: ['var(--font-geist-sans)', 'Inter', 'system-ui', 'sans-serif'],
+                        mono: ['var(--font-geist-mono)', 'SF Mono', 'Monaco', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
         :root {
-            --font-geist-sans: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-            --font-geist-mono: 'Geist Mono', 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+            --background: 0 0% 100%;
+            --foreground: 0 0% 9%;
+            --font-geist-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+            --font-geist-mono: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
         }
-        
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background: 0 0% 4%;
+                --foreground: 0 0% 93%;
+            }
+        }
+
         body {
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
             font-family: var(--font-geist-sans);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -128,15 +189,22 @@ function compileBemba(code) {
         ${customStyles}
     </style>
 </head>
-<body class="__variable_4d318d __variable_ea5f4b antialiased">
-    <div class="container">
-        <main>
-            <img alt="BembaJS logo" width="100" height="20" decoding="async" data-nimg="1" class="dark:invert" style="color:transparent" src="/bemba-logo.svg">
-            <div class="content-section">
-                <h1>Ukutampa bwino, lemba pali amapeji/index.bemba file</h1>
-                <p>Uleefwaya ukutampa nelyo ukufwailko ifpefyo fyakukonkelemo? Ya ku <a href="https://bembajs.dev/learn">Learning Center</a></p>
+<body class="antialiased">
+    <div class="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
+        <main class="flex min-h-screen w-full max-w-3xl flex-col items-center justify-center py-32 px-16 bg-white dark:bg-black sm:items-start">
+            <img
+                src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350"
+                alt="BembaJS logo"
+                width="180"
+                height="38"
+                class="dark:invert"
+            />
+            <div class="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left mt-8">
+                <ol class="list-inside list-decimal text-sm font-[family-name:var(--font-geist-mono)]">
+                    ${sectionSteps}
+                </ol>
             </div>
-            <div class="button-container">
+            <div class="flex flex-col gap-4 text-base font-medium sm:flex-row mt-8">
                 ${sections}
             </div>
         </main>
