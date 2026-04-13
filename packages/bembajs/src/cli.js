@@ -280,6 +280,7 @@ program
         console.log('');
         console.log('Commands:');
         console.log('   bemba panga <name>    - Create project (prompts template)');
+        console.log('   bemba template sync   - Refresh docs/starter from bembajs-core (run inside a project)');
         console.log('   bemba tungulula       - Start dev server');
         console.log('   bemba akha            - Export static HTML (→ dist/)');
         console.log('   bemba fumya           - Export static HTML (→ out/)');
@@ -294,8 +295,19 @@ program
         console.log('Community: https://github.com/bembajs/bembajs');
     });
 
-program.parse();
-
-if (!process.argv.slice(2).length) {
-    program.outputHelp();
+// `template` (e.g. `bemba template sync`) lives in bembajs-core; forward so `bunx bemba` works the same as `bembajs-core`.
+const forwardArgv = process.argv.slice(2);
+if (forwardArgv[0] === 'template') {
+    const CoreCli = resolveCoreCliClass();
+    if (!CoreCli) {
+        console.error('bembajs-core is required for `bemba template`. In a project: bun add -d bembajs-core');
+        process.exit(1);
+    }
+    const coreCli = new CoreCli();
+    coreCli.run();
+} else {
+    program.parse();
+    if (!process.argv.slice(2).length) {
+        program.outputHelp();
+    }
 }
