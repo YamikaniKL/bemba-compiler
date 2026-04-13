@@ -57,6 +57,14 @@ class BembaCLI {
             .option('--starter', 'Overwrite starter pages/shell/partials/README/.gitignore/.editorconfig (destructive)')
             .action((options) => this.syncTemplateFromPackage(options));
 
+        // Single-token alias (some runners / older help expect one subcommand)
+        this.program
+            .command('sync-template')
+            .description('Same as `template sync` — refresh docs/starter from this bembajs-core package')
+            .option('-t, --template <template>', 'base | ui (default: ui if ifikopo/cipanda/StarterCard.bemba exists, else base)')
+            .option('--starter', 'Overwrite starter pages/shell/partials/README/.gitignore/.editorconfig (destructive)')
+            .action((options) => this.syncTemplateFromPackage(options));
+
         // Start development server
         this.program
             .command('tungulula')

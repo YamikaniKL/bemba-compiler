@@ -1,5 +1,7 @@
 # Code style and UI (BembaJS starter)
 
+This Markdown file is **for developers** (optional lint/style notes). It is **not** rendered on your site. Your visible UI comes from `amapeji/*.bemba` and `ifikopo/**/*.bemba`.
+
 Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` you add (scripts, emitted React, etc.).
 
 ## Linting JavaScript (optional)

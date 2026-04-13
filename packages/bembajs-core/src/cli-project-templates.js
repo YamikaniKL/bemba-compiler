@@ -168,13 +168,20 @@ function starterCardPartial() {
         Duplicate it, rename the file, and include it from pages with <code>ingisa</code>.
       </p>
       <div class="bem-card__actions">
-        <a class="bem-btn bem-btn--primary" href="https://bembajs.dev/docs" target="_blank" rel="noopener noreferrer">BembaJS docs</a>
-        <a class="bem-btn bem-btn--secondary" href="/about">About this app</a>
+        <a class="bem-btn bem-btn--primary" href="/about">About</a>
+        <span class="bem-card__hint">Add your own links in <code>ifikopo/cipanda/StarterCard.bemba</code>.</span>
       </div>
     </section>
   \`,
   imikalile: \`
-    .bem-card__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .bem-card__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; }
+    .bem-card__hint {
+      font-size: 0.8125rem;
+      color: var(--muted);
+      line-height: 1.4;
+      max-width: 14rem;
+    }
+    .bem-card__hint code { font-size: 0.92em; }
     .bem-card--starter code {
       font-size: 0.8em;
       padding: 0.12em 0.4em;
@@ -198,12 +205,8 @@ function indexPage() {
       ilyashi: 'Run the dev server, edit pages under amapeji/, then add partials under ifikopo/cipanda/.',
       amabatani: [
         {
-          ilembo: 'Deploy now',
-          pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
-        },
-        {
-          ilembo: 'Read our docs',
-          pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+          ilembo: 'About',
+          pakuKlikisha: 'window.location.href = "/about"'
         }
       ]
     }
@@ -227,12 +230,8 @@ function indexPageUi() {
       ilyashi: 'Run the dev server, edit amapeji/, and extend ifikopo/cipanda/StarterCard.bemba or add new partials.',
       amabatani: [
         {
-          ilembo: 'Deploy now',
-          pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
-        },
-        {
-          ilembo: 'Read our docs',
-          pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+          ilembo: 'About',
+          pakuKlikisha: 'window.location.href = "/about"'
         }
       ]
     }
@@ -318,7 +317,9 @@ Optional reference: **\`docs/CODE-STYLE-AND-UI.md\`** — linting for \`.js\` fi
 
 ## Stay in sync with the scaffold
 
-After upgrading **bembajs-core**, run \`bunx bemba template sync\` to refresh \`docs/CODE-STYLE-AND-UI.md\` from the package. Add \`--starter\` only if you intentionally want default shell/pages/README replaced (**overwrites** your edits to those files).
+**New projects** (\`bemba panga …\`) already copy the latest starter from your installed **bembajs** / **bembajs-core** — you do **not** run \`template sync\` for each new app. Use sync only for an **existing** folder after upgrading the CLI, or to pull doc/starter updates without re-scaffolding.
+
+After upgrading **bembajs-core**, run \`bunx bemba template sync\` to refresh \`docs/CODE-STYLE-AND-UI.md\`. Add \`--starter\` only if you want default shell/pages/README replaced (**overwrites** your edits).
 
 ## Project structure
 
