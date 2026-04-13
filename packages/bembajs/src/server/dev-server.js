@@ -41,6 +41,9 @@ function compilePangaIpepaHtmlViaParser(code, compileOpts = {}) {
     if (!BembaParserClass || !code.includes('pangaIpepa')) return null;
     try {
         const parser = new BembaParserClass();
+        if (compileOpts.projectRoot) {
+            parser.projectRoot = compileOpts.projectRoot;
+        }
         const html = parser.compile(code, compileOpts);
         return isHtmlString(html) ? html : null;
     } catch (_) {
@@ -506,13 +509,24 @@ class BembaDevServer {
         return html.replace('</body>', `${snippet}</body>`);
     }
 
-    compileBemba(code, currentPath = '/') {
-        return this.wrapDevHtml(
-            compileBembaToHtml(code, {
-                projectRoot: this.projectRoot,
-                currentPath: currentPath || '/'
-            })
-        );
+    /**
+     * @param {string} code
+     * @param {string | { currentPath?: string, pageFilePath?: string }} pathOrOpts - legacy: path string only
+     */
+    compileBemba(code, pathOrOpts = '/') {
+        const opts =
+            pathOrOpts && typeof pathOrOpts === 'object'
+                ? {
+                      projectRoot: this.projectRoot,
+                      currentPath: pathOrOpts.currentPath || '/',
+                      pageFilePath: pathOrOpts.pageFilePath || ''
+                  }
+                : {
+                      projectRoot: this.projectRoot,
+                      currentPath: pathOrOpts || '/',
+                      pageFilePath: ''
+                  };
+        return this.wrapDevHtml(compileBembaToHtml(code, opts));
     }
 
     sendNoCacheHtml(res, html) {
@@ -623,9 +637,12 @@ class BembaDevServer {
                 }
 
                 const currentPath = typeof req.body?.currentPath === 'string' ? req.body.currentPath : '/';
+                const pageFilePath =
+                    typeof req.body?.pageFilePath === 'string' ? req.body.pageFilePath : '';
                 const result = compileBembaToHtml(code, {
                     projectRoot: this.projectRoot,
-                    currentPath
+                    currentPath,
+                    pageFilePath
                 });
                 res.json({ 
                     success: true, 
@@ -706,7 +723,10 @@ class BembaDevServer {
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = this.compileBemba(code, req.path);
+                    const html = this.compileBemba(code, {
+                        currentPath: req.path,
+                        pageFilePath: pagePath
+                    });
                     this.sendNoCacheHtml(res, html);
                 } catch (error) {
                     res.status(500).send(`Error compiling page: ${error.message}`);
@@ -723,7 +743,10 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = this.compileBemba(code, '/');
+                const html = this.compileBemba(code, {
+                    currentPath: '/',
+                    pageFilePath: indexPath
+                });
                 this.sendNoCacheHtml(res, html);
             } catch (error) {
                 res.status(500).send(`Error compiling home page: ${error.message}`);

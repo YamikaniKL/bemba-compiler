@@ -171,7 +171,8 @@ class BembaDevServer {
                 try {
                     const doc = this.parser.compile(rawSource, {
                         projectRoot: this.projectRoot,
-                        currentPath: req.path || '/'
+                        currentPath: req.path || '/',
+                        pageFilePath: route.filePath
                     });
                     if (
                         typeof doc === 'string' &&
