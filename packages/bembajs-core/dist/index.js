@@ -6,6 +6,8 @@ const BembaGenerator = require('./generator');
 const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { version: CORE_VERSION } = require('../package.json');
 const { exportStaticHtmlSite, routeToOutHtmlPath } = require('./static-html-export');
+const { resolveCssImports } = require('./css-imports');
+const { publicAssetUrl, buildPictureHtml } = require('./asset-helpers');
 const { shouldUseGo, runGoEngine } = require('./go-engine');
 const {
     buildHeadMetaTags,
@@ -138,6 +140,9 @@ module.exports = {
     // Main API
     compile,
     listStaticPageDependencyPaths,
+    resolveCssImports,
+    publicAssetUrl,
+    buildPictureHtml,
     exportStaticHtmlSite,
     routeToOutHtmlPath,
     buildHeadMetaTags,

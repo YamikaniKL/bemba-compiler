@@ -39,6 +39,11 @@
     "url": "https://github.com/bembajs/bembajs/issues"
   },
   "homepage": "https://bembajs.dev",
+  "pnpm": {
+    "overrides": {
+      "bembajs-core": "link:./packages/bembajs-core"
+    }
+  },
   "devDependencies": {
     "prettier": "^3.4.2",
     "eslint": "^8.57.0",

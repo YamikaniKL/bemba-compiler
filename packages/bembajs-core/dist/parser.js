@@ -18,6 +18,7 @@ const {
     ASTUtils
 } = require('./ast');
 const { BEMBA_SYNTAX, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
+const { resolveCssImports } = require('./css-imports');
 const fs = require('fs');
 const path = require('path');
 
@@ -113,6 +114,23 @@ function extractTopLevelBraceObjectsFromArrayInner(inner) {
 /**
  * Replace tokens in NavBar partial HTML with data from umusango (site name + nav links + active route).
  */
+/** Substitute `{{umutwe}}` in partial HTML with escaped prop values (ingisa `amashiwi`). */
+function applyPartialPropsTemplate(html, props) {
+    if (!html || !props || typeof props !== 'object') return html || '';
+    let out = String(html);
+    for (const key of Object.keys(props)) {
+        if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) continue;
+        const re = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+        const v = String(props[key] ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        out = out.replace(re, v);
+    }
+    return out;
+}
+
 function fillNavShellPlaceholders(template, siteName, navLinks, activePath) {
     const brand = escapeHtmlNav(siteName || 'BembaJS');
     const linksHtml = (navLinks || [])
@@ -1395,7 +1413,8 @@ class BembaParser {
         const projectRoot = options.projectRoot;
         let layoutCode = options.layoutCode;
         if (layoutCode == null && projectRoot) {
-            const layoutPath = path.join(projectRoot, BEMBA_FOLDERS.PAGES, BEMBA_FILES.SITE_SHELL);
+            const variant = this.extractShellVariantFromPage(code);
+            const layoutPath = this.resolveSiteShellPath(projectRoot, variant);
             if (fs.existsSync(layoutPath)) {
                 layoutCode = fs.readFileSync(layoutPath, 'utf8');
             }
@@ -1413,18 +1432,35 @@ class BembaParser {
         const footerCopyright = siteLayout ? this.extractFooterCopyrightFromNewSyntax(shellSource) : '';
         const footerLegalLinks = siteLayout ? this.extractFooterLegalLinksFromNewSyntax(shellSource) : [];
 
-        const pageStyles = this.extractStylesFromNewSyntax(code);
-        const layoutStyles = useSharedShell ? this.extractStylesFromNewSyntax(layoutCode) : '';
+        const rootAbs = projectRoot ? path.resolve(projectRoot) : null;
+        const pageStylesRaw = this.extractStylesFromNewSyntax(code);
+        const layoutStylesRaw = useSharedShell ? this.extractStylesFromNewSyntax(layoutCode) : '';
+        const layoutDir = projectRoot ? path.join(projectRoot, BEMBA_FOLDERS.PAGES) : null;
+        const pageFilePath = options.pageFilePath ? String(options.pageFilePath) : '';
+        const pageDir =
+            projectRoot && pageFilePath ? path.dirname(path.resolve(pageFilePath)) : rootAbs;
+        const layoutStyles =
+            useSharedShell && layoutDir && rootAbs
+                ? resolveCssImports(layoutStylesRaw, layoutDir, new Set(), rootAbs)
+                : layoutStylesRaw;
+        const pageStyles =
+            projectRoot && rootAbs
+                ? resolveCssImports(pageStylesRaw, pageDir || rootAbs, new Set(), rootAbs)
+                : pageStylesRaw;
         let styles = [layoutStyles, pageStyles].filter(Boolean).join('\n\n');
 
-        const ingisaNames = projectRoot ? this.extractIngisaNames(code) : [];
-        const partialBundle = this.loadIngisaPartials(projectRoot, ingisaNames);
-
-        const pageFilePath = options.pageFilePath ? String(options.pageFilePath) : '';
+        const ingisaEntries = projectRoot ? this.extractIngisaEntries(code) : [];
+        const partialBundle = this.loadIngisaPartials(projectRoot, ingisaEntries);
         const importBundle =
             projectRoot && pageFilePath
                 ? this.loadStaticImportsFromPage(projectRoot, pageFilePath, code)
-                : { navShell: null, bodyHtml: '', bodyCss: '', skippedDynamic: [] };
+                : {
+                      navShell: null,
+                      bodyHtml: '',
+                      bodyCss: '',
+                      headHtml: '',
+                      skippedDynamic: []
+                  };
 
         if (importBundle.bodyCss) {
             styles = [styles, importBundle.bodyCss].filter(Boolean).join('\n\n');
@@ -1468,7 +1504,17 @@ class BembaParser {
         const bodyBlocks = this.extractIfiputulwaBlocks(code);
 
         const htmlLang = options.htmlLang != null ? String(options.htmlLang) : 'en';
-        const headExtra = options.headExtra != null ? String(options.headExtra) : '';
+        let headExtra = options.headExtra != null ? String(options.headExtra) : '';
+        const pageHeadFrags = this.extractImitwePaHTMLFragmentsFromSource(code);
+        if (pageHeadFrags.length) {
+            headExtra = [pageHeadFrags.join('\n'), headExtra].filter(Boolean).join('\n');
+        }
+        if (importBundle.headHtml) {
+            headExtra = [importBundle.headHtml, headExtra].filter(Boolean).join('\n');
+        }
+        if (partialBundle.headHtml) {
+            headExtra = [partialBundle.headHtml, headExtra].filter(Boolean).join('\n');
+        }
         const bembaSiteScript = Boolean(options.bembaSiteScript);
 
         return this.generateModernLayout(appName, sections, styles, {
@@ -1525,12 +1571,14 @@ class BembaParser {
         }
 
         const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
-        const shellPath = path.join(projectRoot, BEMBA_FOLDERS.PAGES, BEMBA_FILES.SITE_SHELL);
-        if (siteLayout) add(shellPath);
+        if (siteLayout) {
+            const variant = this.extractShellVariantFromPage(code);
+            add(this.resolveSiteShellPath(projectRoot, variant));
+        }
 
-        const ingisaNames = this.extractIngisaNames(code);
-        for (const n of ingisaNames) {
-            const fp = this.resolveIngisaPartialFilePath(projectRoot, n);
+        const ingisaEntries = this.extractIngisaEntries(code);
+        for (const ent of ingisaEntries) {
+            const fp = this.resolveIngisaPartialFilePath(projectRoot, ent.name);
             if (fp) add(fp);
         }
 
@@ -1585,8 +1633,8 @@ class BembaParser {
                 }
             }
 
-            for (const n of this.extractIngisaNames(src)) {
-                const p2 = this.resolveIngisaPartialFilePath(projectRoot, n);
+            for (const ent of this.extractIngisaEntries(src)) {
+                const p2 = this.resolveIngisaPartialFilePath(projectRoot, ent.name);
                 if (p2) {
                     add(p2);
                     queue.push(p2);
@@ -1604,29 +1652,22 @@ class BembaParser {
         return m ? m[1] : '';
     }
 
-    /** Page lists partials: ingisa: [ 'Card', 'Promo' ] → loads ifikopo/Card.bemba, etc. */
+    /** @deprecated Use extractIngisaEntries — kept for string-only `ingisa` compatibility. */
     extractIngisaNames(code) {
-        const inner = this.extractArrayBlockAfterKey(code, 'ingisa');
-        if (!inner) return [];
-        const names = [];
-        const re = /['"]([a-zA-Z0-9_-]+)['"]/g;
-        let m;
-        while ((m = re.exec(inner)) !== null) {
-            names.push(m[1]);
-        }
-        return names;
+        return this.extractIngisaEntries(code).map((e) => e.name);
     }
 
     /**
-     * Partial file: pangaIcapaba({ ibeensi: `raw HTML`, imikalile: `css` })
+     * Partial file: pangaIcapaba({ ibeensi, imikalile, imitwePaHTML })
      */
     extractPangaIcapabaPartial(source) {
         if (!/\bpangaIcapaba\s*\(/.test(source)) {
-            return { html: '', css: '' };
+            return { html: '', css: '', headFragments: [] };
         }
         const html = this.extractBacktickField(source, 'ibeensi') || '';
         const css = this.extractStylesFromNewSyntax(source);
-        return { html, css };
+        const headFragments = this.extractImitwePaHTMLFragmentsFromSource(source);
+        return { html, css, headFragments };
     }
 
     /** Resolve `ifikopo/<Name>.bemba` or `ifikopo/cipanda/<Name>.bemba` when present. */
@@ -1640,18 +1681,20 @@ class BembaParser {
         return null;
     }
 
-    loadIngisaPartials(projectRoot, names) {
-        if (!projectRoot || !names || !names.length) {
-            return { html: '', css: '', navShell: null };
+    loadIngisaPartials(projectRoot, entries) {
+        if (!projectRoot || !entries || !entries.length) {
+            return { html: '', css: '', navShell: null, headHtml: '' };
         }
+        const rootAbs = path.resolve(projectRoot);
         const htmlParts = [];
         const cssParts = [];
+        const headParts = [];
         let navShell = null;
         const navName = BEMBA_INGISA.NAV_BAR;
-        for (const rawName of names) {
-            const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
+        for (const entry of entries) {
+            const safe = String(entry.name || '').replace(/[^a-zA-Z0-9_-]/g, '');
             if (!safe) continue;
-            const fp = this.resolveIngisaPartialFilePath(projectRoot, rawName);
+            const fp = this.resolveIngisaPartialFilePath(projectRoot, entry.name);
             if (!fp) continue;
             let src;
             try {
@@ -1660,18 +1703,32 @@ class BembaParser {
                 continue;
             }
             const frag = this.extractPangaIcapabaPartial(src);
+            const dir = path.dirname(fp);
+            const cssResolved = frag.css
+                ? resolveCssImports(frag.css, dir, new Set(), rootAbs)
+                : '';
+            if (frag.headFragments && frag.headFragments.length) {
+                headParts.push(...frag.headFragments);
+            }
             if (safe === navName) {
-                navShell = { html: frag.html || '', css: frag.css || '' };
+                navShell = { html: frag.html || '', css: cssResolved };
                 continue;
             }
-            if (frag.html) {
+            let htmlOut = frag.html || '';
+            htmlOut = applyPartialPropsTemplate(htmlOut, entry.props || {});
+            if (htmlOut) {
                 htmlParts.push(
-                    `<div class="bemba-ingisa" data-ingisa="${safe.replace(/"/g, '')}">${frag.html}</div>`
+                    `<div class="bemba-ingisa" data-ingisa="${safe.replace(/"/g, '')}">${htmlOut}</div>`
                 );
             }
-            if (frag.css) cssParts.push(frag.css);
+            if (cssResolved) cssParts.push(cssResolved);
         }
-        return { html: htmlParts.join('\n'), css: cssParts.join('\n\n'), navShell };
+        return {
+            html: htmlParts.join('\n'),
+            css: cssParts.join('\n\n'),
+            navShell,
+            headHtml: headParts.join('\n')
+        };
     }
 
     /**
@@ -1726,6 +1783,7 @@ class BembaParser {
             navShell: null,
             bodyHtml: '',
             bodyCss: '',
+            headHtml: '',
             skippedDynamic: []
         });
         if (!projectRoot || !pageFilePath) return emptyOut();
@@ -1739,8 +1797,10 @@ class BembaParser {
         }
         if (!importNodes.length) return emptyOut();
 
+        const rootAbs = path.resolve(projectRoot);
         const htmlParts = [];
         const cssParts = [];
+        const headParts = [];
         const skippedDynamic = [];
         let navShell = null;
 
@@ -1772,13 +1832,19 @@ class BembaParser {
 
             if (hasPartial) {
                 const frag = this.extractPangaIcapabaPartial(fileSrc);
+                if (frag.headFragments && frag.headFragments.length) {
+                    headParts.push(...frag.headFragments);
+                }
+                const cssResolved = frag.css
+                    ? resolveCssImports(frag.css, path.dirname(resolved), new Set(), rootAbs)
+                    : '';
                 const isNav =
                     local === BEMBA_INGISA.NAV_BAR ||
                     base === BEMBA_INGISA.NAV_BAR ||
                     (frag.html && frag.html.includes('{{BEMBA_NAV_BRAND}}'));
 
                 if (isNav && String(frag.html).trim()) {
-                    navShell = { html: frag.html, css: frag.css || '' };
+                    navShell = { html: frag.html, css: cssResolved };
                 } else {
                     const tag = String(local || base).replace(/"/g, '');
                     if (frag.html) {
@@ -1786,7 +1852,7 @@ class BembaParser {
                             `<div class="bemba-ingisa" data-ingisa="${tag}">${frag.html}</div>`
                         );
                     }
-                    if (frag.css) cssParts.push(frag.css);
+                    if (cssResolved) cssParts.push(cssResolved);
                 }
             }
         }
@@ -1795,6 +1861,7 @@ class BembaParser {
             navShell,
             bodyHtml: htmlParts.join('\n'),
             bodyCss: cssParts.join('\n\n'),
+            headHtml: headParts.join('\n'),
             skippedDynamic
         };
     }
@@ -2041,6 +2108,130 @@ class BembaParser {
             }
         }
         return code.slice(openBracket + 1, i - 1);
+    }
+
+    /**
+     * Trusted `<head>` fragments from `imitwePaHTML` on a page or `pangaIcapaba` partial.
+     * Single backtick block or array of backtick strings.
+     */
+    extractImitwePaHTMLFragmentsFromSource(source) {
+        if (!source) return [];
+        const one = source.match(/imitwePaHTML:\s*`([\s\S]*?)`/);
+        if (one) return [one[1].trim()].filter(Boolean);
+        const inner = this.extractArrayBlockAfterKey(source, 'imitwePaHTML');
+        if (!inner) return [];
+        const out = [];
+        const re = /`([\s\S]*?)`/g;
+        let m;
+        while ((m = re.exec(inner)) !== null) {
+            out.push(m[1].trim());
+        }
+        return out.filter(Boolean);
+    }
+
+    /** Page-only: which shell file to load (`amapeji/umusango-<variant>.bemba`). */
+    extractShellVariantFromPage(code) {
+        const m = code.match(/\bishiwiLyUmusango:\s*["']([^"']*)["']/);
+        return m ? m[1].trim().replace(/[^a-zA-Z0-9_-]/g, '') : '';
+    }
+
+    /** Resolved path to shared shell for this project + variant. */
+    resolveSiteShellPath(projectRoot, variant) {
+        if (!projectRoot) return null;
+        const pages = path.join(projectRoot, BEMBA_FOLDERS.PAGES);
+        if (variant) {
+            const vp = path.join(pages, `umusango-${variant}.bemba`);
+            if (fs.existsSync(vp)) return vp;
+        }
+        return path.join(pages, BEMBA_FILES.SITE_SHELL);
+    }
+
+    scanTopLevelIngisaElements(inner) {
+        const out = [];
+        let i = 0;
+        const s = String(inner || '').trim();
+        while (i < s.length) {
+            while (i < s.length && /[\s,]/.test(s[i])) i++;
+            if (i >= s.length) break;
+            const q = s[i];
+            if (q === '"' || q === "'") {
+                i++;
+                const start = i;
+                while (i < s.length && s[i] !== q) {
+                    if (s[i] === '\\') i++;
+                    i++;
+                }
+                out.push({ kind: 'str', raw: s.slice(start, i) });
+                i++;
+                continue;
+            }
+            if (q === '{') {
+                let depth = 0;
+                const start = i;
+                for (; i < s.length; i++) {
+                    if (s[i] === '{') depth++;
+                    else if (s[i] === '}') {
+                        depth--;
+                        if (depth === 0) {
+                            i++;
+                            out.push({ kind: 'obj', raw: s.slice(start, i) });
+                            break;
+                        }
+                    }
+                }
+                continue;
+            }
+            i++;
+        }
+        return out;
+    }
+
+    parseIngisaObjectBlock(raw) {
+        const ilembo = raw.match(/\bilembo:\s*["']([^"']*)["']/);
+        const name = ilembo ? ilembo[1] : '';
+        const props = {};
+        const amIdx = raw.search(/\bamashiwi:\s*\{/);
+        if (amIdx !== -1) {
+            const open = raw.indexOf('{', amIdx);
+            let depth = 0;
+            let k = open;
+            for (; k < raw.length; k++) {
+                if (raw[k] === '{') depth++;
+                else if (raw[k] === '}') {
+                    depth--;
+                    if (depth === 0) {
+                        const innerObj = raw.slice(open + 1, k);
+                        const kv = /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*:\s*["']([^"']*)["']/g;
+                        let m;
+                        while ((m = kv.exec(innerObj)) !== null) {
+                            props[m[1]] = m[2];
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return { name, props };
+    }
+
+    /**
+     * `ingisa` entries: string names or `{ ilembo: 'Partial', amashiwi: { umutwe: '…' } }`.
+     * Partials may use `{{umutwe}}` in `ibeensi` (HTML-escaped).
+     */
+    extractIngisaEntries(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'ingisa');
+        if (!inner || !inner.trim()) return [];
+        const els = this.scanTopLevelIngisaElements(inner);
+        const entries = [];
+        for (const el of els) {
+            if (el.kind === 'str') {
+                if (el.raw) entries.push({ name: el.raw, props: {} });
+            } else {
+                const row = this.parseIngisaObjectBlock(el.raw);
+                if (row.name) entries.push({ name: row.name, props: row.props || {} });
+            }
+        }
+        return entries;
     }
 
     extractNavLinksFromNewSyntax(code) {
