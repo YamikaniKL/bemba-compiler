@@ -11,37 +11,87 @@ function shellBemba(projectTitle) {
     { ilembo: 'Home', inshila: '/' },
     { ilembo: 'About', inshila: '/about' }
   ],
-  ilyashiPaMusule: 'Starter template — see docs/CODE-STYLE-AND-UI.md',
+  ilyashiPaMusule: 'Edit amapeji/ and ifikopo/ — docs live in docs/ when you need them.',
   imikalile: \`
+    /* Overrides layout defaults (this block is appended after the built-in shell CSS). */
     :root {
-      --background: 0 0% 100%;
-      --foreground: 240 10% 3.9%;
-      --card: 0 0% 100%;
-      --card-foreground: 240 10% 3.9%;
-      --muted-foreground: 240 3.8% 46.1%;
-      --primary: 262 83% 58%;
-      --primary-foreground: 0 0% 98%;
-      --border: 240 5.9% 90%;
-      --radius: 0.5rem;
+      --radius: 0.625rem;
+      --bg: #f6f4fc;
+      --surface: #ffffff;
+      --text: #18181b;
+      --muted: #64748b;
+      --border: rgba(24, 24, 27, 0.1);
+      --accent: #6d28d9;
+      --accent-hover: #5b21b6;
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 18px 48px rgba(109, 40, 217, 0.08);
     }
     @media (prefers-color-scheme: dark) {
       :root {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 240 10% 6%;
-        --card-foreground: 0 0% 98%;
-        --muted-foreground: 240 5% 64.9%;
-        --border: 240 3.7% 15.9%;
+        --bg: #0c0a12;
+        --surface: #14121c;
+        --text: #f4f4f5;
+        --muted: #94a3b8;
+        --border: rgba(244, 244, 245, 0.1);
+        --accent: #a78bfa;
+        --accent-hover: #c4b5fd;
+        --shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 48px rgba(0, 0, 0, 0.45);
       }
+    }
+    .hero-banner__backdrop {
+      background:
+        radial-gradient(120% 80% at 15% 0%, color-mix(in srgb, var(--accent) 22%, transparent) 0%, transparent 55%),
+        radial-gradient(90% 60% at 85% 20%, color-mix(in srgb, var(--accent) 12%, transparent) 0%, transparent 50%),
+        linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%) !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .hero-banner__backdrop {
+        background:
+          radial-gradient(120% 80% at 15% 0%, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 55%),
+          radial-gradient(90% 60% at 85% 20%, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 50%),
+          linear-gradient(180deg, color-mix(in srgb, var(--surface) 45%, var(--bg)) 0%, var(--bg) 100%) !important;
+      }
+    }
+    .hero-title {
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+    }
+    .hero-lead {
+      max-width: 36rem;
+      font-size: 1.05rem;
+      line-height: 1.65;
+    }
+    .site-body-wrap {
+      width: 100%;
+      max-width: 56rem;
+      margin: 0 auto;
+      padding: 0 clamp(1rem, 4vw, 1.5rem) 2.5rem;
+    }
+    .site-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .body-section {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      padding: 1.35rem 1.5rem;
+    }
+    .body-section-title {
+      margin-top: 0;
+    }
+    .bemba-ingisa-root.site-body-wrap {
+      padding-top: 0.25rem;
     }
     .bem-card {
       border-radius: var(--radius);
-      border: 1px solid hsl(var(--border));
-      background: hsl(var(--card));
-      color: hsl(var(--card-foreground));
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
       padding: 1.5rem;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-      max-width: 28rem;
+      box-shadow: var(--shadow);
+      max-width: min(28rem, 100%);
     }
     .bem-card__title {
       font-size: 1.125rem;
@@ -51,7 +101,7 @@ function shellBemba(projectTitle) {
     }
     .bem-card__desc {
       font-size: 0.875rem;
-      color: hsl(var(--muted-foreground));
+      color: var(--muted);
       margin: 0 0 1rem;
       line-height: 1.55;
     }
@@ -70,19 +120,19 @@ function shellBemba(projectTitle) {
       transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, filter 0.15s ease;
     }
     .bem-btn--primary {
-      background: hsl(var(--primary));
-      color: hsl(var(--primary-foreground));
+      background: var(--accent);
+      color: #fff;
     }
     .bem-btn--primary:hover {
-      filter: brightness(1.06);
+      background: var(--accent-hover);
     }
     .bem-btn--secondary {
       background: transparent;
-      color: hsl(var(--foreground));
-      border-color: hsl(var(--border));
+      color: var(--text);
+      border-color: var(--border);
     }
     .bem-btn--secondary:hover {
-      background: hsl(var(--foreground) / 0.06);
+      background: color-mix(in srgb, var(--text) 6%, transparent);
     }
   \`
 });
@@ -93,14 +143,14 @@ function starterCardPartial() {
     return `pangaIcapaba({
   ibeensi: \`
     <section class="bem-card bem-card--starter" role="region" aria-labelledby="starter-card-h">
-      <h2 id="starter-card-h" class="bem-card__title">Starter card</h2>
+      <h2 id="starter-card-h" class="bem-card__title">Reusable block</h2>
       <p class="bem-card__desc">
-        This card lives in <code>ifikopo/cipanda/StarterCard.bemba</code>.
-        Edit or replace it with your own UI blocks.
+        This card is a <code>pangaIcapaba</code> partial in <code>ifikopo/cipanda/StarterCard.bemba</code>.
+        Duplicate it, rename the file, and include it from pages with <code>ingisa</code>.
       </p>
       <div class="bem-card__actions">
-        <a class="bem-btn bem-btn--primary" href="https://standardjs.com/" target="_blank" rel="noopener noreferrer">Standard JS</a>
-        <a class="bem-btn bem-btn--secondary" href="https://google.github.io/styleguide/" target="_blank" rel="noopener noreferrer">Google guides</a>
+        <a class="bem-btn bem-btn--primary" href="https://bembajs.dev/docs" target="_blank" rel="noopener noreferrer">BembaJS docs</a>
+        <a class="bem-btn bem-btn--secondary" href="/about">About this app</a>
       </div>
     </section>
   \`,
@@ -121,12 +171,12 @@ function starterCardPartial() {
 function indexPage() {
     return `pangaIpepa('Home', {
   umusangoSite: ee,
-  umutwe: 'Create BembaJS App',
-  ilyashi: 'Semantic tokens and Standard JS are ready for your project.',
+  umutwe: 'Your BembaJS site',
+  ilyashi: 'A clear layout, shared shell, and design tokens you can tune in umusango.bemba.',
   ifiputulwa: [
     {
       umutwe: 'Get started',
-      ilyashi: 'Install dependencies, run the dev server, and run the linter on .js files.',
+      ilyashi: 'Run the dev server, edit pages under amapeji/, then add partials under ifikopo/cipanda/.',
       amabatani: [
         {
           ilembo: 'Deploy now',
@@ -150,12 +200,12 @@ function indexPageUi() {
     return `pangaIpepa('Home', {
   umusangoSite: ee,
   ingisa: [ 'StarterCard' ],
-  umutwe: 'Create BembaJS App',
-  ilyashi: 'Semantic tokens plus a starter card partial are ready.',
+  umutwe: 'Your BembaJS site',
+  ilyashi: 'Shell styles in umusango.bemba plus a sample partial show how blocks compose.',
   ifiputulwa: [
     {
       umutwe: 'Get started',
-      ilyashi: 'Install dependencies, run the dev server, and run the linter on .js files.',
+      ilyashi: 'Run the dev server, edit amapeji/, and extend ifikopo/cipanda/StarterCard.bemba or add new partials.',
       amabatani: [
         {
           ilembo: 'Deploy now',
@@ -179,7 +229,7 @@ function aboutPage() {
     return `pangaIpepa('About', {
   umusangoSite: ee,
   umutwe: 'About',
-  ilyashi: 'This page uses the same shell and design tokens as the home page.',
+  ilyashi: 'Same navigation, footer, and CSS variables as the home page — one shell for every route.',
   ifiputulwa: [
     {
       umutwe: 'About this app',
@@ -245,11 +295,7 @@ bun run dev
 
 ## Code style and UI patterns
 
-See **\`docs/CODE-STYLE-AND-UI.md\`** for:
-
-- [JavaScript Standard Style](https://standardjs.com/) (\`bun run lint\`)
-- [Google style guides](https://google.github.io/styleguide/) (JavaScript, HTML/CSS, TypeScript)
-- Template notes and UI patterns for static sites
+Optional reference: **\`docs/CODE-STYLE-AND-UI.md\`** — linting for \`.js\` files you add, UI tokens, and partials workflow.
 
 ## Project structure
 
@@ -264,31 +310,19 @@ See **\`docs/CODE-STYLE-AND-UI.md\`** for:
 function projectCodeStyleMarkdown() {
     return `# Code style and UI (BembaJS starter)
 
-This project is set up so beginners can write **consistent JavaScript** and **cohesive UI** without guessing.
+Bemba \`.bemba\` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to \`.js\` / \`.jsx\` you add (scripts, emitted React, etc.).
 
-## JavaScript — [Standard JS](https://standardjs.com/)
+## Linting JavaScript (optional)
 
-- **No semicolons**, **2 spaces**, **single quotes**, **===** not \`==\`, and other rules enforced by Standard.
-- Run \`bun run lint\` (or \`npx standard\`) on \`.js\` / \`.jsx\` files you add (configs, scripts, or code emitted by \`bemba emit-react\`).
-- Auto-fix: \`bun run lint:fix\`
+This template can run **[Standard JS](https://standardjs.com/)** via \`bun run lint\` on \`.js\` / \`.jsx\` files. Auto-fix: \`bun run lint:fix\`. It is not required for Bemba pages themselves.
 
-Standard intentionally avoids config files so teams do not bikeshed formatting.
-
-## Google style guides
-
-Use these as reference for deeper conventions and reviews:
-
-- [JavaScript Style Guide](https://google.github.io/styleguide/jsguide.html)
-- [HTML/CSS Style Guide](https://google.github.io/styleguide/htmlcssguide.html)
-- [TypeScript](https://google.github.io/styleguide/tsguide.html) if you add TS
-
-Bemba \`.bemba\` files are not linted by Standard; keep **readable indentation** and **small functions** the same spirit.
+For team reviews, you may also use **[Google’s JS / HTML / TS guides](https://google.github.io/styleguide/)** as reference.
 
 ## UI — shadcn-like workflow for static sites
 
 [shadcn/ui](https://ui.shadcn.com/) is not an npm dependency you import: you **copy component source into your app** and own it. The same idea fits Bemba static pages:
 
-1. **Design tokens** live in \`amapeji/umusango.bemba\` as \`:root\` custom properties (HSL components, like shadcn).
+1. **Design tokens** live in \`amapeji/umusango.bemba\` as \`:root\` overrides for \`--bg\`, \`--surface\`, \`--text\`, \`--accent\`, and related layout variables.
 2. **Reusable blocks** are \`pangaIcapaba\` partials under \`ifikopo/cipanda/\`, included with \`ingisa: [ 'Name' ]\`.
 3. **Tweak in place** — duplicate \`StarterCard.bemba\`, rename, and edit HTML/CSS without fighting upstream versions.
 
