@@ -39,7 +39,7 @@
   "scripts": {
     "build": "node build.js",
     "dev": "node build.js --watch",
-    "test": "node test/index.js",
+    "test": "node test/index.js && node test/smoke-export.js",
     "clean": "rm -rf dist"
   },
   "keywords": [

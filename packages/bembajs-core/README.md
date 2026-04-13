@@ -123,10 +123,46 @@ When compiling **`pangaIpepa`** (not the default AST `compile()` success path), 
 | **`currentPath`** | Request URL path (e.g. `/learn`) for **active** nav link styling |
 | **`pageFilePath`** | Absolute path to the page `.bemba` file — **required** for top-of-file **`import … from './relative.bemba'`** |
 | **`layoutCode`** | Optional: inline shell source instead of reading `umusango.bemba` from disk |
+| **`htmlLang`** | `<html lang="…">` (BCP 47), default `en` — use for **i18n** (`bem`, `en`, …) |
+| **`headExtra`** | Trusted HTML fragment inserted in `<head>` after `<title>` (e.g. from **`buildHeadMetaTags()`**) |
+| **`bembaSiteScript`** | If true, append `<script src="/bemba-site.js" defer>` before `</body>` (see static export) |
 
-### `listStaticPageDependencyPaths(code, { projectRoot, pageFilePath })`
+### Static HTML export (`exportStaticHtmlSite`)
 
-Returns a sorted list of **absolute paths** to existing `.bemba` files that static HTML for this page depends on: the page itself, **`umusango.bemba`** when `umusangoSite: ee`, each resolved **`ingisa`** file, and each resolved static **`import`**. Use for tooling or fine-grained invalidation (the **bembajs** dev server still uses a simple generation counter).
+From code or CLI (**`bemba fumya`** / **`bemba akha`** in the `bembajs` package, **`bemba fumya`** / **`bemba akha`** in core):
+
+- Walks **`amapeji/`** (non-dynamic routes only), compiles each **`pangaIpepa`** page to **`index.html`** under a folder per URL (e.g. `/learn` → `out/learn/index.html`).
+- Copies **`amashinda/`** (and **`maungu/`** if present) into the output tree.
+- With **`baseUrl`** (or env **`BEMBA_SITE_URL`**), writes **`sitemap.xml`** and **`feed.xml`** (RSS).
+- Copies **`bemba-site.js`** (optional nav toggle hook for **`[data-bemba-nav-toggle]`**) unless you pass **`bembaSiteScript: false`** or **`--no-bemba-site`**.
+
+```javascript
+const { exportStaticHtmlSite } = require('bembajs-core');
+await exportStaticHtmlSite({
+  projectRoot: process.cwd(),
+  outDir: 'out',
+  baseUrl: 'https://example.com',
+  locale: 'bem',
+  siteTitle: 'My site'
+});
+```
+
+### Head meta, sitemap, RSS (pure helpers)
+
+```javascript
+const { buildHeadMetaTags, generateSitemapXml, generateRssFeedXml } = require('bembajs-core');
+const head = buildHeadMetaTags({
+  description: '…',
+  canonical: 'https://example.com/page',
+  ogTitle: '…',
+  ogImage: 'https://example.com/og.png'
+});
+// Pass as compile(..., { headExtra: head })
+```
+
+### `listStaticPageDependencyPaths(code, { projectRoot, pageFilePath, transitive? })`
+
+Returns a sorted list of **absolute paths** to existing `.bemba` files that static HTML for this page depends on: the page itself, **`umusango.bemba`** when `umusangoSite: ee`, each resolved **`ingisa`** file, and each resolved static **`import`**. With **`transitive: true`** (default), also follows **`import`** / **`ingisa`** inside those partials. **bembajs-core** and **bembajs** dev servers use this list with **file mtimes** to invalidate cached HTML per page (no full-cache flush on every save).
 
 ```javascript
 const { listStaticPageDependencyPaths } = require('bembajs-core');

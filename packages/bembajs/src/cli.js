@@ -87,14 +87,72 @@ program
         }
     });
 
-// Build command
+function resolveCoreExport() {
+    try {
+        const corePkg = path.dirname(require.resolve('bembajs-core/package.json'));
+        return require(path.join(corePkg, 'dist', 'static-html-export.js'));
+    } catch (e) {
+        return null;
+    }
+}
+
+// Build command — static HTML export (pangaIpepa) to dist/
 program
     .command('akha')
-    .description('Build for production')
-    .action(() => {
-        console.log('Building BembaJS project for production...');
-        console.log('Output: dist/ folder');
-        console.log('Build complete.');
+    .description('Export static HTML site for production (default: ./dist)')
+    .option('-o, --output <dir>', 'Output directory', 'dist')
+    .option('--base-url <url>', 'Origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
+    .option('--locale <code>', 'html lang (BCP 47)', 'en')
+    .option('--site-title <title>', 'RSS channel title')
+    .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+    .action(async (opts) => {
+        const mod = resolveCoreExport();
+        if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
+            console.error('bembajs-core with static-html-export is required.');
+            process.exit(1);
+        }
+        try {
+            await mod.exportStaticHtmlSite({
+                projectRoot: process.cwd(),
+                outDir: opts.output,
+                baseUrl: opts.baseUrl || process.env.BEMBA_SITE_URL || '',
+                siteTitle: opts.siteTitle,
+                htmlLang: opts.locale || 'en',
+                bembaSiteScript: opts.bembaSite !== false
+            });
+        } catch (e) {
+            console.error(e.message || e);
+            process.exit(1);
+        }
+    });
+
+program
+    .command('fumya')
+    .description('Export static HTML site (same as akha; default output ./out)')
+    .option('-o, --output <dir>', 'Output directory', 'out')
+    .option('--base-url <url>', 'Origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
+    .option('--locale <code>', 'html lang (BCP 47)', 'en')
+    .option('--site-title <title>', 'RSS channel title')
+    .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+    .action(async (opts) => {
+        const mod = resolveCoreExport();
+        if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
+            console.error('bembajs-core with static-html-export is required.');
+            process.exit(1);
+        }
+        try {
+            await mod.exportStaticHtmlSite({
+                projectRoot: process.cwd(),
+                outDir: opts.output,
+                baseUrl: opts.baseUrl || process.env.BEMBA_SITE_URL || '',
+                siteTitle: opts.siteTitle,
+                htmlLang: opts.locale || 'en',
+                bembaSiteScript: opts.bembaSite !== false
+            });
+        } catch (e) {
+            console.error(e.message || e);
+            process.exit(1);
+        }
     });
 
 function resolveEmitReactScript() {
@@ -151,7 +209,8 @@ program
         console.log('Commands:');
         console.log('   bemba panga <name>    - Create new project');
         console.log('   bemba tungulula       - Start dev server');
-        console.log('   bemba akha            - Build for production');
+        console.log('   bemba akha            - Export static HTML (→ dist/)');
+        console.log('   bemba fumya           - Export static HTML (→ out/)');
         console.log('   bemba lint            - Lint code');
         console.log('   bemba format          - Format code');
         console.log('   bemba emit-react      - Emit JSX for bundler + React/motion');

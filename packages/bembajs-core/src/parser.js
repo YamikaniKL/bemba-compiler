@@ -1039,6 +1039,9 @@ class BembaParser {
      * @param {string} [options.currentPath] - URL path for active nav, e.g. `/contact`
      * @param {string} [options.pageFilePath] - Absolute path to this `.bemba` file (required for relative `import`)
      * @param {string} [options.layoutCode] - Inline shell source override (rare; normally read from disk)
+     * @param {string} [options.htmlLang] - `<html lang>` (BCP 47), default `en`
+     * @param {string} [options.headExtra] - Trusted HTML fragment inserted in `<head>` after `<title>`
+     * @param {boolean} [options.bembaSiteScript] - Append `<script src="/bemba-site.js" defer>` before `</body>`
      */
     compile(code, options = {}) {
         try {
@@ -1407,6 +1410,10 @@ class BembaParser {
         const sections = this.extractSectionsFromNewSyntax(code, appName);
         const bodyBlocks = this.extractIfiputulwaBlocks(code);
 
+        const htmlLang = options.htmlLang != null ? String(options.htmlLang) : 'en';
+        const headExtra = options.headExtra != null ? String(options.headExtra) : '';
+        const bembaSiteScript = Boolean(options.bembaSiteScript);
+
         return this.generateModernLayout(appName, sections, styles, {
             siteLayout,
             siteName,
@@ -1415,17 +1422,22 @@ class BembaParser {
             bodyBlocks,
             activePath,
             partialsHtml: partialsHtmlMerged,
-            navShellFilledHtml
+            navShellFilledHtml,
+            htmlLang,
+            headExtra,
+            bembaSiteScript
         });
     }
 
     /**
      * Files that affect static HTML output for a `pangaIpepa` page (for tooling / fine-grained cache invalidation).
      * Includes the page file, `umusango.bemba` when used, `ingisa` partials that exist on disk, and resolved static imports.
+     * With `transitive` (default `true`), also follows `import` and `ingisa` inside those partials recursively.
      * @param {string} code - Page source
      * @param {object} options
      * @param {string} options.projectRoot
      * @param {string} [options.pageFilePath] - Absolute path to the page `.bemba`
+     * @param {boolean} [options.transitive=true]
      * @returns {string[]} Sorted absolute paths (existing files only)
      */
     listStaticPageDependencyPaths(code, options = {}) {
@@ -1434,6 +1446,7 @@ class BembaParser {
         }
         const projectRoot = options.projectRoot;
         const pageFilePath = options.pageFilePath ? String(options.pageFilePath) : '';
+        const transitive = options.transitive !== false;
         const seen = new Set();
         const add = (p) => {
             if (!p) return;
@@ -1472,6 +1485,51 @@ class BembaParser {
                 if (!imp || imp.type !== 'Import') continue;
                 const r = resolveBembaImportPath(projectRoot, absPage, imp.source);
                 if (r) add(r);
+            }
+        }
+
+        if (!transitive) {
+            return Array.from(seen).sort();
+        }
+
+        const visitedBody = new Set();
+        const queue = Array.from(seen).filter((p) => typeof p === 'string' && p.endsWith('.bemba'));
+
+        while (queue.length > 0) {
+            const fp = queue.pop();
+            const abs = path.normalize(path.resolve(fp));
+            if (!abs.endsWith('.bemba') || !fs.existsSync(abs)) continue;
+            if (visitedBody.has(abs)) continue;
+            visitedBody.add(abs);
+
+            let src = '';
+            try {
+                src = fs.readFileSync(abs, 'utf8');
+            } catch (_) {
+                continue;
+            }
+
+            let importNodes = [];
+            try {
+                importNodes = this.parseLeadingImportStatements(src);
+            } catch (_) {
+                importNodes = [];
+            }
+            for (const imp of importNodes) {
+                if (!imp || imp.type !== 'Import') continue;
+                const r = resolveBembaImportPath(projectRoot, abs, imp.source);
+                if (r) {
+                    add(r);
+                    queue.push(r);
+                }
+            }
+
+            for (const n of this.extractIngisaNames(src)) {
+                const p2 = this.resolveIngisaPartialFilePath(projectRoot, n);
+                if (p2) {
+                    add(p2);
+                    queue.push(p2);
+                }
             }
         }
 
@@ -1949,8 +2007,17 @@ class BembaParser {
             bodyBlocks = [],
             activePath = '',
             partialsHtml = '',
-            navShellFilledHtml = ''
+            navShellFilledHtml = '',
+            htmlLang = 'en',
+            headExtra = '',
+            bembaSiteScript = false
         } = layoutOpts;
+        const safeLang =
+            htmlLang && /^[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*$/i.test(String(htmlLang).trim())
+                ? String(htmlLang).trim()
+                : 'en';
+        const headExtraBlock = headExtra ? `\n    ${headExtra}` : '';
+        const siteScriptBlock = bembaSiteScript ? '\n    <script src="/bemba-site.js" defer></script>' : '';
         const ingisaMotion = partialsHtml
             ? `
         .bemba-ingisa-root { width: 100%; max-width: 100%; }
@@ -2042,11 +2109,11 @@ class BembaParser {
 
         if (!siteLayout) {
             return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${safeLang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(docTitle)}</title>
+    <title>${escapeHtml(docTitle)}</title>${headExtraBlock}
     <style>
         * { box-sizing: border-box; }
 
@@ -2303,7 +2370,7 @@ class BembaParser {
         function pangaIcapaba(props) {
             console.log('Partial:', props);
         }
-    </script>
+    </script>${siteScriptBlock}
 </body>
 </html>`;
         }
@@ -2336,11 +2403,11 @@ class BembaParser {
                 : '';
 
         return `<!DOCTYPE html>
-<html lang="en">
+<html lang="${safeLang}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>${escapeHtml(docTitle)}</title>
+    <title>${escapeHtml(docTitle)}</title>${headExtraBlock}
     <style>
         * { box-sizing: border-box; }
 
@@ -2779,7 +2846,7 @@ ${navBlock}
         function pangaIcapaba(props) {
             console.log('Partial:', props);
         }
-    </script>
+    </script>${siteScriptBlock}
 </body>
 </html>`;
     }

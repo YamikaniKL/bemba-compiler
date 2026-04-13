@@ -10,6 +10,35 @@ const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
 const { loadApiHandlerFromGeneratedSource } = require('./server-load-api');
 
+/** @param {string[]} depPaths @returns {Record<string, number>} */
+function snapshotDepMtimes(depPaths) {
+    const mtimes = {};
+    for (const p of depPaths || []) {
+        try {
+            if (fs.existsSync(p)) {
+                mtimes[p] = fs.statSync(p).mtimeMs;
+            }
+        } catch (_) {
+            /* ignore */
+        }
+    }
+    return mtimes;
+}
+
+/** @param {string[]} depPaths @param {Record<string, number>} mtimes */
+function staticDepsStillFresh(depPaths, mtimes) {
+    if (!depPaths || !mtimes || depPaths.length === 0) return false;
+    for (const p of depPaths) {
+        try {
+            if (!fs.existsSync(p)) return false;
+            if (fs.statSync(p).mtimeMs !== mtimes[p]) return false;
+        } catch (_) {
+            return false;
+        }
+    }
+    return true;
+}
+
 class BembaDevServer {
     constructor(options = {}) {
         this.app = express();
@@ -20,8 +49,7 @@ class BembaDevServer {
         // Compilation cache
         this.compilationCache = new Map();
         this.fileWatchers = new Map();
-        /** pangaIpepa HTML cache; invalidated on any watched source change */
-        this._staticHtmlGen = 0;
+        /** pangaIpepa HTML cache; entries invalidated when dependency mtimes change */
         this._staticHtmlCache = new Map();
         
         // Framework instances
@@ -110,8 +138,6 @@ class BembaDevServer {
         const relativePath = path.relative(this.projectRoot, filePath);
         this.compilationCache.delete(relativePath);
         this.compilationCache.delete(`api:${relativePath}`);
-        this._staticHtmlGen += 1;
-        this._staticHtmlCache.clear();
         
         // Reload router if it's a route file
         if (filePath.includes(BEMBA_FOLDERS.PAGES) || filePath.includes(BEMBA_FOLDERS.API)) {
@@ -178,7 +204,11 @@ class BembaDevServer {
                     const cacheKey = `${route.filePath}\0${cur}`;
                     let doc;
                     const hit = this._staticHtmlCache.get(cacheKey);
-                    if (hit && hit.gen === this._staticHtmlGen) {
+                    const deps = this.parser.listStaticPageDependencyPaths(rawSource, {
+                        projectRoot: this.projectRoot,
+                        pageFilePath: route.filePath
+                    });
+                    if (hit && staticDepsStillFresh(hit.deps, hit.mtimes)) {
                         doc = hit.html;
                     } else {
                         doc = this.parser.compile(rawSource, {
@@ -192,7 +222,8 @@ class BembaDevServer {
                         ) {
                             this._staticHtmlCache.set(cacheKey, {
                                 html: doc,
-                                gen: this._staticHtmlGen
+                                deps,
+                                mtimes: snapshotDepMtimes(deps)
                             });
                         }
                     }

@@ -13,10 +13,13 @@ let coreCompile = null;
 let BembaParserClass = null;
 /** @type {null | { Parser: any, Transformer: any, Generator: any, loadApi: (src: string, hint: string) => Function }} */
 let coreApiPipeline = null;
+/** @type {null | ((code: string, opts: object) => string[])} */
+let listStaticPageDependencyPaths = null;
 try {
     const core = require('bembajs-core');
     coreCompile = core.compile;
     BembaParserClass = core.BembaParser;
+    listStaticPageDependencyPaths = core.listStaticPageDependencyPaths;
     const coreMain = require.resolve('bembajs-core');
     const coreRoot = path.resolve(path.dirname(coreMain), '..');
     const { loadApiHandlerFromGeneratedSource } = require(path.join(coreRoot, 'dist', 'server-load-api.js'));
@@ -28,6 +31,35 @@ try {
     };
 } catch (_) {
     /* bembajs-core may be unavailable in some installs */
+}
+
+/** @param {string[]} depPaths */
+function snapshotDepMtimes(depPaths) {
+    const mtimes = {};
+    for (const p of depPaths || []) {
+        try {
+            if (fs.existsSync(p)) {
+                mtimes[p] = fs.statSync(p).mtimeMs;
+            }
+        } catch (_) {
+            /* ignore */
+        }
+    }
+    return mtimes;
+}
+
+/** @param {string[]} depPaths @param {Record<string, number>} mtimes */
+function staticDepsStillFresh(depPaths, mtimes) {
+    if (!depPaths || !mtimes || depPaths.length === 0) return false;
+    for (const p of depPaths) {
+        try {
+            if (!fs.existsSync(p)) return false;
+            if (fs.statSync(p).mtimeMs !== mtimes[p]) return false;
+        } catch (_) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function isHtmlString(str) {
@@ -461,10 +493,9 @@ class BembaDevServer {
         /** Cache compiled pangaApi handlers: key maapi:relativePath */
         this._maapiHandlerCache = new Map();
         /**
-         * Cached HTML for pangaIpepa pages (dev speed). Invalidated when any watched .bemba changes.
+         * Cached HTML for pangaIpepa pages (dev speed). Entries drop when dependency mtimes change.
          * Key: pageFilePath + currentPath (active nav depends on route).
          */
-        this._pangaIpepaHtmlGen = 0;
         this._pangaIpepaHtmlCache = new Map();
         this._coreApiPipeline = coreApiPipeline;
         this.setupMiddleware();
@@ -536,19 +567,34 @@ class BembaDevServer {
     }
 
     /**
-     * Return cached pangaIpepa HTML if still valid for this dev generation; else compile and store.
+     * Return cached pangaIpepa HTML if dependency mtimes match; else compile and store.
      * @param {string} pagePath absolute path to .bemba page
      * @param {string} currentPath request path (e.g. /about)
+     * @param {string} sourceCode page source (for dependency listing)
      * @param {() => string} compileFn returns full HTML (including live-reload snippet)
      */
-    getOrCompilePangaIpepaHtml(pagePath, currentPath, compileFn) {
+    getOrCompilePangaIpepaHtml(pagePath, currentPath, sourceCode, compileFn) {
         const key = `${path.resolve(pagePath)}\0${currentPath || '/'}`;
         const hit = this._pangaIpepaHtmlCache.get(key);
-        if (hit && hit.gen === this._pangaIpepaHtmlGen) {
+        let deps = [];
+        if (typeof listStaticPageDependencyPaths === 'function' && typeof sourceCode === 'string') {
+            deps = listStaticPageDependencyPaths(sourceCode, {
+                projectRoot: this.projectRoot,
+                pageFilePath: pagePath
+            });
+        }
+        if (!deps.length && pagePath) {
+            deps = [path.resolve(pagePath)];
+        }
+        if (hit && staticDepsStillFresh(hit.deps, hit.mtimes)) {
             return hit.html;
         }
         const html = compileFn();
-        this._pangaIpepaHtmlCache.set(key, { html, gen: this._pangaIpepaHtmlGen });
+        this._pangaIpepaHtmlCache.set(key, {
+            html,
+            deps,
+            mtimes: snapshotDepMtimes(deps)
+        });
         return html;
     }
 
@@ -746,7 +792,7 @@ class BembaDevServer {
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = this.getOrCompilePangaIpepaHtml(pagePath, req.path, () =>
+                    const html = this.getOrCompilePangaIpepaHtml(pagePath, req.path, code, () =>
                         this.compileBemba(code, {
                             currentPath: req.path,
                             pageFilePath: pagePath
@@ -768,7 +814,7 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = this.getOrCompilePangaIpepaHtml(indexPath, '/', () =>
+                const html = this.getOrCompilePangaIpepaHtml(indexPath, '/', code, () =>
                     this.compileBemba(code, {
                         currentPath: '/',
                         pageFilePath: indexPath
@@ -852,8 +898,6 @@ pangaIpepa('Home', {
                                 if (rel.startsWith(`maapi${path.sep}`)) {
                                     this._maapiHandlerCache.delete(`maapi:${rel}`);
                                 }
-                                this._pangaIpepaHtmlGen += 1;
-                                this._pangaIpepaHtmlCache.clear();
                                 console.log(`${rel} changed — reloading open tabs.`);
                                 this.notifyLiveClients();
                             }

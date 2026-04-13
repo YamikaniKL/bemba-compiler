@@ -58,17 +58,40 @@ class BembaCLI {
         // Build for production
         this.program
             .command('akha')
-            .description('Build project for production')
+            .description('Export static HTML (pangaIpepa) for production, or legacy Next-style build')
             .option('-o, --output <dir>', 'Output directory', 'dist')
-            .option('--analyze', 'Analyze bundle size')
-            .action((options) => this.buildProject(options));
+            .option('--base-url <url>', 'Site origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
+            .option('--locale <code>', 'html lang (BCP 47)', 'en')
+            .option('--site-title <title>', 'RSS channel title')
+            .option('--analyze', 'Analyze bundle size (legacy build only)')
+            .option('--legacy-next', 'Run legacy Next.js scaffold build instead of HTML export')
+            .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+            .action(async (options) => {
+                try {
+                    await this.buildProject(options);
+                } catch (e) {
+                    console.error(e.message || e);
+                    process.exit(1);
+                }
+            });
         
         // Export static site
         this.program
             .command('fumya')
-            .description('Export static site')
+            .description('Export static HTML site (pangaIpepa pages) to a folder')
             .option('-o, --output <dir>', 'Output directory', 'out')
-            .action((options) => this.exportStatic(options));
+            .option('--base-url <url>', 'Site origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
+            .option('--locale <code>', 'html lang (BCP 47)', 'en')
+            .option('--site-title <title>', 'RSS channel title')
+            .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+            .action(async (options) => {
+                try {
+                    await this.exportStatic(options);
+                } catch (e) {
+                    console.error(e.message || e);
+                    process.exit(1);
+                }
+            });
         
         // Compile single file
         this.program
@@ -740,29 +763,41 @@ Visit [BembaJS Documentation](https://bembajs.dev) to learn more about the frame
     }
     
     // Build project
-    buildProject(options) {
-        console.log('Building BembaJS project for production...');
-        
-        const BuildSystem = require('./build');
-        const builder = new BuildSystem({
-            outputDir: options.output,
-            analyze: options.analyze
+    async buildProject(options) {
+        if (options.legacyNext) {
+            console.log('Building BembaJS project (legacy Next scaffold)...');
+            const BuildSystem = require('./build');
+            const builder = new BuildSystem({
+                outputDir: options.output,
+                analyze: options.analyze
+            });
+            return builder.build();
+        }
+
+        console.log('Exporting static HTML (pangaIpepa)...');
+        const { exportStaticHtmlSite } = require('./static-html-export');
+        await exportStaticHtmlSite({
+            projectRoot: process.cwd(),
+            outDir: options.output || 'dist',
+            baseUrl: options.baseUrl || process.env.BEMBA_SITE_URL || '',
+            siteTitle: options.siteTitle,
+            htmlLang: options.locale || 'en',
+            bembaSiteScript: options.bembaSite !== false
         });
-        
-        builder.build();
     }
     
     // Export static site
-    exportStatic(options) {
-        console.log('Exporting static site...');
-        
-        const BuildSystem = require('./build');
-        const builder = new BuildSystem({
-            outputDir: options.output,
-            static: true
+    async exportStatic(options) {
+        console.log('Exporting static HTML site...');
+        const { exportStaticHtmlSite } = require('./static-html-export');
+        await exportStaticHtmlSite({
+            projectRoot: process.cwd(),
+            outDir: options.output || 'out',
+            baseUrl: options.baseUrl || process.env.BEMBA_SITE_URL || '',
+            siteTitle: options.siteTitle,
+            htmlLang: options.locale || 'en',
+            bembaSiteScript: options.bembaSite !== false
         });
-        
-        builder.export();
     }
     
     // Compile single file

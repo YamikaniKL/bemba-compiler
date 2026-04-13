@@ -5,6 +5,13 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { version: CORE_VERSION } = require('../package.json');
+const { exportStaticHtmlSite, routeToOutHtmlPath } = require('./static-html-export');
+const {
+    buildHeadMetaTags,
+    generateSitemapXml,
+    generateRssFeedXml,
+    escapeXml: escapeXmlForStatic
+} = require('./static-site-helpers');
 
 /**
  * Compile Bemba code to JavaScript/HTML (AST path) or static HTML (legacy fallback).
@@ -17,6 +24,9 @@ const { version: CORE_VERSION } = require('../package.json');
  * @param {string} [options.currentPath] - Static pages: active nav path
  * @param {string} [options.pageFilePath] - Static pages: absolute path to the `.bemba` file
  * @param {string} [options.layoutCode] - Static pages: optional shell override
+ * @param {string} [options.htmlLang] - `<html lang>` (BCP 47)
+ * @param {string} [options.headExtra] - Trusted fragment after `<title>` in static HTML
+ * @param {boolean} [options.bembaSiteScript] - Append `/bemba-site.js` script tag
  * @returns {{ success: true, code: string, legacy?: boolean } | { success: false, error: string, stack?: string }}
  */
 function compile(code, options = {}) {
@@ -98,7 +108,7 @@ function generate(ast) {
 /**
  * Absolute paths to `.bemba` files that influence static HTML for a `pangaIpepa` page (shell, `ingisa`, `import`).
  * @param {string} code - Page source
- * @param {{ projectRoot: string, pageFilePath?: string }} options
+ * @param {{ projectRoot: string, pageFilePath?: string, transitive?: boolean }} options
  * @returns {string[]}
  */
 function listStaticPageDependencyPaths(code, options) {
@@ -111,6 +121,12 @@ module.exports = {
     // Main API
     compile,
     listStaticPageDependencyPaths,
+    exportStaticHtmlSite,
+    routeToOutHtmlPath,
+    buildHeadMetaTags,
+    generateSitemapXml,
+    generateRssFeedXml,
+    escapeXmlForStatic,
     parse,
     transform,
     generate,

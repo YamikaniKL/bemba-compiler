@@ -11,10 +11,10 @@
 
 ```bash
 # Install globally
-npm install -g bembajs
+bun add -g bembajs
 
-# Or use with npx
-npx bembajs --help
+# Or use with bunx
+bunx bembajs --help
 ```
 
 ### Create Your First Project
@@ -38,14 +38,18 @@ npm run dev
 ## 📚 CLI Commands
 
 ```bash
-bemba panga <name>    # Create new project
-bemba tungulula       # Start development server
-bemba akha            # Build for production
-bemba lint            # Lint Bemba code
-bemba format          # Format Bemba code
-bemba --version       # Show version
-bemba help            # Show help
+bemba panga <name>       # Create new project
+bemba tungulula          # Start development server
+bemba akha               # Export static HTML → ./dist (pangaIpepa sites)
+bemba fumya              # Same export → ./out
+bemba emit-react         # Emit JSX for Vite/esbuild + React
+bemba lint               # Lint Bemba code
+bemba format             # Format Bemba code
+bemba --version          # Show version
+bemba help               # Show help
 ```
+
+**Static export flags (akha / fumya):** `--base-url <url>` (or **`BEMBA_SITE_URL`**) for **`sitemap.xml`** / **`feed.xml`**, **`--locale <code>`** for **`<html lang>`**, **`--site-title`** for RSS, **`--no-bemba-site`** to skip **`bemba-site.js`**.
 
 ## 🏗️ Project Structure
 
@@ -107,6 +111,11 @@ await build({
 - **🔧 CLI Tools** - Powerful command-line interface
 - **📱 Responsive** - Mobile-first design
 - **🎨 Modern UI** - Beautiful default styling
+
+## 📤 Production static sites & Vite + React
+
+- **`bemba akha`** / **`bemba fumya`** run **`exportStaticHtmlSite`** from **bembajs-core**: plain HTML for **`pangaIpepa`** pages, public assets, optional **sitemap** / **RSS**, and optional **`bemba-site.js`** for small progressive enhancements.
+- For **rich client UI** (headless components, animation libraries, SPA routing), use **`bemba emit-react -o dist/bemba-react`** then point **Vite** (or esbuild) at that folder and add **React**, **react-router**, etc. The emit step skips **`pangaIcapaba`-only** partials; keep heavy UI in **`fyambaIcipanda`** modules consumed by the bundler.
 
 ## 🎯 Templates
 

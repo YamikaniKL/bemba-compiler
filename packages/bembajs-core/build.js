@@ -44,6 +44,13 @@ function writeEsmShim(name) {
 
 function writeTypeShim(name) {
     const dtsPath = path.join(distDir, `${name}.d.ts`);
+    if (name === 'index') {
+        const manual = path.join(packageRoot, 'src', 'index.d.ts');
+        if (fs.existsSync(manual)) {
+            fs.copyFileSync(manual, dtsPath);
+            return;
+        }
+    }
     const content = `declare const value: any;\nexport = value;\n`;
     fs.writeFileSync(dtsPath, content, 'utf8');
 }

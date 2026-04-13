@@ -89,7 +89,9 @@ class BembaRouter {
         let route = filePath
             .replace(/\\/g, '/') // Normalize path separators
             .replace(/\.bemba$/, '') // Remove .bemba extension
-            .replace(/\/index$/, '/') // Convert index to root
+            // `amapeji/index.bemba` → `/` (not `/index`)
+            .replace(/^\/?index$/, '')
+            .replace(/\/index$/, '/') // `foo/index` → `foo/`
             .replace(/\/$/, ''); // Remove trailing slash
         
         // Handle dynamic routes [param] -> :param

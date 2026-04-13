@@ -15,6 +15,9 @@ class BembaBuildSystem {
         this.static = options.static || false;
         this.analyze = options.analyze || false;
         this.minify = options.minify !== false;
+        this.baseUrl = options.baseUrl || '';
+        this.siteTitle = options.siteTitle || '';
+        this.bembaSiteScript = options.bembaSite !== false;
         
         // Framework instances
         this.parser = new BembaParser();
@@ -93,9 +96,15 @@ class BembaBuildSystem {
     }
     
     async export() {
-        console.log('📦 Exporting static site...');
-        this.static = true;
-        await this.build();
+        console.log('📦 Exporting static HTML (pangaIpepa)…');
+        const { exportStaticHtmlSite } = require('./static-html-export');
+        await exportStaticHtmlSite({
+            projectRoot: this.projectRoot,
+            outDir: this.outputDir,
+            baseUrl: this.baseUrl || process.env.BEMBA_SITE_URL || '',
+            siteTitle: this.siteTitle,
+            bembaSiteScript: this.bembaSiteScript
+        });
     }
     
     async cleanOutputDir() {
