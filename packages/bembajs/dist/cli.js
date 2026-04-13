@@ -12,7 +12,8 @@ const {
     normalizeLang,
     msg,
     langExplicitInArgv,
-    hasPersistedCliLangEnv
+    hasPersistedCliLangEnv,
+    parseLangFromArgvOnly
 } = require('./cli-i18n');
 const { program } = require('commander');
 let prompts = null;
@@ -39,6 +40,152 @@ function loadDevServerModule() {
         return require(local);
     }
     return require(path.join(__dirname, 'dev-server'));
+}
+
+async function promptCliLanguageIfNeeded() {
+    if (langExplicitInArgv(process.argv) || hasPersistedCliLangEnv()) return;
+    const picked = await promptLanguageChoice();
+    process.env.BEMBA_CLI_LANG = picked;
+}
+
+async function runCreateProjectFlow(name, commanderOpts) {
+    const CoreCli = resolveCoreCliClass();
+    if (!CoreCli) {
+        console.error(msg('coreMissingPanga'));
+        process.exit(1);
+    }
+
+    await promptCliLanguageIfNeeded();
+
+    let projectName = name != null ? String(name).trim() : '';
+    if (projectName && !isValidProjectName(projectName)) {
+        console.error(msg('invalidProjectName'));
+        process.exit(1);
+    }
+    if (!projectName) {
+        do {
+            projectName = await promptProjectName();
+            if (!isValidProjectName(projectName)) {
+                console.error(msg('invalidProjectName'));
+            }
+        } while (!isValidProjectName(projectName));
+    }
+
+    let template = commanderOpts.template ? String(commanderOpts.template).trim().toLowerCase() : '';
+    if (!template) {
+        template = await promptTemplateChoice();
+    }
+    if (template !== 'base' && template !== 'ui') {
+        console.error(msg('unknownTemplate', template));
+        process.exit(1);
+    }
+    const coreCli = new CoreCli();
+    coreCli.createProject(projectName, {
+        template,
+        typescript: !!commanderOpts.typescript
+    });
+}
+
+function runTungululaCli() {
+    console.log(msg('startingDev'));
+    console.log(msg('hotReload'));
+
+    try {
+        const BembaDevServer = loadDevServerModule();
+        const server = new BembaDevServer({ port: 3000 });
+        server.start();
+
+        process.on('SIGINT', () => {
+            console.log(`\n${msg('stoppingDev')}`);
+            process.exit(0);
+        });
+    } catch (error) {
+        console.error(msg('devStartErr'), error.message);
+        console.log(msg('devCwdHint'));
+        process.exit(1);
+    }
+}
+
+function printBembaHelpText() {
+    console.log(msg('helpTitle'));
+    console.log('');
+    console.log('Commands:');
+    console.log(`   ${msg('helpCmdPanga')}`);
+    console.log(`   ${msg('helpCmdTemplate')}`);
+    console.log(`   ${msg('helpCmdSyncTpl')}`);
+    console.log(`   ${msg('helpCmdTungulula')}`);
+    console.log(`   ${msg('helpCmdAkha')}`);
+    console.log(`   ${msg('helpCmdFumya')}`);
+    console.log(`   ${msg('helpCmdLint')}`);
+    console.log(`   ${msg('helpCmdFormat')}`);
+    console.log(`   ${msg('helpCmdEmit')}`);
+    console.log(`   ${msg('helpCmdVersion')}`);
+    console.log(`   ${msg('helpCmdHelp')}`);
+    console.log('');
+    console.log(msg('helpLangHint'));
+    console.log('');
+    console.log(msg('helpWebsite'));
+    console.log(msg('helpDocs'));
+    console.log(msg('helpGh'));
+}
+
+async function promptMainMenuChoice() {
+    if (prompts && typeof prompts === 'function') {
+        const response = await prompts(
+            {
+                type: 'select',
+                name: 'choice',
+                message: msg('mainMenuTitle'),
+                choices: [
+                    { title: msg('mainMenuCreate'), value: 'create' },
+                    { title: msg('mainMenuDev'), value: 'dev' },
+                    { title: msg('mainMenuHelp'), value: 'help' },
+                    { title: msg('mainMenuExit'), value: 'exit' }
+                ],
+                initial: 0
+            },
+            {
+                onCancel: () => {
+                    process.exit(1);
+                }
+            }
+        );
+        return response.choice || 'exit';
+    }
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+    try {
+        const answer = String(await ask(msg('mainMenuPromptRl'))).trim().toLowerCase();
+        if (answer === '2' || answer === 'dev' || answer === 'tungulula') return 'dev';
+        if (answer === '3' || answer === 'help') return 'help';
+        if (answer === '4' || answer === 'exit' || answer === 'quit') return 'exit';
+        return 'create';
+    } finally {
+        rl.close();
+    }
+}
+
+async function runInteractiveMainMenu() {
+    const argvLang = parseLangFromArgvOnly(process.argv);
+    if (argvLang) {
+        process.env.BEMBA_CLI_LANG = normalizeLang(argvLang);
+    }
+    await promptCliLanguageIfNeeded();
+
+    const choice = await promptMainMenuChoice();
+    if (choice === 'create') {
+        await runCreateProjectFlow(undefined, {});
+    } else if (choice === 'dev') {
+        runTungululaCli();
+    } else if (choice === 'help') {
+        printBembaHelpText();
+    } else {
+        process.exit(0);
+    }
 }
 
 function resolveCoreCliClass() {
@@ -92,6 +239,64 @@ async function promptLanguageChoice() {
         const answer = String(await ask(msg('langPromptRl'))).trim().toLowerCase();
         if (answer === '2' || answer === 'bem' || answer === 'bemba') return 'bem';
         return 'en';
+    } finally {
+        rl.close();
+    }
+}
+
+function argvWithoutLangFlags(argv) {
+    const a = [...argv];
+    for (let i = 0; i < a.length; i++) {
+        if (a[i] === '-l' || a[i] === '--lang') {
+            a.splice(i, 2);
+            i--;
+            continue;
+        }
+        if (a[i] && a[i].startsWith('--lang=')) {
+            a.splice(i, 1);
+            i--;
+        }
+    }
+    return a;
+}
+
+function isValidProjectName(name) {
+    const n = String(name || '').trim();
+    if (!n || n.length > 128) return false;
+    if (n.includes('/') || n.includes('\\') || n.startsWith('.')) return false;
+    return /^[a-zA-Z0-9._-]+$/.test(n);
+}
+
+async function promptProjectName() {
+    if (prompts && typeof prompts === 'function') {
+        const response = await prompts(
+            {
+                type: 'text',
+                name: 'name',
+                message: msg('projectNamePrompt'),
+                validate: (s) => (s && String(s).trim() ? true : msg('projectNameRequired'))
+            },
+            {
+                onCancel: () => {
+                    process.exit(1);
+                }
+            }
+        );
+        return String(response.name || '').trim();
+    }
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+    try {
+        let out = '';
+        while (!out) {
+            out = String(await ask(msg('projectNameRl'))).trim();
+            if (!out) console.log(msg('projectNameRequired'));
+        }
+        return out;
     } finally {
         rl.close();
     }
@@ -161,39 +366,13 @@ program
 
 // Create project command
 program
-    .command('panga <name>')
+    .command('panga')
+    .argument('[name]', msg('pangaArgName'))
     .description(msg('pangaDesc'))
     .option('-t, --template <template>', msg('optTemplate'))
     .option('--typescript', msg('optTypescript'))
     .action(async (name, opts) => {
-        const CoreCli = resolveCoreCliClass();
-        if (!CoreCli) {
-            console.error(msg('coreMissingPanga'));
-            process.exit(1);
-        }
-
-        const skipLanguagePrompt =
-            langExplicitInArgv(process.argv) ||
-            (opts.lang != null && String(opts.lang).trim() !== '') ||
-            hasPersistedCliLangEnv();
-        if (!skipLanguagePrompt) {
-            const picked = await promptLanguageChoice();
-            process.env.BEMBA_CLI_LANG = picked;
-        }
-
-        let template = opts.template ? String(opts.template).trim().toLowerCase() : '';
-        if (!template) {
-            template = await promptTemplateChoice();
-        }
-        if (template !== 'base' && template !== 'ui') {
-            console.error(msg('unknownTemplate', template));
-            process.exit(1);
-        }
-        const coreCli = new CoreCli();
-        coreCli.createProject(name, {
-            template,
-            typescript: !!opts.typescript
-        });
+        await runCreateProjectFlow(name, opts);
     });
 
 // Start dev server command
@@ -201,23 +380,7 @@ program
     .command('tungulula')
     .description(msg('tungululaDesc'))
     .action(() => {
-        console.log(msg('startingDev'));
-        console.log(msg('hotReload'));
-
-        try {
-            const BembaDevServer = loadDevServerModule();
-            const server = new BembaDevServer({ port: 3000 });
-            server.start();
-
-            process.on('SIGINT', () => {
-                console.log(`\n${msg('stoppingDev')}`);
-                process.exit(0);
-            });
-        } catch (error) {
-            console.error(msg('devStartErr'), error.message);
-            console.log(msg('devCwdHint'));
-            process.exit(1);
-        }
+        runTungululaCli();
     });
 
 function resolveCoreExport() {
@@ -337,31 +500,13 @@ program
     .command('help')
     .description(msg('helpDesc'))
     .action(() => {
-        console.log(msg('helpTitle'));
-        console.log('');
-        console.log('Commands:');
-        console.log(`   ${msg('helpCmdPanga')}`);
-        console.log(`   ${msg('helpCmdTemplate')}`);
-        console.log(`   ${msg('helpCmdSyncTpl')}`);
-        console.log(`   ${msg('helpCmdTungulula')}`);
-        console.log(`   ${msg('helpCmdAkha')}`);
-        console.log(`   ${msg('helpCmdFumya')}`);
-        console.log(`   ${msg('helpCmdLint')}`);
-        console.log(`   ${msg('helpCmdFormat')}`);
-        console.log(`   ${msg('helpCmdEmit')}`);
-        console.log(`   ${msg('helpCmdVersion')}`);
-        console.log(`   ${msg('helpCmdHelp')}`);
-        console.log('');
-        console.log(msg('helpLangHint'));
-        console.log('');
-        console.log(msg('helpWebsite'));
-        console.log(msg('helpDocs'));
-        console.log(msg('helpGh'));
+        printBembaHelpText();
     });
 
 // Subcommands implemented only in bembajs-core — forward so `bunx bemba` matches `bembajs-core`.
 const forwardArgv = process.argv.slice(2);
-const forwardToCore = forwardArgv[0] === 'template' || forwardArgv[0] === 'sync-template';
+const forwardLook = argvWithoutLangFlags(forwardArgv);
+const forwardToCore = forwardLook[0] === 'template' || forwardLook[0] === 'sync-template';
 if (forwardToCore) {
     const CoreCli = resolveCoreCliClass();
     if (!CoreCli) {
@@ -371,8 +516,13 @@ if (forwardToCore) {
     const coreCli = new CoreCli();
     coreCli.run();
 } else {
-    program.parse();
-    if (!process.argv.slice(2).length) {
-        program.outputHelp();
+    const stripped = argvWithoutLangFlags(forwardArgv);
+    if (stripped.length === 0) {
+        runInteractiveMainMenu().catch((e) => {
+            console.error(e);
+            process.exit(1);
+        });
+    } else {
+        program.parse();
     }
 }

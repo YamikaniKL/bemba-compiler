@@ -44,6 +44,20 @@ const EXTRA = {
         langChoiceBemba: 'Bemba (CLI messages in Bemba)',
         langPromptRl: 'Language [1 English · 2 Bemba, default 1]: ',
 
+        pangaArgName: 'Project folder name (optional if you use interactive prompts)',
+        projectNamePrompt: 'Project folder name (e.g. my-app)',
+        projectNameRequired: 'Enter a non-empty name',
+        projectNameRl: 'Project folder name: ',
+        invalidProjectName:
+            'Invalid name: use letters, numbers, dot, underscore, or hyphen only (no paths or spaces).',
+
+        mainMenuTitle: 'What do you want to do?',
+        mainMenuCreate: 'Create a new project (language → name → template)',
+        mainMenuDev: 'Start dev server (tungulula)',
+        mainMenuHelp: 'Show command help',
+        mainMenuExit: 'Exit',
+        mainMenuPromptRl: 'Choose [1 create · 2 dev · 3 help · 4 exit, default 1]: ',
+
         startingDev: 'Starting BembaJS development server...',
         hotReload: 'Hot reload on; press Ctrl+C to stop.',
         stoppingDev: 'Stopping BembaJS development server...',
@@ -64,7 +78,7 @@ const EXTRA = {
         promptLine2: '  2) ui   — starter UI blocks',
 
         helpTitle: 'BembaJS — Programming in Bemba',
-        helpCmdPanga: 'bemba panga <name>    — Create project (prompts template)',
+        helpCmdPanga: 'bemba panga [name]   — Create project (language → name → template if omitted)',
         helpCmdTemplate: 'bemba template sync   — Refresh docs/starter from bembajs-core',
         helpCmdSyncTpl: 'bemba sync-template     — Same as template sync',
         helpCmdTungulula: 'bemba tungulula       — Start dev server (primary; matches bun run dev)',
@@ -76,7 +90,7 @@ const EXTRA = {
         helpCmdVersion: 'bemba --version       — Show version',
         helpCmdHelp: 'bemba help            — Show this help',
         helpLangHint:
-            'Interactive `bemba panga` asks language first, then template. Or use bemba --lang bem panga … / set BEMBA_CLI_LANG.',
+            'Run `bemba` alone for a menu. `bemba panga` without a name asks language, folder name, then template. Or: bemba --lang bem panga my-app -t ui',
         helpWebsite: 'Website: https://bembajs.dev',
         helpDocs: 'Docs: https://docs.bembajs.dev',
         helpGh: 'Community: https://github.com/bembajs/bembajs',
@@ -110,6 +124,19 @@ const EXTRA = {
         langChoiceBemba: 'Icifulo ca Bemba',
         langPromptRl: 'Ululomi [1 Icilungu · 2 Bemba, default 1]: ',
 
+        pangaArgName: 'Ishina lyabufolder (nga tashile, kulakulanda)',
+        projectNamePrompt: 'Ishina lyabufolder (nga my-app)',
+        projectNameRequired: 'Lemba ishina',
+        projectNameRl: 'Ishina lyabufolder: ',
+        invalidProjectName: 'Ishina tashilungika: ukufwile ama letters, numbers, . _ - (tafwile ama path nangu amasango).',
+
+        mainMenuTitle: 'Ulefwaya ukucita nshi?',
+        mainMenuCreate: 'Panga project iipya (ululomi → ishina → ifishi)',
+        mainMenuDev: 'Gulula sava yakupanga (tungulula)',
+        mainMenuHelp: 'Mona ukwafwa wa ma command',
+        mainMenuExit: 'Fuma',
+        mainMenuPromptRl: 'Sala [1 panga · 2 tungulula · 3 help · 4 fuma, default 1]: ',
+
         startingDev: 'Tungulula sava yakupanga ya BembaJS...',
         hotReload: 'Hot reload yaliko; cinshi Ctrl+C pakuleka.',
         stoppingDev: 'Tuleka sava yakupanga...',
@@ -129,7 +156,7 @@ const EXTRA = {
         promptLine2: '  2) ui   — ama block ya UI',
 
         helpTitle: 'BembaJS',
-        helpCmdPanga: 'bemba panga <name>    — Panga project',
+        helpCmdPanga: 'bemba panga [ishina] — Panga project (ululomi → ishina → ifishi nga tashile)',
         helpCmdTemplate: 'bemba template sync   — Sansa docs ne starter',
         helpCmdSyncTpl: 'bemba sync-template     — Cimo ne template sync',
         helpCmdTungulula: 'bemba tungulula       — Gulula sava (cimo ne bun run dev)',
@@ -141,7 +168,7 @@ const EXTRA = {
         helpCmdVersion: 'bemba --version       — Mano ya version',
         helpCmdHelp: 'bemba help            — Uku afwa',
         helpLangHint:
-            '`bemba panga` pa interactive kulanda ululomi pakubala, elyo ifishi. Nangu bemba --lang bem panga … / BEMBA_CLI_LANG.',
+            'Ina `bemba` yeka ku menu. `bemba panga` nga tashile ishina kulanda ululomi, ishina, elyo ifishi. Nangu: bemba --lang bem panga my-app -t ui',
         helpWebsite: 'Website: https://bembajs.dev',
         helpDocs: 'Docs: https://docs.bembajs.dev',
         helpGh: 'GitHub: https://github.com/bembajs/bembajs',
@@ -163,6 +190,9 @@ function normalizeLang(raw) {
 
 /** `-l` / `--lang` in argv only; `undefined` if absent (interactive may prompt). */
 function parseLangFromArgvOnly(argv) {
+    if (core && typeof core.parseLangFromArgvOnly === 'function') {
+        return core.parseLangFromArgvOnly(argv);
+    }
     const args = argv || process.argv;
     for (let i = 0; i < args.length; i++) {
         const a = args[i];

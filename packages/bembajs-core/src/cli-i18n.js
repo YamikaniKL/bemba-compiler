@@ -147,8 +147,8 @@ function normalizeLang(raw) {
     return 'en';
 }
 
-/** Read -l / --lang before Commander runs (so defaults and t() match). */
-function parseEarlyLangFromArgv(argv) {
+/** `-l` / `--lang` only; `undefined` if absent (do not write `process.env` to `en`). */
+function parseLangFromArgvOnly(argv) {
     const args = argv || process.argv;
     for (let i = 0; i < args.length; i++) {
         const a = args[i];
@@ -158,7 +158,14 @@ function parseEarlyLangFromArgv(argv) {
         }
         if (a.startsWith('--lang=')) return normalizeLang(a.slice('--lang='.length));
     }
-    return normalizeLang(process.env.BEMBA_CLI_LANG);
+    return undefined;
+}
+
+/** Resolved language for display (argv → env → en). Does not mutate env. */
+function parseEarlyLangFromArgv(argv) {
+    const fromArgv = parseLangFromArgvOnly(argv);
+    if (fromArgv !== undefined) return fromArgv;
+    return normalizeLang(process.env.BEMBA_CLI_LANG || 'en');
 }
 
 function activeLang() {
@@ -180,6 +187,7 @@ function t(key, ...args) {
 module.exports = {
     MSGS,
     normalizeLang,
+    parseLangFromArgvOnly,
     parseEarlyLangFromArgv,
     activeLang,
     t
