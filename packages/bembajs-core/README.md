@@ -113,6 +113,33 @@ The **site layout** CSS (in `BembaParser#generateModernLayout` for `umusangoSite
 
 Dark mode: the same variables are overridden inside `@media (prefers-color-scheme: dark)` in the emitted layout.
 
+### Static HTML compile options (`BembaParser#compile` / legacy `compile()` fallback)
+
+When compiling **`pangaIpepa`** (not the default AST `compile()` success path), pass:
+
+| Option | Purpose |
+|--------|---------|
+| **`projectRoot`** | Resolves `amapeji/umusango.bemba`, **`ingisa`** partials under `ifikopo/`, and validates import paths stay in the project |
+| **`currentPath`** | Request URL path (e.g. `/learn`) for **active** nav link styling |
+| **`pageFilePath`** | Absolute path to the page `.bemba` file — **required** for top-of-file **`import … from './relative.bemba'`** |
+| **`layoutCode`** | Optional: inline shell source instead of reading `umusango.bemba` from disk |
+
+### `listStaticPageDependencyPaths(code, { projectRoot, pageFilePath })`
+
+Returns a sorted list of **absolute paths** to existing `.bemba` files that static HTML for this page depends on: the page itself, **`umusango.bemba`** when `umusangoSite: ee`, each resolved **`ingisa`** file, and each resolved static **`import`**. Use for tooling or fine-grained invalidation (the **bembajs** dev server still uses a simple generation counter).
+
+```javascript
+const { listStaticPageDependencyPaths } = require('bembajs-core');
+const fs = require('fs');
+const code = fs.readFileSync('amapeji/contact.bemba', 'utf8');
+console.log(listStaticPageDependencyPaths(code, {
+  projectRoot: process.cwd(),
+  pageFilePath: require('path').resolve('amapeji/contact.bemba')
+}));
+```
+
+`BembaParser` also exposes **`resolveIngisaPartialFilePath(projectRoot, name)`** for resolving a single partial path the same way **`ingisa`** does.
+
 ### HTML partials (`ingisa` + `pangaIcapaba`)
 
 - On a **`pangaIpepa`** page, add **`ingisa: [ 'Card', 'Promo' ]`** (names without `.bemba`).

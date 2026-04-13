@@ -7,10 +7,17 @@ const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./
 const { version: CORE_VERSION } = require('../package.json');
 
 /**
- * Compile Bemba code to JavaScript/HTML
+ * Compile Bemba code to JavaScript/HTML (AST path) or static HTML (legacy fallback).
  * @param {string} code - Bemba source code
- * @param {object} options - Compilation options
- * @returns {object} Compiled result
+ * @param {object} [options]
+ * @param {boolean} [options.legacyFallback=true] - When AST compile fails, fall back to `BembaParser#compile` (static HTML)
+ * @param {boolean} [options.includeAst]
+ * @param {boolean} [options.includeTransformedAst]
+ * @param {string} [options.projectRoot] - Static pages: enables shell, `ingisa`, `import`
+ * @param {string} [options.currentPath] - Static pages: active nav path
+ * @param {string} [options.pageFilePath] - Static pages: absolute path to the `.bemba` file
+ * @param {string} [options.layoutCode] - Static pages: optional shell override
+ * @returns {{ success: true, code: string, legacy?: boolean } | { success: false, error: string, stack?: string }}
  */
 function compile(code, options = {}) {
     const lexer = new BembaLexer();
@@ -88,10 +95,22 @@ function generate(ast) {
     return generator.generate(ast);
 }
 
+/**
+ * Absolute paths to `.bemba` files that influence static HTML for a `pangaIpepa` page (shell, `ingisa`, `import`).
+ * @param {string} code - Page source
+ * @param {{ projectRoot: string, pageFilePath?: string }} options
+ * @returns {string[]}
+ */
+function listStaticPageDependencyPaths(code, options) {
+    const parser = new BembaParser();
+    return parser.listStaticPageDependencyPaths(code, options || {});
+}
+
 // Export all functionality
 module.exports = {
     // Main API
     compile,
+    listStaticPageDependencyPaths,
     parse,
     transform,
     generate,

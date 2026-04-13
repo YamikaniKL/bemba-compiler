@@ -1031,7 +1031,15 @@ class BembaParser {
         }
     }
     
-    // Backward compatibility method for old syntax
+    /**
+     * Compile page/component source to HTML (new syntax) or legacy HTML.
+     * @param {string} code
+     * @param {object} [options]
+     * @param {string} [options.projectRoot] - Enables `amapeji/umusango.bemba`, `ingisa`, and static `import` resolution
+     * @param {string} [options.currentPath] - URL path for active nav, e.g. `/contact`
+     * @param {string} [options.pageFilePath] - Absolute path to this `.bemba` file (required for relative `import`)
+     * @param {string} [options.layoutCode] - Inline shell source override (rare; normally read from disk)
+     */
     compile(code, options = {}) {
         try {
             // Simple compilation for pangaWebusaiti syntax
@@ -1411,6 +1419,65 @@ class BembaParser {
         });
     }
 
+    /**
+     * Files that affect static HTML output for a `pangaIpepa` page (for tooling / fine-grained cache invalidation).
+     * Includes the page file, `umusango.bemba` when used, `ingisa` partials that exist on disk, and resolved static imports.
+     * @param {string} code - Page source
+     * @param {object} options
+     * @param {string} options.projectRoot
+     * @param {string} [options.pageFilePath] - Absolute path to the page `.bemba`
+     * @returns {string[]} Sorted absolute paths (existing files only)
+     */
+    listStaticPageDependencyPaths(code, options = {}) {
+        if (!code || typeof code !== 'string' || !code.includes('pangaIpepa')) {
+            return [];
+        }
+        const projectRoot = options.projectRoot;
+        const pageFilePath = options.pageFilePath ? String(options.pageFilePath) : '';
+        const seen = new Set();
+        const add = (p) => {
+            if (!p) return;
+            try {
+                const abs = path.normalize(path.resolve(p));
+                if (fs.existsSync(abs)) seen.add(abs);
+            } catch (_) {
+                /* ignore */
+            }
+        };
+
+        if (pageFilePath) add(pageFilePath);
+        if (!projectRoot) {
+            return Array.from(seen).sort();
+        }
+
+        const siteLayout = this.extractSiteLayoutFromNewSyntax(code);
+        const shellPath = path.join(projectRoot, BEMBA_FOLDERS.PAGES, BEMBA_FILES.SITE_SHELL);
+        if (siteLayout) add(shellPath);
+
+        const ingisaNames = this.extractIngisaNames(code);
+        for (const n of ingisaNames) {
+            const fp = this.resolveIngisaPartialFilePath(projectRoot, n);
+            if (fp) add(fp);
+        }
+
+        if (pageFilePath) {
+            const absPage = path.resolve(pageFilePath);
+            let importNodes = [];
+            try {
+                importNodes = this.parseLeadingImportStatements(code);
+            } catch (_) {
+                importNodes = [];
+            }
+            for (const imp of importNodes) {
+                if (!imp || imp.type !== 'Import') continue;
+                const r = resolveBembaImportPath(projectRoot, absPage, imp.source);
+                if (r) add(r);
+            }
+        }
+
+        return Array.from(seen).sort();
+    }
+
     /** Backtick field e.g. ibeensi: `...` (trusted HTML from author). */
     extractBacktickField(source, key) {
         const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -1443,6 +1510,17 @@ class BembaParser {
         return { html, css };
     }
 
+    /** Resolve `ifikopo/<Name>.bemba` or `ifikopo/cipanda/<Name>.bemba` when present. */
+    resolveIngisaPartialFilePath(projectRoot, rawName) {
+        const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
+        if (!safe || !projectRoot) return null;
+        const rootPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, `${safe}.bemba`);
+        const nestedPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, 'cipanda', `${safe}.bemba`);
+        if (fs.existsSync(rootPart)) return rootPart;
+        if (fs.existsSync(nestedPart)) return nestedPart;
+        return null;
+    }
+
     loadIngisaPartials(projectRoot, names) {
         if (!projectRoot || !names || !names.length) {
             return { html: '', css: '', navShell: null };
@@ -1454,9 +1532,7 @@ class BembaParser {
         for (const rawName of names) {
             const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
             if (!safe) continue;
-            const rootPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, `${safe}.bemba`);
-            const nestedPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, 'cipanda', `${safe}.bemba`);
-            const fp = fs.existsSync(rootPart) ? rootPart : fs.existsSync(nestedPart) ? nestedPart : null;
+            const fp = this.resolveIngisaPartialFilePath(projectRoot, rawName);
             if (!fp) continue;
             let src;
             try {
