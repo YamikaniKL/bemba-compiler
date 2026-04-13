@@ -313,7 +313,7 @@ bun run dev
 
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
 
-CLI language (optional): **\`bemba --lang bem …\`** or **\`BEMBA_CLI_LANG=bem\`** for Bemba CLI messages; default is English.
+CLI language: interactive **\`bemba panga\`** asks **language first**, then template. Or **\`bemba --lang bem panga …\`**, **\`BEMBA_CLI_LANG=bem\`**, or **\`-t base|ui\`** to skip prompts you do not need.
 
 ## Code style and UI patterns
 

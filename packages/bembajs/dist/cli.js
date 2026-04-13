@@ -8,7 +8,12 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
-const { parseEarlyLangFromArgv, normalizeLang, msg } = require('./cli-i18n');
+const {
+    normalizeLang,
+    msg,
+    langExplicitInArgv,
+    hasPersistedCliLangEnv
+} = require('./cli-i18n');
 const { program } = require('commander');
 let prompts = null;
 try {
@@ -56,6 +61,42 @@ function resolveCoreCliClass() {
     }
 }
 
+async function promptLanguageChoice() {
+    if (prompts && typeof prompts === 'function') {
+        const response = await prompts(
+            {
+                type: 'select',
+                name: 'lang',
+                message: msg('chooseCliLang'),
+                choices: [
+                    { title: msg('langChoiceEnglish'), value: 'en' },
+                    { title: msg('langChoiceBemba'), value: 'bem' }
+                ],
+                initial: 0
+            },
+            {
+                onCancel: () => {
+                    process.exit(1);
+                }
+            }
+        );
+        return response.lang === 'bem' ? 'bem' : 'en';
+    }
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+    try {
+        const answer = String(await ask(msg('langPromptRl'))).trim().toLowerCase();
+        if (answer === '2' || answer === 'bem' || answer === 'bemba') return 'bem';
+        return 'en';
+    } finally {
+        rl.close();
+    }
+}
+
 async function promptTemplateChoice() {
     if (prompts && typeof prompts === 'function') {
         const response = await prompts(
@@ -96,17 +137,16 @@ async function promptTemplateChoice() {
 }
 
 // Main CLI program
-const earlyLang = parseEarlyLangFromArgv(process.argv);
 program
     .name('bemba')
     .description(msg('programDesc'))
     .version(pkgVersion)
-    .option('-l, --lang <lang>', msg('optLang'), earlyLang);
+    .option('-l, --lang <lang>', msg('optLang'));
 
 program.hook('preAction', (thisCommand) => {
     const root = typeof thisCommand.root === 'function' ? thisCommand.root() : program;
     const opts = root.opts && root.opts();
-    if (opts && opts.lang != null) {
+    if (opts && opts.lang != null && String(opts.lang).trim() !== '') {
         process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);
     }
 });
@@ -131,6 +171,16 @@ program
             console.error(msg('coreMissingPanga'));
             process.exit(1);
         }
+
+        const skipLanguagePrompt =
+            langExplicitInArgv(process.argv) ||
+            (opts.lang != null && String(opts.lang).trim() !== '') ||
+            hasPersistedCliLangEnv();
+        if (!skipLanguagePrompt) {
+            const picked = await promptLanguageChoice();
+            process.env.BEMBA_CLI_LANG = picked;
+        }
+
         let template = opts.template ? String(opts.template).trim().toLowerCase() : '';
         if (!template) {
             template = await promptTemplateChoice();

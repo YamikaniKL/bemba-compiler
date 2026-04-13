@@ -39,6 +39,11 @@ const EXTRA = {
         optEmitOut: 'Output directory for emitted JSX',
         optLang: 'CLI messages: en | bem (or BEMBA_CLI_LANG)',
 
+        chooseCliLang: 'Choose CLI language · Sala ululomi (prompts + scaffolding)',
+        langChoiceEnglish: 'English',
+        langChoiceBemba: 'Bemba (CLI messages in Bemba)',
+        langPromptRl: 'Language [1 English · 2 Bemba, default 1]: ',
+
         startingDev: 'Starting BembaJS development server...',
         hotReload: 'Hot reload on; press Ctrl+C to stop.',
         stoppingDev: 'Stopping BembaJS development server...',
@@ -70,7 +75,8 @@ const EXTRA = {
         helpCmdEmit: 'bemba emit-react      — Emit JSX for bundler + React',
         helpCmdVersion: 'bemba --version       — Show version',
         helpCmdHelp: 'bemba help            — Show this help',
-        helpLangHint: 'Use bemba --lang bem … for Bemba CLI messages.',
+        helpLangHint:
+            'Interactive `bemba panga` asks language first, then template. Or use bemba --lang bem panga … / set BEMBA_CLI_LANG.',
         helpWebsite: 'Website: https://bembajs.dev',
         helpDocs: 'Docs: https://docs.bembajs.dev',
         helpGh: 'Community: https://github.com/bembajs/bembajs',
@@ -98,6 +104,11 @@ const EXTRA = {
         optNoBembaSite: 'Kwatako bemba-site.js',
         optEmitOut: 'Bufolder bwa JSX',
         optLang: 'Umulomo wa CLI: en | bem (nangu BEMBA_CLI_LANG)',
+
+        chooseCliLang: 'Sala ululomi lwa CLI · Choose language (mapeeso + project)',
+        langChoiceEnglish: 'Icilungu (English)',
+        langChoiceBemba: 'Icifulo ca Bemba',
+        langPromptRl: 'Ululomi [1 Icilungu · 2 Bemba, default 1]: ',
 
         startingDev: 'Tungulula sava yakupanga ya BembaJS...',
         hotReload: 'Hot reload yaliko; cinshi Ctrl+C pakuleka.',
@@ -129,7 +140,8 @@ const EXTRA = {
         helpCmdEmit: 'bemba emit-react      — Fumya JSX',
         helpCmdVersion: 'bemba --version       — Mano ya version',
         helpCmdHelp: 'bemba help            — Uku afwa',
-        helpLangHint: 'Ukufwile bemba --lang bem … pa mapeeso ya Bemba.',
+        helpLangHint:
+            '`bemba panga` pa interactive kulanda ululomi pakubala, elyo ifishi. Nangu bemba --lang bem panga … / BEMBA_CLI_LANG.',
         helpWebsite: 'Website: https://bembajs.dev',
         helpDocs: 'Docs: https://docs.bembajs.dev',
         helpGh: 'GitHub: https://github.com/bembajs/bembajs',
@@ -149,8 +161,8 @@ function normalizeLang(raw) {
     return 'en';
 }
 
-function parseEarlyLangFromArgv(argv) {
-    if (core) return core.parseEarlyLangFromArgv(argv);
+/** `-l` / `--lang` in argv only; `undefined` if absent (interactive may prompt). */
+function parseLangFromArgvOnly(argv) {
     const args = argv || process.argv;
     for (let i = 0; i < args.length; i++) {
         const a = args[i];
@@ -160,11 +172,27 @@ function parseEarlyLangFromArgv(argv) {
         }
         if (a.startsWith('--lang=')) return normalizeLang(a.slice('--lang='.length));
     }
-    return normalizeLang(process.env.BEMBA_CLI_LANG);
+    return undefined;
+}
+
+function parseEarlyLangFromArgv(argv) {
+    if (core) return core.parseEarlyLangFromArgv(argv);
+    const fromArgv = parseLangFromArgvOnly(argv);
+    if (fromArgv !== undefined) return fromArgv;
+    return normalizeLang(process.env.BEMBA_CLI_LANG || 'en');
 }
 
 function activeLang() {
-    return normalizeLang(process.env.BEMBA_CLI_LANG);
+    return normalizeLang(process.env.BEMBA_CLI_LANG || 'en');
+}
+
+function langExplicitInArgv(argv) {
+    return parseLangFromArgvOnly(argv) !== undefined;
+}
+
+function hasPersistedCliLangEnv() {
+    const v = process.env.BEMBA_CLI_LANG;
+    return v != null && String(v).trim() !== '';
 }
 
 function msg(key, ...args) {
@@ -175,10 +203,17 @@ function msg(key, ...args) {
     return val != null ? val : key;
 }
 
-process.env.BEMBA_CLI_LANG = parseEarlyLangFromArgv(process.argv);
+// Apply language from argv only; keep shell BEMBA_CLI_LANG; leave unset for interactive `panga` prompt.
+const __langFlag = parseLangFromArgvOnly(process.argv);
+if (__langFlag !== undefined) {
+    process.env.BEMBA_CLI_LANG = __langFlag;
+}
 
 module.exports = {
     parseEarlyLangFromArgv,
+    parseLangFromArgvOnly,
+    langExplicitInArgv,
+    hasPersistedCliLangEnv,
     normalizeLang,
     activeLang,
     msg,
