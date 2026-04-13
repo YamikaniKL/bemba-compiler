@@ -1,6 +1,5 @@
 /**
- * Default files for `bemba panga` / `bemba init` (base template).
- * UI tokens follow a shadcn-like semantic palette; JS tooling points at Standard + Google guides.
+ * Default files for `bemba panga` / `bemba init` templates.
  */
 const { BEMBA_FOLDERS } = require('./constants');
 
@@ -94,11 +93,10 @@ function starterCardPartial() {
     return `pangaIcapaba({
   ibeensi: \`
     <section class="bem-card bem-card--starter" role="region" aria-labelledby="starter-card-h">
-      <h2 id="starter-card-h" class="bem-card__title">Starter UI block</h2>
+      <h2 id="starter-card-h" class="bem-card__title">Starter card</h2>
       <p class="bem-card__desc">
-        This lives in <code>ifikopo/cipanda/StarterCard.bemba</code>. Like
-        <a href="https://ui.shadcn.com/" target="_blank" rel="noopener noreferrer">shadcn/ui</a>,
-        you copy and edit the source in your repo instead of fighting a black-box package.
+        This card lives in <code>ifikopo/cipanda/StarterCard.bemba</code>.
+        Edit or replace it with your own UI blocks.
       </p>
       <div class="bem-card__actions">
         <a class="bem-btn bem-btn--primary" href="https://standardjs.com/" target="_blank" rel="noopener noreferrer">Standard JS</a>
@@ -123,9 +121,8 @@ function starterCardPartial() {
 function indexPage() {
     return `pangaIpepa('Home', {
   umusangoSite: ee,
-  ingisa: [ 'StarterCard' ],
   umutwe: 'Create BembaJS App',
-  ilyashi: 'Semantic tokens, a starter card partial, and Standard JS for any JavaScript you add.',
+  ilyashi: 'Semantic tokens and Standard JS are ready for your project.',
   ifiputulwa: [
     {
       umutwe: 'Get started',
@@ -143,7 +140,36 @@ function indexPage() {
     }
   ],
   imikalile: \`
-    /* Page-specific tweaks; shared chrome + .bem-* utilities come from umusango.bemba */
+    /* Page-specific tweaks; shared chrome comes from umusango.bemba */
+  \`
+});
+`;
+}
+
+function indexPageUi() {
+    return `pangaIpepa('Home', {
+  umusangoSite: ee,
+  ingisa: [ 'StarterCard' ],
+  umutwe: 'Create BembaJS App',
+  ilyashi: 'Semantic tokens plus a starter card partial are ready.',
+  ifiputulwa: [
+    {
+      umutwe: 'Get started',
+      ilyashi: 'Install dependencies, run the dev server, and run the linter on .js files.',
+      amabatani: [
+        {
+          ilembo: 'Deploy now',
+          pakuKlikisha: 'window.open("https://vercel.com/new?utm_source=create-bembajs&utm_medium=appdir-template&utm_campaign=create-bembajs", "_blank")'
+        },
+        {
+          ilembo: 'Read our docs',
+          pakuKlikisha: 'window.open("https://bembajs.dev/docs", "_blank")'
+        }
+      ]
+    }
+  ],
+  imikalile: \`
+    /* Page-specific tweaks; shared chrome + starter card come from umusango.bemba and ifikopo/cipanda */
   \`
 });
 `;
@@ -206,7 +232,7 @@ body {
 function projectReadme(projectName) {
     return `# ${projectName}
 
-A [BembaJS](https://bembajs.dev) application with a **shared shell**, **starter partial**, and **linting** defaults.
+A [BembaJS](https://bembajs.dev) application with a shared shell and linting defaults.
 
 ## Getting started
 
@@ -223,7 +249,7 @@ See **\`docs/CODE-STYLE-AND-UI.md\`** for:
 
 - [JavaScript Standard Style](https://standardjs.com/) (\`bun run lint\`)
 - [Google style guides](https://google.github.io/styleguide/) (JavaScript, HTML/CSS, TypeScript)
-- A **shadcn-style workflow** for static sites: copy/edit partials under \`ifikopo/cipanda/\`, semantic \`--tokens\` in \`umusango.bemba\`
+- Template notes and UI patterns for static sites
 
 ## Project structure
 
@@ -310,6 +336,7 @@ module.exports = {
     shellBemba,
     starterCardPartial,
     indexPage,
+    indexPageUi,
     aboutPage,
     buttonComponentBemba,
     globalCss,

@@ -27,7 +27,7 @@ class BembaCLI {
         this.program
             .command('panga <name>')
             .description('Create a new BembaJS project')
-            .option('-t, --template <template>', 'Project template to use', 'base')
+            .option('-t, --template <template>', 'Project template: base | ui', 'base')
             .option('--typescript', 'Use TypeScript')
             .action((name, options) => this.createProject(name, options));
         
@@ -35,7 +35,7 @@ class BembaCLI {
         this.program
             .command('new <name>')
             .description('Create a new BembaJS project (alias for panga)')
-            .option('-t, --template <template>', 'Project template to use', 'base')
+            .option('-t, --template <template>', 'Project template: base | ui', 'base')
             .option('--typescript', 'Use TypeScript')
             .action((name, options) => this.createProject(name, options));
         
@@ -43,7 +43,7 @@ class BembaCLI {
         this.program
             .command('init')
             .description('Initialize BembaJS project in current directory')
-            .option('-t, --template <template>', 'Project template to use', 'base')
+            .option('-t, --template <template>', 'Project template: base | ui', 'base')
             .option('--typescript', 'Use TypeScript')
             .action((options) => this.initProject(options));
         
@@ -155,13 +155,14 @@ class BembaCLI {
         // Create configuration
         this.createConfig(projectPath);
         
-        console.log(`✅ Project ${name} created successfully!`);
-        console.log(`📁 Navigate to the project: cd ${name}`);
-        console.log(`🚀 Start development: bemba tungulula`);
+        console.log(`Project ${name} created successfully.`);
+        console.log(`Template: ${options.template || 'base'}`);
+        console.log(`Navigate to the project: cd ${name}`);
+        console.log(`Start development: bemba tungulula`);
     }
     
     initProject(options) {
-        console.log(`🚀 Initializing BembaJS project in current directory`);
+        console.log(`Initializing BembaJS project in current directory`);
         
         const projectPath = process.cwd();
         const projectName = path.basename(projectPath);
@@ -169,7 +170,7 @@ class BembaCLI {
         // Check if directory is empty
         const files = fs.readdirSync(projectPath);
         if (files.length > 0) {
-            console.log(`⚠️  Directory is not empty. Some files may be overwritten.`);
+            console.log(`Warning: Directory is not empty. Some files may be overwritten.`);
         }
         
         // Create folder structure
@@ -184,9 +185,10 @@ class BembaCLI {
         // Create configuration
         this.createConfig(projectPath);
         
-        console.log(`✅ Project initialized successfully!`);
-        console.log(`📁 Location: ${projectPath}`);
-        console.log(`🚀 Start development: bemba tungulula`);
+        console.log(`Project initialized successfully.`);
+        console.log(`Template: ${options.template || 'base'}`);
+        console.log(`Location: ${projectPath}`);
+        console.log(`Start development: bemba tungulula`);
     }
     
     createFolderStructure(projectPath) {
@@ -207,13 +209,24 @@ class BembaCLI {
     
     createInitialFiles(projectPath, name, options) {
         const t = require('./cli-project-templates');
+        const template = String(options?.template || 'base').toLowerCase();
+        const isUiTemplate = template === 'ui';
+        if (template !== 'base' && template !== 'ui') {
+            throw new Error(`Unknown template "${template}". Use --template base or --template ui`);
+        }
+
         fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'umusango.bemba'), t.shellBemba(name));
-        fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda'), { recursive: true });
+        if (isUiTemplate) {
+            fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda'), { recursive: true });
+            fs.writeFileSync(
+                path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba'),
+                t.starterCardPartial()
+            );
+        }
         fs.writeFileSync(
-            path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba'),
-            t.starterCardPartial()
+            path.join(projectPath, BEMBA_FOLDERS.PAGES, 'index.bemba'),
+            isUiTemplate ? t.indexPageUi() : t.indexPage()
         );
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'index.bemba'), t.indexPage());
         fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'about.bemba'), t.aboutPage());
         fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'Button.bemba'), t.buttonComponentBemba());
         fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'global.css'), t.globalCss(name));
