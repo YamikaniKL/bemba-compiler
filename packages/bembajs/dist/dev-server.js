@@ -11,10 +11,21 @@ const fs = require('fs');
 
 let coreCompile = null;
 let BembaParserClass = null;
+/** @type {null | { Parser: any, Transformer: any, Generator: any, loadApi: (src: string, hint: string) => Function }} */
+let coreApiPipeline = null;
 try {
     const core = require('bembajs-core');
     coreCompile = core.compile;
     BembaParserClass = core.BembaParser;
+    const coreMain = require.resolve('bembajs-core');
+    const coreRoot = path.resolve(path.dirname(coreMain), '..');
+    const { loadApiHandlerFromGeneratedSource } = require(path.join(coreRoot, 'dist', 'server-load-api.js'));
+    coreApiPipeline = {
+        Parser: core.BembaParser,
+        Transformer: core.BembaTransformer,
+        Generator: core.BembaGenerator,
+        loadApi: loadApiHandlerFromGeneratedSource
+    };
 } catch (_) {
     /* bembajs-core may be unavailable in some installs */
 }
@@ -26,11 +37,11 @@ function isHtmlString(str) {
 }
 
 /** Full AST compile returns JS; browser preview needs HTML for simple pangaIpepa pages. */
-function compilePangaIpepaHtmlViaParser(code) {
+function compilePangaIpepaHtmlViaParser(code, compileOpts = {}) {
     if (!BembaParserClass || !code.includes('pangaIpepa')) return null;
     try {
         const parser = new BembaParserClass();
-        const html = parser.compile(code, {});
+        const html = parser.compile(code, compileOpts);
         return isHtmlString(html) ? html : null;
     } catch (_) {
         return null;
@@ -98,10 +109,10 @@ function renderLegacyDevButton(btnText, btnAction, index) {
  * Compile .bemba to HTML for the dev server preview.
  * Parser HTML first for pangaIpepa (matches bembajs-core layout); no Tailwind CDN.
  */
-function compileBembaToHtml(code) {
+function compileBembaToHtml(code, compileOpts = {}) {
     try {
         if (code.includes('pangaIpepa')) {
-            const parserHtml = compilePangaIpepaHtmlViaParser(code);
+            const parserHtml = compilePangaIpepaHtmlViaParser(code, compileOpts);
             if (parserHtml) {
                 return parserHtml;
             }
@@ -444,8 +455,34 @@ class BembaDevServer {
         this.projectRoot = process.cwd();
         /** @type {Set<import('http').ServerResponse>} */
         this._liveClients = new Set();
+        /** Cache compiled pangaApi handlers: key maapi:relativePath */
+        this._maapiHandlerCache = new Map();
+        this._coreApiPipeline = coreApiPipeline;
         this.setupMiddleware();
         this.setupRoutes();
+    }
+
+    /**
+     * Compile maapi/*.bemba (pangaApi) to a runnable Express handler via bembajs-core + vm.
+     */
+    compileMaapiHandler(apiFilePath) {
+        const rel = path.relative(this.projectRoot, apiFilePath);
+        const key = `maapi:${rel}`;
+        if (this._maapiHandlerCache.has(key)) {
+            return this._maapiHandlerCache.get(key);
+        }
+        if (!this._coreApiPipeline) {
+            throw new Error('bembajs-core (with dist/server-load-api.js) is required to run maapi pangaApi routes');
+        }
+        const { Parser, Transformer, Generator, loadApi } = this._coreApiPipeline;
+        const parser = new Parser();
+        parser.projectRoot = this.projectRoot;
+        const ast = parser.parseFile(apiFilePath);
+        const transformed = new Transformer().transform(ast);
+        const generated = new Generator().generate(transformed);
+        const handler = loadApi(generated, apiFilePath);
+        this._maapiHandlerCache.set(key, handler);
+        return handler;
     }
 
     /** Push a lightweight event so open dev tabs recompile on save (SSE). */
@@ -469,8 +506,13 @@ class BembaDevServer {
         return html.replace('</body>', `${snippet}</body>`);
     }
 
-    compileBemba(code) {
-        return this.wrapDevHtml(compileBembaToHtml(code));
+    compileBemba(code, currentPath = '/') {
+        return this.wrapDevHtml(
+            compileBembaToHtml(code, {
+                projectRoot: this.projectRoot,
+                currentPath: currentPath || '/'
+            })
+        );
     }
 
     sendNoCacheHtml(res, html) {
@@ -580,7 +622,11 @@ class BembaDevServer {
                     return res.status(400).json({ error: 'No code provided' });
                 }
 
-                const result = compileBembaToHtml(code);
+                const currentPath = typeof req.body?.currentPath === 'string' ? req.body.currentPath : '/';
+                const result = compileBembaToHtml(code, {
+                    projectRoot: this.projectRoot,
+                    currentPath
+                });
                 res.json({ 
                     success: true, 
                     result: result,
@@ -591,6 +637,33 @@ class BembaDevServer {
                     success: false, 
                     error: error.message 
                 });
+            }
+        });
+
+        // Project API routes from maapi/*.bemba (pangaApi) — must stay before /:page; skip /api/compile
+        this.app.all('/api/:route', async (req, res, next) => {
+            if (req.params.route === 'compile') {
+                return next();
+            }
+            const routeName = req.params.route;
+            const apiPath = path.join(this.projectRoot, 'maapi', `${routeName}.bemba`);
+            if (!fs.existsSync(apiPath)) {
+                return res.status(404).json({ error: 'API route not found' });
+            }
+            try {
+                const code = fs.readFileSync(apiPath, 'utf8');
+                if (!code.includes('pangaApi')) {
+                    return res.status(501).json({
+                        error: 'maapi file exists but has no pangaApi(...). Add a pangaApi route or remove the file.'
+                    });
+                }
+                const handler = this.compileMaapiHandler(apiPath);
+                await handler(req, res);
+            } catch (error) {
+                console.error(`maapi/${routeName}.bemba:`, error);
+                if (!res.headersSent) {
+                    res.status(500).json({ error: error.message || String(error) });
+                }
             }
         });
 
@@ -620,42 +693,26 @@ class BembaDevServer {
         // Serve pages from amapeji/ directory
         this.app.get('/:page', (req, res) => {
             const pageName = req.params.page;
+            if (pageName === 'umusango') {
+                return res
+                    .status(404)
+                    .type('html')
+                    .send(
+                        '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Not a page</title></head><body><p><code>umusango.bemba</code> is the shared site shell (navbar and footer). Open <a href="/">/</a> or another route.</p></body></html>'
+                    );
+            }
             const pagePath = path.join(this.projectRoot, 'amapeji', `${pageName}.bemba`);
             
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = this.compileBemba(code);
+                    const html = this.compileBemba(code, req.path);
                     this.sendNoCacheHtml(res, html);
                 } catch (error) {
                     res.status(500).send(`Error compiling page: ${error.message}`);
                 }
             } else {
                 res.status(404).send('Page not found');
-            }
-        });
-
-        // API routes from maapi/ directory
-        this.app.all('/api/:route', (req, res) => {
-            const routeName = req.params.route;
-            const apiPath = path.join(this.projectRoot, 'maapi', `${routeName}.bemba`);
-            
-            if (fs.existsSync(apiPath)) {
-                try {
-                    const code = fs.readFileSync(apiPath, 'utf8');
-                    // For now, just return a simple response
-                    // In the future, this could execute the Bemba API code
-                    res.json({ 
-                        message: `API route ${routeName} executed`,
-                        method: req.method,
-                        body: req.body,
-                        query: req.query
-                    });
-                } catch (error) {
-                    res.status(500).json({ error: error.message });
-                }
-            } else {
-                res.status(404).json({ error: 'API route not found' });
             }
         });
     }
@@ -666,7 +723,7 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = this.compileBemba(code);
+                const html = this.compileBemba(code, '/');
                 this.sendNoCacheHtml(res, html);
             } catch (error) {
                 res.status(500).send(`Error compiling home page: ${error.message}`);
@@ -742,6 +799,9 @@ pangaIpepa('Home', {
                         .on('all', (evt, filePath) => {
                             if (typeof filePath === 'string' && filePath.endsWith('.bemba')) {
                                 const rel = path.relative(this.projectRoot, filePath);
+                                if (rel.startsWith(`maapi${path.sep}`)) {
+                                    this._maapiHandlerCache.delete(`maapi:${rel}`);
+                                }
                                 console.log(`${rel} changed — reloading open tabs.`);
                                 this.notifyLiveClients();
                             }
