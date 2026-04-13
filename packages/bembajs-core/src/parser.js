@@ -2268,6 +2268,10 @@ class BembaParser {
     <style>
         * { box-sizing: border-box; }
 
+        html {
+            scrollbar-gutter: stable;
+        }
+
         :root {
             --bg: #f4f4f5;
             --surface: #ffffff;

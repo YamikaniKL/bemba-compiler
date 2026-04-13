@@ -2268,6 +2268,10 @@ class BembaParser {
     <style>
         * { box-sizing: border-box; }
 
+        html {
+            scrollbar-gutter: stable;
+        }
+
         :root {
             --bg: #f4f4f5;
             --surface: #ffffff;
@@ -2368,6 +2372,8 @@ class BembaParser {
             text-decoration: none;
             padding: 0.4rem 0.65rem;
             border-radius: 0.375rem;
+            /* Same box on every state so the active item does not change text width / push siblings. */
+            border: 1px solid transparent;
         }
 
         .nav-link:hover {
@@ -2378,7 +2384,8 @@ class BembaParser {
         .nav-link.is-active {
             color: var(--text);
             background: color-mix(in srgb, var(--accent) 14%, transparent);
-            font-weight: 650;
+            font-weight: 600;
+            border-color: color-mix(in srgb, var(--accent) 45%, transparent);
         }
 
         .hero-banner {
