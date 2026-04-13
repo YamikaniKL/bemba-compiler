@@ -95,6 +95,24 @@ Compile with `projectRoot` so the parser can resolve `amapeji/umusango.bemba`; p
 
 Hero copy uses top-level `umutwe` / `ilyashi` before `ifiputulwa`; body sections use `ifiputulwa` as usual.
 
+### Design tokens (static `pangaIpepa` shell)
+
+The **site layout** CSS (in `BembaParser#generateModernLayout` for `umusangoSite: ee`) defines **`:root`** custom properties. Use them in partial `imikalile` or raw HTML `style=""` so custom components match the shell.
+
+| Token | Role |
+|-------|------|
+| `--bg` | Page background |
+| `--surface` | Surfaces / cards |
+| `--text` | Primary text |
+| `--muted` | Secondary text |
+| `--border` | Hairlines / inputs |
+| `--accent` | Primary actions (matches `.ibatani` fill) |
+| `--accent-hover` | Primary hover |
+
+**Buttons:** hero and body actions use **`.ibatani`** (primary) and **`.ibatani.secondary`** (outline). Reuse these classes inside **`pangaIcapaba`** HTML for visual consistency.
+
+Dark mode: the same variables are overridden inside `@media (prefers-color-scheme: dark)` in the emitted layout.
+
 ### HTML partials (`ingisa` + `pangaIcapaba`)
 
 - On a **`pangaIpepa`** page, add **`ingisa: [ 'Card', 'Promo' ]`** (names without `.bemba`).
