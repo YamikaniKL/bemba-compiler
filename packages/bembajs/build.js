@@ -42,4 +42,18 @@ if (fs.existsSync(updatedDevServer)) {
     console.log('  copied src/server/dev-server.js to dist/dev-server.js');
 }
 
+const scriptsSrc = path.join(__dirname, 'scripts');
+const scriptsDest = path.join(distDir, 'scripts');
+if (fs.existsSync(scriptsSrc)) {
+    if (!fs.existsSync(scriptsDest)) {
+        fs.mkdirSync(scriptsDest, { recursive: true });
+    }
+    for (const entry of fs.readdirSync(scriptsSrc)) {
+        if (entry.endsWith('.js')) {
+            fs.copyFileSync(path.join(scriptsSrc, entry), path.join(scriptsDest, entry));
+            console.log(`  copied scripts/${entry}`);
+        }
+    }
+}
+
 console.log('bembajs built successfully.');

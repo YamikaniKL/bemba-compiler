@@ -30,6 +30,8 @@ const BEMBA_SYNTAX = {
     COMPONENT_DEF: 'fyambaIcipanda',
     PAGE_DEF: 'pangaIpepa',
     SITE_SHELL_DEF: 'pangaUmusango',
+    /** HTML partial for static pages (ifikopo); paired with page field `ingisa: [ 'Name' ]`. */
+    PARTIAL_DEF: 'pangaIcapaba',
     
     // Component properties
     PROPS: 'ifyapangwa',

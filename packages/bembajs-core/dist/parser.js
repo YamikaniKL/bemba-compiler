@@ -1296,7 +1296,13 @@ class BembaParser {
 
         const pageStyles = this.extractStylesFromNewSyntax(code);
         const layoutStyles = useSharedShell ? this.extractStylesFromNewSyntax(layoutCode) : '';
-        const styles = [layoutStyles, pageStyles].filter(Boolean).join('\n\n');
+        let styles = [layoutStyles, pageStyles].filter(Boolean).join('\n\n');
+
+        const ingisaNames = projectRoot ? this.extractIngisaNames(code) : [];
+        const partialBundle = this.loadIngisaPartials(projectRoot, ingisaNames);
+        if (partialBundle.css) {
+            styles = [styles, partialBundle.css].filter(Boolean).join('\n\n');
+        }
 
         const appName = this.extractAppNameFromNewSyntax(code);
         const sections = this.extractSectionsFromNewSyntax(code, appName);
@@ -1309,8 +1315,69 @@ class BembaParser {
             navLinks,
             footerTagline,
             bodyBlocks,
-            activePath
+            activePath,
+            partialsHtml: partialBundle.html
         });
+    }
+
+    /** Backtick field e.g. ibeensi: `...` (trusted HTML from author). */
+    extractBacktickField(source, key) {
+        const esc = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const m = source.match(new RegExp(esc + ':\\s*`([\\s\\S]*?)`'));
+        return m ? m[1] : '';
+    }
+
+    /** Page lists partials: ingisa: [ 'Card', 'Promo' ] → loads ifikopo/Card.bemba, etc. */
+    extractIngisaNames(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'ingisa');
+        if (!inner) return [];
+        const names = [];
+        const re = /['"]([a-zA-Z0-9_-]+)['"]/g;
+        let m;
+        while ((m = re.exec(inner)) !== null) {
+            names.push(m[1]);
+        }
+        return names;
+    }
+
+    /**
+     * Partial file: pangaIcapaba({ ibeensi: `raw HTML`, imikalile: `css` })
+     */
+    extractPangaIcapabaPartial(source) {
+        if (!/\bpangaIcapaba\s*\(/.test(source)) {
+            return { html: '', css: '' };
+        }
+        const html = this.extractBacktickField(source, 'ibeensi') || '';
+        const css = this.extractStylesFromNewSyntax(source);
+        return { html, css };
+    }
+
+    loadIngisaPartials(projectRoot, names) {
+        if (!projectRoot || !names || !names.length) {
+            return { html: '', css: '' };
+        }
+        const htmlParts = [];
+        const cssParts = [];
+        for (const rawName of names) {
+            const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
+            if (!safe) continue;
+            const fp = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, `${safe}.bemba`);
+            if (!fs.existsSync(fp)) continue;
+            let src;
+            try {
+                src = fs.readFileSync(fp, 'utf8');
+            } catch (_) {
+                continue;
+            }
+            const frag = this.extractPangaIcapabaPartial(src);
+            if (frag.html) {
+                htmlParts.push(
+                    `<div class="bemba-ingisa" data-ingisa="${safe.replace(/"/g, '')}">${frag.html}</div>`
+                );
+            }
+            if (frag.css) cssParts.push(frag.css);
+        }
+        return { html: htmlParts.join('\n'), css: cssParts.join('\n\n') };
     }
     
     extractAppNameFromNewSyntax(code) {
@@ -1580,8 +1647,17 @@ class BembaParser {
             navLinks = [],
             footerTagline = '',
             bodyBlocks = [],
-            activePath = ''
+            activePath = '',
+            partialsHtml = ''
         } = layoutOpts;
+        const ingisaMotion = partialsHtml
+            ? `
+        .bemba-ingisa-root { width: 100%; max-width: 100%; }
+        .bemba-ingisa { margin-top: 1.25rem; animation: bembaIngisaIn 0.42s ease-out both; }
+        @keyframes bembaIngisaIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        `
+            : '';
+        const allStyles = ingisaMotion + (ingisaMotion && styles ? '\n' : '') + styles;
         const escapeHtml = (s) => {
             if (s == null || s === '') return '';
             return String(s)
@@ -1883,7 +1959,7 @@ class BembaParser {
             flex-shrink: 0;
         }
 
-        ${styles}
+        ${allStyles}
     </style>
 </head>
 <body class="antialiased">
@@ -1904,6 +1980,11 @@ class BembaParser {
                         ? `<div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div>`
                         : ''
                 }
+                ${
+                    partialsHtml
+                        ? `<div class="bemba-ingisa-root" role="region" aria-label="Imported partials">${partialsHtml}</div>`
+                        : ''
+                }
             </div>
         </main>
         <footer>${footerAnchors}</footer>
@@ -1917,6 +1998,9 @@ class BembaParser {
         }
         function fyambaIcipanda(name, props) {
             console.log('Component:', name, props);
+        }
+        function pangaIcapaba(props) {
+            console.log('Partial:', props);
         }
     </script>
 </body>
@@ -2326,7 +2410,7 @@ class BembaParser {
             flex-shrink: 0;
         }
 
-        ${styles}
+        ${allStyles}
     </style>
 </head>
 <body class="antialiased">
@@ -2356,6 +2440,11 @@ ${navBlock}
                 ? `<div class="site-body-wrap"><div class="site-body" role="region" aria-label="Page sections">${bodySectionsHtml}</div></div>`
                 : ''
         }
+        ${
+            partialsHtml
+                ? `<div class="site-body-wrap bemba-ingisa-root" role="region" aria-label="Imported partials">${partialsHtml}</div>`
+                : ''
+        }
     </main>
     <footer class="site-footer">
         <div class="site-footer-inner">
@@ -2376,6 +2465,9 @@ ${navBlock}
         
         function fyambaIcipanda(name, props) {
             console.log('Component:', name, props);
+        }
+        function pangaIcapaba(props) {
+            console.log('Partial:', props);
         }
     </script>
 </body>

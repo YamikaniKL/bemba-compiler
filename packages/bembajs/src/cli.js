@@ -97,6 +97,32 @@ program
         console.log('Build complete.');
     });
 
+function resolveEmitReactScript() {
+    const candidates = [
+        path.join(__dirname, 'scripts', 'emit-react-routes.js'),
+        path.join(__dirname, '..', 'scripts', 'emit-react-routes.js')
+    ];
+    for (const p of candidates) {
+        if (fs.existsSync(p)) {
+            return p;
+        }
+    }
+    return null;
+}
+
+program
+    .command('emit-react')
+    .description('Emit JSX from amapeji, ifikopo, maapi (and mafungulo) .bemba for Vite/esbuild + React')
+    .option('-o, --out <dir>', 'output directory', 'dist/bemba-react')
+    .action((opts) => {
+        const scriptPath = resolveEmitReactScript();
+        if (!scriptPath) {
+            console.error('emit-react-routes.js not found. Rebuild the bembajs package.');
+            process.exit(1);
+        }
+        require(scriptPath).run({ outDir: opts.out });
+    });
+
 // Lint command
 program
     .command('lint')
@@ -128,6 +154,7 @@ program
         console.log('   bemba akha            - Build for production');
         console.log('   bemba lint            - Lint code');
         console.log('   bemba format          - Format code');
+        console.log('   bemba emit-react      - Emit JSX for bundler + React/motion');
         console.log('   bemba --version       - Show version');
         console.log('   bemba help            - Show this help');
         console.log('');

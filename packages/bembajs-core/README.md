@@ -95,6 +95,16 @@ Compile with `projectRoot` so the parser can resolve `amapeji/umusango.bemba`; p
 
 Hero copy uses top-level `umutwe` / `ilyashi` before `ifiputulwa`; body sections use `ifiputulwa` as usual.
 
+### HTML partials (`ingisa` + `pangaIcapaba`)
+
+- On a **`pangaIpepa`** page, add **`ingisa: [ 'Card', 'Promo' ]`** (names without `.bemba`).
+- For each name, the compiler reads **`ifikopo/<Name>.bemba`** containing **`pangaIcapaba({ ibeensi: \`…HTML…\`, imikalile: \`…css…\` })`**.
+- **`ibeensi`** is trusted author HTML (not escaped). Partials get a light CSS entrance animation. **`projectRoot`** must be set (dev servers pass it).
+
+### `bemba emit-react` (CLI in `bembajs` package)
+
+Emits **`.jsx`** from **`amapeji/`**, **`ifikopo/`**, **`maapi/`**, and **`mafungulo/`** into **`dist/bemba-react/`** for wiring with **Vite/esbuild + React** (e.g. **framer-motion** in your app). Does not bundle by itself.
+
 ### Dynamic dev server (`bemba tungulula` → `DevServer`)
 
 The core **Express** dev server is aimed at **server-rendered, dynamic** behavior:
