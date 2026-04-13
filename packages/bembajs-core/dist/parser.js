@@ -58,6 +58,59 @@ function escapeHtmlNav(s) {
 }
 
 /**
+ * Parse `{ ilembo, inshila }` pairs from the inner text of a nav links array `[ ... ]`.
+ */
+function parseNavLinkObjectsFromArrayInner(inner) {
+    if (!inner || !String(inner).trim()) return [];
+    const links = [];
+    const patIlemboFirst =
+        /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*inshila:\s*(["'])([^"']*)\3\s*\}/g;
+    let m;
+    while ((m = patIlemboFirst.exec(inner)) !== null) {
+        links.push({ label: m[2], href: m[4] });
+    }
+    if (links.length > 0) return links;
+    const patInshilaFirst =
+        /\{\s*inshila:\s*(["'])([^"']*)\1\s*,\s*ilembo:\s*(["'])([^"']*)\3\s*\}/g;
+    while ((m = patInshilaFirst.exec(inner)) !== null) {
+        links.push({ label: m[4], href: m[2] });
+    }
+    return links;
+}
+
+/**
+ * Split the inner text of a `[ ... ]` array into top-level `{ ... }` object literals.
+ */
+function extractTopLevelBraceObjectsFromArrayInner(inner) {
+    const s = String(inner || '').trim();
+    const objs = [];
+    let i = 0;
+    while (i < s.length) {
+        while (i < s.length && /[\s,]/.test(s[i])) i++;
+        if (i >= s.length) break;
+        if (s[i] !== '{') {
+            i++;
+            continue;
+        }
+        let depth = 0;
+        const start = i;
+        for (; i < s.length; i++) {
+            const c = s[i];
+            if (c === '{') depth++;
+            else if (c === '}') {
+                depth--;
+                if (depth === 0) {
+                    i++;
+                    objs.push(s.slice(start, i));
+                    break;
+                }
+            }
+        }
+    }
+    return objs;
+}
+
+/**
  * Replace tokens in NavBar partial HTML with data from umusango (site name + nav links + active route).
  */
 function fillNavShellPlaceholders(template, siteName, navLinks, activePath) {
@@ -1354,7 +1407,11 @@ class BembaParser {
 
         const siteName = siteLayout ? this.extractSiteNameFromNewSyntax(shellSource) : '';
         const navLinks = siteLayout ? this.extractNavLinksFromNewSyntax(shellSource) : [];
+        const navUtilityLinks = siteLayout ? this.extractUtilityNavLinksFromNewSyntax(shellSource) : [];
         const footerTagline = siteLayout ? this.extractFooterTaglineFromNewSyntax(shellSource) : '';
+        const footerDirectory = siteLayout ? this.extractFooterDirectoryFromNewSyntax(shellSource) : [];
+        const footerCopyright = siteLayout ? this.extractFooterCopyrightFromNewSyntax(shellSource) : '';
+        const footerLegalLinks = siteLayout ? this.extractFooterLegalLinksFromNewSyntax(shellSource) : [];
 
         const pageStyles = this.extractStylesFromNewSyntax(code);
         const layoutStyles = useSharedShell ? this.extractStylesFromNewSyntax(layoutCode) : '';
@@ -1418,7 +1475,11 @@ class BembaParser {
             siteLayout,
             siteName,
             navLinks,
+            navUtilityLinks,
             footerTagline,
+            footerDirectory,
+            footerCopyright,
+            footerLegalLinks,
             bodyBlocks,
             activePath,
             partialsHtml: partialsHtmlMerged,
@@ -1935,8 +1996,11 @@ class BembaParser {
      * Site chrome is opt-in (Bemba keys only):
      * - umusangoSite: ee
      * - ishinaLyabusite (navbar title)
-     * - ilyashiPaMusule (footer line)
-     * - inshilaNav: [ { ilembo, inshila }, ... ]
+     * - ilyashiPaMusule (footer ribbon line when using directory footer)
+     * - inshilaNav: [ { ilembo, inshila }, ... ] (place before ifiputulwaPaMusule)
+     * - inshilaCipali: optional utility links (right side of nav)
+     * - ifiputulwaPaMusule: optional footer columns (replaces default BembaJS/GitHub links)
+     * - ilyashiLupwaPaMusule, amalinkaLupwaPaMusule: copyright + legal row
      */
     extractSiteLayoutFromNewSyntax(code) {
         return /\bumusangoSite:\s*ee\b/i.test(code);
@@ -1982,20 +2046,65 @@ class BembaParser {
     extractNavLinksFromNewSyntax(code) {
         const inner = this.extractArrayBlockAfterKey(code, 'inshilaNav');
         if (!inner) return [];
-        const links = [];
-        const patIlemboFirst =
-            /\{\s*ilembo:\s*(["'])([^"']*)\1\s*,\s*inshila:\s*(["'])([^"']*)\3\s*\}/g;
-        let m;
-        while ((m = patIlemboFirst.exec(inner)) !== null) {
-            links.push({ label: m[2], href: m[4] });
+        return parseNavLinkObjectsFromArrayInner(inner);
+    }
+
+    /**
+     * Optional right-side nav shortcuts (`inshilaCipali`) — same shape as `inshilaNav`.
+     * Put `inshilaNav` before `ifiputulwaPaMusule` in `umusango.bemba` so the main nav array is matched first.
+     */
+    extractUtilityNavLinksFromNewSyntax(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'inshilaCipali');
+        if (!inner) return [];
+        return parseNavLinkObjectsFromArrayInner(inner);
+    }
+
+    /**
+     * Footer directory columns: `[ { umutwe, inshilaNav: [ { ilembo, inshila }, ... ] }, ... ]`.
+     * When non-empty, replaces the default BembaJS/GitHub footer promo links.
+     */
+    extractFooterDirectoryFromNewSyntax(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'ifiputulwaPaMusule');
+        if (!inner || !inner.trim()) return [];
+        const cols = [];
+        for (const block of extractTopLevelBraceObjectsFromArrayInner(inner)) {
+            const tm = block.match(/\bumutwe:\s*["']([^"']*)["']/);
+            if (!tm) continue;
+            const title = tm[1];
+            const navKey = block.search(/\binshilaNav:\s*\[/);
+            if (navKey === -1) continue;
+            const openIdx = block.indexOf('[', navKey);
+            if (openIdx === -1) continue;
+            let depth = 0;
+            let j = openIdx;
+            for (; j < block.length; j++) {
+                const ch = block[j];
+                if (ch === '[') depth++;
+                else if (ch === ']') {
+                    depth--;
+                    if (depth === 0) {
+                        const linksInner = block.slice(openIdx + 1, j);
+                        const links = parseNavLinkObjectsFromArrayInner(linksInner);
+                        cols.push({ title, links });
+                        break;
+                    }
+                }
+            }
         }
-        if (links.length > 0) return links;
-        const patInshilaFirst =
-            /\{\s*inshila:\s*(["'])([^"']*)\1\s*,\s*ilembo:\s*(["'])([^"']*)\3\s*\}/g;
-        while ((m = patInshilaFirst.exec(inner)) !== null) {
-            links.push({ label: m[4], href: m[2] });
-        }
-        return links;
+        return cols;
+    }
+
+    /** Single-line copyright / disclaimer above the legal links row (`ilyashiLupwaPaMusule`). */
+    extractFooterCopyrightFromNewSyntax(code) {
+        const m = code.match(/ilyashiLupwaPaMusule:\s*["']([^"']*)["']/);
+        return m ? m[1] : '';
+    }
+
+    /** Legal / policy links (`amalinkaLupwaPaMusule`) — same shape as `inshilaNav`. */
+    extractFooterLegalLinksFromNewSyntax(code) {
+        const inner = this.extractArrayBlockAfterKey(code, 'amalinkaLupwaPaMusule');
+        if (!inner) return [];
+        return parseNavLinkObjectsFromArrayInner(inner);
     }
     
     generateModernLayout(appName, sections, styles, layoutOpts = {}) {
@@ -2003,7 +2112,11 @@ class BembaParser {
             siteLayout = false,
             siteName = '',
             navLinks = [],
+            navUtilityLinks = [],
             footerTagline = '',
+            footerDirectory = [],
+            footerCopyright = '',
+            footerLegalLinks = [],
             bodyBlocks = [],
             activePath = '',
             partialsHtml = '',
@@ -2378,6 +2491,20 @@ class BembaParser {
         const brandName = siteName || 'BembaJS';
         const useNavShell = Boolean(siteLayout && String(navShellFilledHtml || '').trim());
         const showInnerBrand = !useNavShell && navLinks.length === 0;
+        const navUtilitiesHtml =
+            navUtilityLinks && navUtilityLinks.length
+                ? `<nav class="nav-utilities" aria-label="Shortcuts">
+            ${navUtilityLinks
+                .map((l) => {
+                    const active = navHrefIsActive(l.href, activePath);
+                    const cls = active ? 'nav-utility is-active' : 'nav-utility';
+                    const cur = active ? ' aria-current="page"' : '';
+                    return `<a href="${escapeHtml(l.href)}" class="${cls}"${cur}>${escapeHtml(l.label)}</a>`;
+                })
+                .join('')}
+        </nav>`
+                : '';
+
         const navBlock = useNavShell
             ? String(navShellFilledHtml).trim()
             : navLinks.length > 0
@@ -2394,6 +2521,7 @@ class BembaParser {
                 })
                 .join('')}
         </nav>
+        ${navUtilitiesHtml}
     </div>
 </header>`
                 : '';
@@ -2401,6 +2529,52 @@ class BembaParser {
             footerTagline && String(footerTagline).trim()
                 ? `<p class="footer-tagline">${escapeHtml(String(footerTagline).trim())}</p>`
                 : '';
+
+        const useCustomFooter = Boolean(footerDirectory && footerDirectory.length > 0);
+        const footerDirectoryHtml = useCustomFooter
+            ? `<div class="footer-directory" role="navigation" aria-label="Site directory">${footerDirectory
+                  .map((col) => {
+                      const title = escapeHtml(col.title || '');
+                      const items = (col.links || [])
+                          .map(
+                              (l) =>
+                                  `<li><a class="footer-col-link" href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a></li>`
+                          )
+                          .join('');
+                      return `<div class="footer-col">
+            <h3 class="footer-col-title">${title}</h3>
+            <ul class="footer-col-list">${items}</ul>
+        </div>`;
+                  })
+                  .join('')}</div>`
+            : '';
+
+        const footerLegalBlock =
+            (footerCopyright && String(footerCopyright).trim()) ||
+            (footerLegalLinks && footerLegalLinks.length)
+                ? `<div class="footer-legal">
+            ${
+                footerCopyright && String(footerCopyright).trim()
+                    ? `<p class="footer-legal-copy">${escapeHtml(String(footerCopyright).trim())}</p>`
+                    : ''
+            }
+            ${
+                footerLegalLinks && footerLegalLinks.length
+                    ? `<ul class="footer-legal-links">${footerLegalLinks
+                          .map(
+                              (l) =>
+                                  `<li><a class="footer-legal-link" href="${escapeHtml(l.href)}">${escapeHtml(l.label)}</a></li>`
+                          )
+                          .join('')}</ul>`
+                    : ''
+            }
+        </div>`
+                : '';
+
+        const footerPromoLinks = `<div class="footer-links">${footerAnchors}</div>`;
+        const footerBodyInner = useCustomFooter
+            ? `${footerDirectoryHtml}${footerLead}${footerLegalBlock}`
+            : `${footerLead}${footerPromoLinks}`;
 
         return `<!DOCTYPE html>
 <html lang="${safeLang}">
@@ -2479,21 +2653,24 @@ class BembaParser {
         }
 
         .site-header-inner {
-            max-width: 56rem;
+            max-width: 61.25rem;
             margin: 0 auto;
-            padding: 0.65rem clamp(1rem, 4vw, 1.5rem);
-            display: flex;
+            padding: 0 1.375rem;
+            min-height: 2.75rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
             align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
+            column-gap: 1rem;
         }
 
         .nav-brand {
-            font-weight: 700;
-            font-size: 0.95rem;
+            grid-column: 1;
+            justify-self: start;
+            font-weight: 600;
+            font-size: 0.8125rem;
             color: var(--text);
             text-decoration: none;
-            letter-spacing: -0.02em;
+            letter-spacing: -0.01em;
         }
 
         .nav-brand:hover {
@@ -2501,34 +2678,65 @@ class BembaParser {
         }
 
         .site-nav {
+            grid-column: 2;
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.25rem 0.5rem;
+            flex-wrap: nowrap;
+            gap: 0 1.75rem;
             align-items: center;
-            justify-content: flex-end;
+            justify-content: center;
+            min-width: 0;
+        }
+
+        .nav-utilities {
+            grid-column: 3;
+            justify-self: end;
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+            gap: 0 1.5rem;
+            min-width: 0;
+        }
+
+        .nav-utility {
+            font-size: 0.75rem;
+            font-weight: 400;
+            color: var(--muted);
+            text-decoration: none;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .nav-utility:hover {
+            color: var(--text);
+        }
+
+        .nav-utility.is-active {
+            color: var(--text);
+            font-weight: 400;
         }
 
         .nav-link {
-            font-size: 0.8125rem;
-            font-weight: 600;
+            font-size: 0.75rem;
+            font-weight: 400;
             color: var(--muted);
             text-decoration: none;
-            padding: 0.4rem 0.65rem;
-            border-radius: 0.375rem;
-            /* Same box on every state so the active item does not change text width / push siblings. */
-            border: 1px solid transparent;
+            padding: 0;
+            border-radius: 0;
+            border: none;
+            letter-spacing: -0.01em;
+            white-space: nowrap;
         }
 
         .nav-link:hover {
             color: var(--text);
-            background: color-mix(in srgb, var(--text) 6%, transparent);
+            background: transparent;
         }
 
         .nav-link.is-active {
             color: var(--text);
-            background: color-mix(in srgb, var(--accent) 14%, transparent);
-            font-weight: 600;
-            border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+            background: transparent;
+            font-weight: 400;
+            border: none;
         }
 
         .hero-banner {
@@ -2787,6 +2995,89 @@ class BembaParser {
             flex-shrink: 0;
         }
 
+        .site-footer-inner--directory {
+            align-items: stretch;
+            text-align: left;
+            gap: 2rem;
+            max-width: 61.25rem;
+        }
+
+        .footer-directory {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+            gap: 1.75rem 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .footer-col-title {
+            margin: 0 0 0.65rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+
+        .footer-col-list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .footer-col-list li + li {
+            margin-top: 0.45rem;
+        }
+
+        .footer-col-link {
+            font-size: 0.75rem;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .footer-col-link:hover {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .footer-legal {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem 1.5rem;
+            padding-top: 0.25rem;
+        }
+
+        .footer-legal-copy {
+            margin: 0;
+            font-size: 0.6875rem;
+            color: var(--muted);
+            line-height: 1.4;
+            max-width: 36rem;
+        }
+
+        .footer-legal-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem 1rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .footer-legal-link {
+            font-size: 0.6875rem;
+            color: var(--muted);
+            text-decoration: none;
+        }
+
+        .footer-legal-link:hover {
+            color: var(--text);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
         ${allStyles}
     </style>
 </head>
@@ -2824,9 +3115,8 @@ ${navBlock}
         }
     </main>
     <footer class="site-footer">
-        <div class="site-footer-inner">
-            ${footerLead}
-            <div class="footer-links">${footerAnchors}</div>
+        <div class="site-footer-inner${useCustomFooter ? ' site-footer-inner--directory' : ''}">
+            ${footerBodyInner}
         </div>
     </footer>
 </div>

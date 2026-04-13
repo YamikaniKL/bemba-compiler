@@ -10,9 +10,12 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
 const { version: CORE_VERSION } = require('../package.json');
-const { parseEarlyLangFromArgv, normalizeLang, t: msg } = require('./cli-i18n');
+const { parseLangFromArgvOnly, normalizeLang, t: msg } = require('./cli-i18n');
 
-process.env.BEMBA_CLI_LANG = parseEarlyLangFromArgv(process.argv);
+const __coreArgvLang = parseLangFromArgvOnly(process.argv);
+if (__coreArgvLang !== undefined) {
+    process.env.BEMBA_CLI_LANG = __coreArgvLang;
+}
 
 class BembaCLI {
     constructor() {
@@ -21,17 +24,18 @@ class BembaCLI {
     }
     
     setupCommands() {
-        const earlyLang = parseEarlyLangFromArgv(process.argv);
-        this.program
-            .name('bemba')
-            .description(msg('rootDesc'))
-            .version(CORE_VERSION)
-            .option('-l, --lang <lang>', msg('optLang'), earlyLang);
+        const argvLang = parseLangFromArgvOnly(process.argv);
+        this.program.name('bemba').description(msg('rootDesc')).version(CORE_VERSION);
+        if (argvLang !== undefined) {
+            this.program.option('-l, --lang <lang>', msg('optLang'), argvLang);
+        } else {
+            this.program.option('-l, --lang <lang>', msg('optLang'));
+        }
 
         this.program.hook('preAction', (thisCommand) => {
             const root = thisCommand.root();
             const opts = root.opts();
-            if (opts && opts.lang != null) {
+            if (opts && opts.lang != null && String(opts.lang).trim() !== '') {
                 process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);
             }
         });

@@ -99,7 +99,14 @@ const result = compile(code, { legacyFallback: false });
 | Location | Fields |
 |----------|--------|
 | Each page | `umusangoSite: ee` only (plus page content) |
-| `amapeji/umusango.bemba` | `ishinaLyabusite`, `ilyashiPaMusule`, `inshilaNav`: `[{ ilembo, inshila }, …]` |
+| `amapeji/umusango.bemba` | `ishinaLyabusite`, `ilyashiPaMusule`, `inshilaNav`, optional `inshilaCipali` (utility links), optional `ifiputulwaPaMusule` (footer columns), `ilyashiLupwaPaMusule`, `amalinkaLupwaPaMusule` |
+
+Put **`inshilaNav` before `ifiputulwaPaMusule`** so the main nav array is parsed first (column blocks also contain `inshilaNav`).
+
+- **`inshilaCipali`:** same shape as `inshilaNav` — rendered on the right of the global nav (e.g. Search / Bag).
+- **`ifiputulwaPaMusule`:** `[{ umutwe: 'Column title', inshilaNav: [{ ilembo, inshila }, …] }, …]` — when non-empty, **replaces** the default BembaJS + GitHub footer links with a multi-column directory.
+- **`ilyashiLupwaPaMusule`:** short copyright or disclaimer line.
+- **`amalinkaLupwaPaMusule`:** legal links row — same shape as `inshilaNav`.
 
 If `umusango.bemba` is missing, shell fields must live on the same page as `umusangoSite: ee` (single-file demos).
 
