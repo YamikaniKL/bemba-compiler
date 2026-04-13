@@ -488,8 +488,8 @@ class BembaDevServer {
         this.port = options.port || 3000;
         this.app = express();
         this.projectRoot = process.cwd();
-        /** @type {Set<import('http').ServerResponse>} */
-        this._liveClients = new Set();
+        /** Incremented on source changes; browser polls this for reload. */
+        this._liveVersion = 0;
         /** Cache compiled pangaApi handlers: key maapi:relativePath */
         this._maapiHandlerCache = new Map();
         /**
@@ -525,24 +525,28 @@ class BembaDevServer {
         return handler;
     }
 
-    /** Push a lightweight event so open dev tabs recompile on save (SSE). */
+    /** Bump reload token so open dev tabs refresh on next poll. */
     notifyLiveClients() {
-        const payload = `data: ${Date.now()}\n\n`;
-        for (const client of this._liveClients) {
-            try {
-                client.write(payload);
-            } catch (_) {
-                this._liveClients.delete(client);
-            }
-        }
+        this._liveVersion += 1;
     }
 
     wrapDevHtml(html) {
         if (typeof html !== 'string' || !html.includes('</body>')) {
             return html;
         }
-        const snippet =
-            '<script data-bemba-live>(function(){try{var s=new EventSource("/__bemba_live");s.onmessage=function(){location.reload()};}catch(e){}})();</script>';
+        const snippet = `<script data-bemba-live>(function(){try{
+var last=null;
+async function tick(){
+  try{
+    var r=await fetch('/__bemba_live_version',{cache:'no-store'});
+    var t=await r.text();
+    if(last===null){ last=t; return; }
+    if(t!==last){ location.reload(); return; }
+  }catch(e){}
+}
+setInterval(tick,1200);
+tick();
+}catch(e){}})();</script>`;
         return html.replace('</body>', `${snippet}</body>`);
     }
 
@@ -637,19 +641,11 @@ class BembaDevServer {
     }
 
     setupRoutes() {
-        // Dev live reload (SSE) — register before /:page so this path is not treated as a page name
-        this.app.get('/__bemba_live', (req, res) => {
-            res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
-            res.setHeader('Cache-Control', 'no-cache, no-transform');
-            res.setHeader('Connection', 'keep-alive');
-            if (typeof res.flushHeaders === 'function') {
-                res.flushHeaders();
-            }
-            res.write(': bem\n\n');
-            this._liveClients.add(res);
-            req.on('close', () => {
-                this._liveClients.delete(res);
-            });
+        // Dev live reload token endpoint — short polling avoids "forever loading" tab state.
+        this.app.get('/__bemba_live_version', (req, res) => {
+            res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+            res.type('text/plain');
+            res.send(String(this._liveVersion));
         });
 
         // Serve project home page or IDE
