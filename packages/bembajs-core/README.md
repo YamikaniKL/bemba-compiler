@@ -47,6 +47,8 @@ Compiles Bemba code using `tokenize -> parse -> transform -> generate`.
 
 **Returns:** Compile result object
 
+**Experimental native engine:** set `engine: 'go'` (and optional `goBinary`) to try a Go backend bridge. If the binary is missing or errors, core falls back to the JS engine automatically.
+
 **Example:**
 ```javascript
 const result = compile(`

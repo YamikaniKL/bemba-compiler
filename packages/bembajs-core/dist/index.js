@@ -6,6 +6,7 @@ const BembaGenerator = require('./generator');
 const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { version: CORE_VERSION } = require('../package.json');
 const { exportStaticHtmlSite, routeToOutHtmlPath } = require('./static-html-export');
+const { shouldUseGo, runGoEngine } = require('./go-engine');
 const {
     buildHeadMetaTags,
     generateSitemapXml,
@@ -27,9 +28,19 @@ const {
  * @param {string} [options.htmlLang] - `<html lang>` (BCP 47)
  * @param {string} [options.headExtra] - Trusted fragment after `<title>` in static HTML
  * @param {boolean} [options.bembaSiteScript] - Append `/bemba-site.js` script tag
+ * @param {'js' | 'go'} [options.engine='js'] - Experimental: use Go binary bridge when set to `go`
+ * @param {string} [options.goBinary] - Optional explicit path to Go engine binary
  * @returns {{ success: true, code: string, legacy?: boolean } | { success: false, error: string, stack?: string }}
  */
 function compile(code, options = {}) {
+    if (shouldUseGo(options)) {
+        const go = runGoEngine('compile', { code, options }, options);
+        if (go.ok && go.value && go.value.success) {
+            return go.value;
+        }
+        // Fallback is intentional for compatibility while Go engine matures.
+    }
+
     const lexer = new BembaLexer();
     const parser = new BembaParser();
     const transformer = new BembaTransformer();
@@ -108,10 +119,16 @@ function generate(ast) {
 /**
  * Absolute paths to `.bemba` files that influence static HTML for a `pangaIpepa` page (shell, `ingisa`, `import`).
  * @param {string} code - Page source
- * @param {{ projectRoot: string, pageFilePath?: string, transitive?: boolean }} options
+ * @param {{ projectRoot: string, pageFilePath?: string, transitive?: boolean, engine?: 'js' | 'go', goBinary?: string }} options
  * @returns {string[]}
  */
 function listStaticPageDependencyPaths(code, options) {
+    if (shouldUseGo(options || {})) {
+        const go = runGoEngine('list-static-deps', { code, options: options || {} }, options || {});
+        if (go.ok && go.value && Array.isArray(go.value.paths)) {
+            return go.value.paths;
+        }
+    }
     const parser = new BembaParser();
     return parser.listStaticPageDependencyPaths(code, options || {});
 }

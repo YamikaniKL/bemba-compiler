@@ -9,6 +9,12 @@ const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
 const { program } = require('commander');
+let prompts = null;
+try {
+    prompts = require('prompts');
+} catch (_) {
+    /* optional dependency in some installs */
+}
 
 let pkgVersion = '1.0.0';
 try {
@@ -50,6 +56,27 @@ function resolveCoreCliClass() {
 }
 
 async function promptTemplateChoice() {
+    if (prompts && typeof prompts === 'function') {
+        const response = await prompts(
+            {
+                type: 'select',
+                name: 'template',
+                message: 'Choose a project template',
+                choices: [
+                    { title: 'base - minimal starter router', value: 'base' },
+                    { title: 'ui - starter UI blocks', value: 'ui' }
+                ],
+                initial: 0
+            },
+            {
+                onCancel: () => {
+                    process.exit(1);
+                }
+            }
+        );
+        return response.template || 'base';
+    }
+
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout

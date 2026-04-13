@@ -49,6 +49,8 @@ bemba --version          # Show version
 bemba help               # Show help
 ```
 
+`bemba panga` supports interactive template selection (arrow keys + Enter), or pass `--template base|ui` directly.
+
 **Static export flags (akha / fumya):** `--base-url <url>` (or **`BEMBA_SITE_URL`**) for **`sitemap.xml`** / **`feed.xml`**, **`--locale <code>`** for **`<html lang>`**, **`--site-title`** for RSS, **`--no-bemba-site`** to skip **`bemba-site.js`**.
 
 ## 🏗️ Project Structure

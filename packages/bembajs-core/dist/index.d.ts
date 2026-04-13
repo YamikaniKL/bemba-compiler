@@ -9,6 +9,8 @@ export interface CompileStaticOptions {
     htmlLang?: string;
     headExtra?: string;
     bembaSiteScript?: boolean;
+    engine?: 'js' | 'go';
+    goBinary?: string;
 }
 
 export type CompileResult =
@@ -19,6 +21,8 @@ export interface ListStaticDepsOptions {
     projectRoot: string;
     pageFilePath?: string;
     transitive?: boolean;
+    engine?: 'js' | 'go';
+    goBinary?: string;
 }
 
 export interface ExportStaticHtmlOptions {
