@@ -53,10 +53,9 @@ const EXTRA = {
 
         mainMenuTitle: 'What do you want to do?',
         mainMenuCreate: 'Create a new project (language → name → template)',
-        mainMenuDev: 'Start dev server (tungulula)',
         mainMenuHelp: 'Show command help',
         mainMenuExit: 'Exit',
-        mainMenuPromptRl: 'Choose [1 create · 2 dev · 3 help · 4 exit, default 1]: ',
+        mainMenuPromptRl: 'Choose [1 create · 2 help · 3 exit, default 1]: ',
 
         startingDev: 'Starting BembaJS development server...',
         hotReload: 'Hot reload on; press Ctrl+C to stop.',
@@ -132,10 +131,9 @@ const EXTRA = {
 
         mainMenuTitle: 'Ulefwaya ukucita nshi?',
         mainMenuCreate: 'Panga project iipya (ululomi → ishina → ifishi)',
-        mainMenuDev: 'Gulula sava yakupanga (tungulula)',
         mainMenuHelp: 'Mona ukwafwa wa ma command',
         mainMenuExit: 'Fuma',
-        mainMenuPromptRl: 'Sala [1 panga · 2 tungulula · 3 help · 4 fuma, default 1]: ',
+        mainMenuPromptRl: 'Sala [1 panga · 2 help · 3 fuma, default 1]: ',
 
         startingDev: 'Tungulula sava yakupanga ya BembaJS...',
         hotReload: 'Hot reload yaliko; cinshi Ctrl+C pakuleka.',

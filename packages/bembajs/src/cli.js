@@ -138,7 +138,6 @@ async function promptMainMenuChoice() {
                 message: msg('mainMenuTitle'),
                 choices: [
                     { title: msg('mainMenuCreate'), value: 'create' },
-                    { title: msg('mainMenuDev'), value: 'dev' },
                     { title: msg('mainMenuHelp'), value: 'help' },
                     { title: msg('mainMenuExit'), value: 'exit' }
                 ],
@@ -160,9 +159,8 @@ async function promptMainMenuChoice() {
     const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
     try {
         const answer = String(await ask(msg('mainMenuPromptRl'))).trim().toLowerCase();
-        if (answer === '2' || answer === 'dev' || answer === 'tungulula') return 'dev';
-        if (answer === '3' || answer === 'help') return 'help';
-        if (answer === '4' || answer === 'exit' || answer === 'quit') return 'exit';
+        if (answer === '2' || answer === 'help') return 'help';
+        if (answer === '3' || answer === 'exit' || answer === 'quit') return 'exit';
         return 'create';
     } finally {
         rl.close();
@@ -179,8 +177,6 @@ async function runInteractiveMainMenu() {
     const choice = await promptMainMenuChoice();
     if (choice === 'create') {
         await runCreateProjectFlow(undefined, {});
-    } else if (choice === 'dev') {
-        runTungululaCli();
     } else if (choice === 'help') {
         printBembaHelpText();
     } else {
