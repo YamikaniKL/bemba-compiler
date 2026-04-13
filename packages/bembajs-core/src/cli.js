@@ -46,7 +46,17 @@ class BembaCLI {
             .option('-t, --template <template>', 'Project template: base | ui', 'base')
             .option('--typescript', 'Use TypeScript')
             .action((options) => this.initProject(options));
-        
+
+        const templateCmd = this.program.command('template').description('Sync starter content from the installed bembajs-core package');
+        templateCmd
+            .command('sync')
+            .description(
+                'Update docs/CODE-STYLE-AND-UI.md from bembajs-core (single source). Use --starter to overwrite default .bemba pages, shell, README, etc.'
+            )
+            .option('-t, --template <template>', 'base | ui (default: ui if ifikopo/cipanda/StarterCard.bemba exists, else base)')
+            .option('--starter', 'Overwrite starter pages/shell/partials/README/.gitignore/.editorconfig (destructive)')
+            .action((options) => this.syncTemplateFromPackage(options));
+
         // Start development server
         this.program
             .command('tungulula')
@@ -210,31 +220,47 @@ class BembaCLI {
     createInitialFiles(projectPath, name, options) {
         const t = require('./cli-project-templates');
         const template = String(options?.template || 'base').toLowerCase();
-        const isUiTemplate = template === 'ui';
         if (template !== 'base' && template !== 'ui') {
             throw new Error(`Unknown template "${template}". Use --template base or --template ui`);
         }
+        t.writeProjectTemplateFiles(projectPath, name, { template, scope: 'all' });
+    }
 
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'umusango.bemba'), t.shellBemba(name));
-        if (isUiTemplate) {
-            fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda'), { recursive: true });
-            fs.writeFileSync(
-                path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba'),
-                t.starterCardPartial()
+    /** Refresh files from the installed package so docs (and optionally starter pages) stay aligned with bembajs-core. */
+    syncTemplateFromPackage(options) {
+        const t = require('./cli-project-templates');
+        const cwd = process.cwd();
+        let projectName = path.basename(cwd);
+        try {
+            const raw = fs.readFileSync(path.join(cwd, 'package.json'), 'utf8');
+            const pj = JSON.parse(raw);
+            if (pj && typeof pj.name === 'string' && pj.name.trim()) projectName = pj.name.trim();
+        } catch (_) {
+            /* use directory name */
+        }
+
+        let template = String(options.template || '').toLowerCase();
+        if (template !== 'base' && template !== 'ui') {
+            const starterPath = path.join(cwd, t.BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba');
+            template = fs.existsSync(starterPath) ? 'ui' : 'base';
+        }
+
+        const scope = options.starter ? 'all' : 'docs';
+        try {
+            t.writeProjectTemplateFiles(cwd, projectName, { template, scope });
+        } catch (e) {
+            console.error(e.message || e);
+            process.exit(1);
+        }
+
+        if (scope === 'docs') {
+            console.log('Updated docs/CODE-STYLE-AND-UI.md from bembajs-core package.');
+            console.log('Tip: run with --starter to replace default umusango/index/about/partials/README (overwrites your edits).');
+        } else {
+            console.log(
+                `Synced full starter (${template}): shell, pages, docs, README, Button.bemba, global.css, .gitignore, .editorconfig.`
             );
         }
-        fs.writeFileSync(
-            path.join(projectPath, BEMBA_FOLDERS.PAGES, 'index.bemba'),
-            isUiTemplate ? t.indexPageUi() : t.indexPage()
-        );
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'about.bemba'), t.aboutPage());
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'Button.bemba'), t.buttonComponentBemba());
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'global.css'), t.globalCss(name));
-        fs.mkdirSync(path.join(projectPath, 'docs'), { recursive: true });
-        fs.writeFileSync(path.join(projectPath, 'docs', 'CODE-STYLE-AND-UI.md'), t.projectCodeStyleMarkdown());
-        fs.writeFileSync(path.join(projectPath, '.gitignore'), t.gitignoreContent());
-        fs.writeFileSync(path.join(projectPath, '.editorconfig'), t.editorConfigContent());
-        fs.writeFileSync(path.join(projectPath, 'README.md'), t.projectReadme(name));
     }
 
 

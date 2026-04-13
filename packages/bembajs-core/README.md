@@ -13,7 +13,9 @@ npm install bembajs-core
 
 ## New projects (`bemba panga` / `bemba init`)
 
-The core CLI generates a **modern static starter**: shared **`amapeji/umusango.bemba`** shell (semantic HSL tokens and `.bem-*` utilities similar to [shadcn/ui](https://ui.shadcn.com/)), **`ifikopo/cipanda/StarterCard.bemba`** (copy-and-edit partial), **[Standard JS](https://standardjs.com/)** via **`bun run lint`**, **`.editorconfig`**, **`.gitignore`**, and **`docs/CODE-STYLE-AND-UI.md`**. The same guide ships in this repo: [docs/CODE-STYLE-AND-UI.md](./docs/CODE-STYLE-AND-UI.md).
+The core CLI generates a **modern static starter**: shared **`amapeji/umusango.bemba`** shell (design tokens and `.bem-*` utilities), optional **`ifikopo/cipanda/StarterCard.bemba`** (ui template), **[Standard JS](https://standardjs.com/)** via **`bun run lint`**, **`.editorconfig`**, **`.gitignore`**, and **`docs/CODE-STYLE-AND-UI.md`**.
+
+**Single source for the style guide:** the canonical file is **[docs/CODE-STYLE-AND-UI.md](./docs/CODE-STYLE-AND-UI.md)** inside this package. New projects copy it at create time; existing projects can refresh with **`bemba template sync`** (docs only) or **`bemba template sync --starter`** to replace default shell/pages/README as well (overwrites your edits to those files).
 
 ## 🚀 Quick Start
 

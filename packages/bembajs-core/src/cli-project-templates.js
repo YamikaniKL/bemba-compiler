@@ -1,7 +1,26 @@
 /**
  * Default files for `bemba panga` / `bemba init` templates.
+ * Canonical copy of docs/CODE-STYLE-AND-UI.md lives in this package under docs/; it is read at runtime
+ * so one edit propagates to new projects and to `bemba template sync`.
  */
+const fs = require('fs');
+const path = require('path');
 const { BEMBA_FOLDERS } = require('./constants');
+
+/** Package root whether this file lives in src/ or dist/. */
+function bembajsCorePackageRoot() {
+    return path.resolve(__dirname, '..');
+}
+
+/** Single source for CODE-STYLE-AND-UI.md (published in npm package files). */
+function loadCodeStyleMarkdownFromPackage() {
+    const docPath = path.join(bembajsCorePackageRoot(), 'docs', 'CODE-STYLE-AND-UI.md');
+    try {
+        return fs.readFileSync(docPath, 'utf8');
+    } catch (_) {
+        return null;
+    }
+}
 
 function shellBemba(projectTitle) {
     const title = JSON.stringify(String(projectTitle));
@@ -297,6 +316,10 @@ bun run dev
 
 Optional reference: **\`docs/CODE-STYLE-AND-UI.md\`** — linting for \`.js\` files you add, UI tokens, and partials workflow.
 
+## Stay in sync with the scaffold
+
+After upgrading **bembajs-core**, run \`bunx bemba template sync\` to refresh \`docs/CODE-STYLE-AND-UI.md\` from the package. Add \`--starter\` only if you intentionally want default shell/pages/README replaced (**overwrites** your edits to those files).
+
 ## Project structure
 
 - \`${BEMBA_FOLDERS.PAGES}/\` — Pages (\`pangaIpepa\`), including \`umusango.bemba\` shell
@@ -308,34 +331,9 @@ Optional reference: **\`docs/CODE-STYLE-AND-UI.md\`** — linting for \`.js\` fi
 }
 
 function projectCodeStyleMarkdown() {
-    return `# Code style and UI (BembaJS starter)
-
-Bemba \`.bemba\` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to \`.js\` / \`.jsx\` you add (scripts, emitted React, etc.).
-
-## Linting JavaScript (optional)
-
-This template can run **[Standard JS](https://standardjs.com/)** via \`bun run lint\` on \`.js\` / \`.jsx\` files. Auto-fix: \`bun run lint:fix\`. It is not required for Bemba pages themselves.
-
-For team reviews, you may also use **[Google’s JS / HTML / TS guides](https://google.github.io/styleguide/)** as reference.
-
-## UI — shadcn-like workflow for static sites
-
-[shadcn/ui](https://ui.shadcn.com/) is not an npm dependency you import: you **copy component source into your app** and own it. The same idea fits Bemba static pages:
-
-1. **Design tokens** live in \`amapeji/umusango.bemba\` as \`:root\` overrides for \`--bg\`, \`--surface\`, \`--text\`, \`--accent\`, and related layout variables.
-2. **Reusable blocks** are \`pangaIcapaba\` partials under \`ifikopo/cipanda/\`, included with \`ingisa: [ 'Name' ]\`.
-3. **Tweak in place** — duplicate \`StarterCard.bemba\`, rename, and edit HTML/CSS without fighting upstream versions.
-
-For rich **React** UI, use \`bemba emit-react\` and add [shadcn/ui](https://ui.shadcn.com/) in that Vite/React app (see BembaJS docs).
-
-## Accessibility
-
-Use real **headings**, **ARIA** attributes where needed, **visible focus** styles, and **sufficient contrast**. The starter card uses a labelled region as an example.
-
-## Further reading
-
-- [What is shadcn/ui?](https://shadcnstudio.com/blog/what-is-shadcn-ui-comprehensive-guide) — copy-to-own model explained
-`;
+    const fromPkg = loadCodeStyleMarkdownFromPackage();
+    if (fromPkg && fromPkg.trim()) return fromPkg;
+    return `# Code style and UI (BembaJS starter)\n\nInstall a complete **bembajs-core** package (with \`docs/CODE-STYLE-AND-UI.md\`) or see [bembajs.dev/docs](https://bembajs.dev/docs).\n`;
 }
 
 function gitignoreContent() {
@@ -366,6 +364,51 @@ trim_trailing_whitespace = false
 `;
 }
 
+/**
+ * Write scaffold files. scope `docs` updates only docs/CODE-STYLE-AND-UI.md (from package file).
+ * scope `all` writes the full starter set (same as `bemba panga` / `bemba init` template files).
+ *
+ * @param {string} projectPath
+ * @param {string} projectName
+ * @param {{ template?: string, scope?: 'docs' | 'all' }} options
+ */
+function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
+    const template = String(options.template || 'base').toLowerCase();
+    if (template !== 'base' && template !== 'ui') {
+        throw new Error(`Unknown template "${template}". Use base or ui`);
+    }
+    const isUiTemplate = template === 'ui';
+    const scope = options.scope === 'docs' ? 'docs' : 'all';
+
+    fs.mkdirSync(path.join(projectPath, 'docs'), { recursive: true });
+    fs.writeFileSync(path.join(projectPath, 'docs', 'CODE-STYLE-AND-UI.md'), projectCodeStyleMarkdown());
+
+    if (scope === 'docs') {
+        return;
+    }
+
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES), { recursive: true });
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS), { recursive: true });
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.STYLES), { recursive: true });
+
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'umusango.bemba'), shellBemba(projectName));
+    if (isUiTemplate) {
+        const cipandaDir = path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'cipanda');
+        fs.mkdirSync(cipandaDir, { recursive: true });
+        fs.writeFileSync(path.join(cipandaDir, 'StarterCard.bemba'), starterCardPartial());
+    }
+    fs.writeFileSync(
+        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'index.bemba'),
+        isUiTemplate ? indexPageUi() : indexPage()
+    );
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'about.bemba'), aboutPage());
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'Button.bemba'), buttonComponentBemba());
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'global.css'), globalCss(projectName));
+    fs.writeFileSync(path.join(projectPath, '.gitignore'), gitignoreContent());
+    fs.writeFileSync(path.join(projectPath, '.editorconfig'), editorConfigContent());
+    fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));
+}
+
 module.exports = {
     shellBemba,
     starterCardPartial,
@@ -376,6 +419,7 @@ module.exports = {
     globalCss,
     projectReadme,
     projectCodeStyleMarkdown,
+    writeProjectTemplateFiles,
     gitignoreContent,
     editorConfigContent,
     BEMBA_FOLDERS
