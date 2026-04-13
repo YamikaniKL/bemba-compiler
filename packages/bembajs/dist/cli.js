@@ -47,20 +47,15 @@ program
     .command('panga <name>')
     .description('Create a new BembaJS project')
     .action((name) => {
-        console.log(`Creating BembaJS project: ${name}`);
-        console.log('Project structure:');
-        console.log('   amapeji/     - Pages (like Next.js pages/)');
-        console.log('   ifikopo/     - Components (like Next.js components/)');
-        console.log('   maapi/       - API routes (like Next.js api/)');
-        console.log('   maungu/      - Static files (like Next.js public/)');
-        console.log('   maungu/      - Styles (like Next.js styles/)');
+        console.log(`Scaffold "${name}" with the full template (shell, StarterCard, Standard JS, docs):`);
         console.log('');
-        console.log('Next steps:');
-        console.log(`   cd ${name}`);
-        console.log('   npm install');
-        console.log('   npm run dev');
+        console.log('  bunx bembajs-core panga ' + name);
+        console.log('  # or: npx bembajs-core panga ' + name);
         console.log('');
-        console.log('Welcome to BembaJS!');
+        console.log('The lightweight `bembajs` package focuses on dev server + CLI wrappers;');
+        console.log('`bemba panga` above runs the core generator. Then: cd ' + name + ' && bun install && bun run dev');
+        console.log('');
+        console.log('See docs/CODE-STYLE-AND-UI.md in the new project for Google + Standard + shadcn-style UI notes.');
     });
 
 // Start dev server command

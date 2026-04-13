@@ -11,6 +11,10 @@
 npm install bembajs-core
 ```
 
+## New projects (`bemba panga` / `bemba init`)
+
+The core CLI generates a **modern static starter**: shared **`amapeji/umusango.bemba`** shell (semantic HSL tokens and `.bem-*` utilities similar to [shadcn/ui](https://ui.shadcn.com/)), **`ifikopo/cipanda/StarterCard.bemba`** (copy-and-edit partial), **[Standard JS](https://standardjs.com/)** via **`bun run lint`**, **`.editorconfig`**, **`.gitignore`**, and **`docs/CODE-STYLE-AND-UI.md`**. The same guide ships in this repo: [docs/CODE-STYLE-AND-UI.md](./docs/CODE-STYLE-AND-UI.md).
+
 ## 🚀 Quick Start
 
 ```javascript

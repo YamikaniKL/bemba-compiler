@@ -112,6 +112,12 @@ await build({
 - **📱 Responsive** - Mobile-first design
 - **🎨 Modern UI** - Beautiful default styling
 
+## Code style and beginner-friendly UI
+
+- **Standard JS** — new projects from **`bemba panga`** (via **bembajs-core**) include **`standard`**, **`bun run lint`**, and **`bun run lint:fix`** for any **`.js` / `.jsx`** you add (see [Standard JS](https://standardjs.com/)).
+- **Google style guides** — use [JavaScript](https://google.github.io/styleguide/jsguide.html), [HTML/CSS](https://google.github.io/styleguide/htmlcssguide.html), and [TypeScript](https://google.github.io/styleguide/tsguide.html) as references; see **`docs/CODE-STYLE-AND-UI.md`** in generated projects.
+- **shadcn-like static UI** — tokens and **`.bem-card` / `.bem-btn`** utilities live in **`amapeji/umusango.bemba`**; copy **`ifikopo/cipanda/StarterCard.bemba`** the same way you would [shadcn/ui](https://ui.shadcn.com/) components ([overview](https://shadcnstudio.com/blog/what-is-shadcn-ui-comprehensive-guide)).
+
 ## 📤 Production static sites & Vite + React
 
 - **`bemba akha`** / **`bemba fumya`** run **`exportStaticHtmlSite`** from **bembajs-core**: plain HTML for **`pangaIpepa`** pages, public assets, optional **sitemap** / **RSS**, and optional **`bemba-site.js`** for small progressive enhancements.
