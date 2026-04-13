@@ -1361,8 +1361,10 @@ class BembaParser {
         for (const rawName of names) {
             const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
             if (!safe) continue;
-            const fp = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, `${safe}.bemba`);
-            if (!fs.existsSync(fp)) continue;
+            const rootPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, `${safe}.bemba`);
+            const nestedPart = path.join(projectRoot, BEMBA_FOLDERS.COMPONENTS, 'cipanda', `${safe}.bemba`);
+            const fp = fs.existsSync(rootPart) ? rootPart : fs.existsSync(nestedPart) ? nestedPart : null;
+            if (!fp) continue;
             let src;
             try {
                 src = fs.readFileSync(fp, 'utf8');

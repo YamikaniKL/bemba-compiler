@@ -71,13 +71,14 @@ class BembaGenerator {
     }
     
     // React Component generation
-    generateReactComponent(node) {
+    generateReactComponent(node, options = {}) {
+        const { omitDefaultExport = false } = options;
         const imports = this.generateReactImports();
         const hooks = (node.hooks || []).map(hook => this.generateReactHook(hook)).join('\n');
         const methods = this.generateMethods(node.methods);
         const render = this.generateJSXReturn(node.render);
         
-        return `${imports}
+        const body = `${imports}
 
 ${this.generateComponentComment(node.name)}
 function ${node.name}({ ${this.generatePropsSignature(node.props)} }) {
@@ -86,7 +87,12 @@ ${methods}
 ${this.increaseIndent()}return (
 ${this.increaseIndent()}${render}
 ${this.decreaseIndent()});
-${this.decreaseIndent()}}
+${this.decreaseIndent()}}`;
+
+        if (omitDefaultExport) {
+            return body;
+        }
+        return `${body}
 
 export default ${node.name};`;
     }
@@ -335,8 +341,9 @@ ${this.decreaseIndent()}}`;
     
     // Import/Export generation
     generateImport(node) {
+        const src = this.normalizeBembaImportSource(node.source);
         if (node.specifiers.length === 0) {
-            return `import '${node.source}';`;
+            return `import '${src}';`;
         }
         
         const defaultImport = node.specifiers.find(spec => spec.isDefault);
@@ -355,17 +362,26 @@ ${this.decreaseIndent()}}`;
             importString += `{ ${namedImports.map(spec => spec.name).join(', ')} }`;
         }
         
-        importString += ` from '${node.source}';`;
+        importString += ` from '${src}';`;
         
         return importString;
     }
+
+    /** Map trailing .bemba in import paths to .jsx for emitted bundles (emit-react / Vite). */
+    normalizeBembaImportSource(source) {
+        if (typeof source !== 'string') return source;
+        return source.replace(/\.bemba$/i, '.jsx');
+    }
     
     generateExport(node) {
+        if (node.isDefault && node.declaration && node.declaration.type === 'ReactComponent') {
+            const inner = this.generateReactComponent(node.declaration, { omitDefaultExport: true });
+            return `${inner}\n\nexport default ${node.declaration.name};`;
+        }
         if (node.isDefault) {
             return `export default ${this.generateNode(node.declaration)};`;
-        } else {
-            return `export ${this.generateNode(node.declaration)};`;
         }
+        return `export ${this.generateNode(node.declaration)};`;
     }
     
     // Program and Module generation
