@@ -50,6 +50,21 @@ export interface RssItem {
     pubDate?: string | Date;
 }
 
+export interface PictureSourceSpec {
+    srcset: string;
+    media?: string;
+    type?: string;
+}
+
+export interface BuildPictureHtmlOptions {
+    src: string;
+    alt?: string;
+    sources?: PictureSourceSpec[];
+    class?: string;
+    sizes?: string;
+    loadingLazy?: boolean;
+}
+
 interface BembajsCoreExports {
     compile(code: string, options?: CompileStaticOptions): CompileResult;
     listStaticPageDependencyPaths(code: string, options: ListStaticDepsOptions): string[];
@@ -59,6 +74,14 @@ interface BembajsCoreExports {
     generateSitemapXml(args: { baseUrl: string; paths: string[] }): string;
     generateRssFeedXml(args: { baseUrl: string; siteTitle?: string; items?: RssItem[] }): string;
     escapeXmlForStatic(s: string): string;
+    resolveCssImports(
+        css: string,
+        baseDir: string,
+        seen?: Set<string>,
+        rootDir?: string | null
+    ): string;
+    publicAssetUrl(rel: string): string;
+    buildPictureHtml(o?: BuildPictureHtmlOptions): string;
     parse(code: string): unknown;
     transform(ast: unknown): unknown;
     generate(ast: unknown): string;
