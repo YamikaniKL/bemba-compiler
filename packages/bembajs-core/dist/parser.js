@@ -17,7 +17,7 @@ const {
     ExportNode,
     ASTUtils
 } = require('./ast');
-const { BEMBA_SYNTAX, BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
+const { BEMBA_SYNTAX, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const fs = require('fs');
 const path = require('path');
 
@@ -46,6 +46,35 @@ function navHrefIsActive(href, currentPath) {
     const hn = normalizeNavPath(h);
     if (hn === '/' || hn === '') return c === '/' || c === '';
     return c === hn;
+}
+
+function escapeHtmlNav(s) {
+    if (s == null || s === '') return '';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+/**
+ * Replace tokens in NavBar partial HTML with data from umusango (site name + nav links + active route).
+ */
+function fillNavShellPlaceholders(template, siteName, navLinks, activePath) {
+    const brand = escapeHtmlNav(siteName || 'BembaJS');
+    const linksHtml = (navLinks || [])
+        .map((l) => {
+            const active = navHrefIsActive(l.href, activePath);
+            const cls = active ? 'nav-link is-active' : 'nav-link';
+            const cur = active ? ' aria-current="page"' : '';
+            return `<a href="${escapeHtmlNav(l.href)}" class="${cls}"${cur}>${escapeHtmlNav(l.label)}</a>`;
+        })
+        .join('');
+    return String(template || '')
+        .split('{{BEMBA_NAV_BRAND}}')
+        .join(brand)
+        .split('{{BEMBA_NAV_LINKS}}')
+        .join(linksHtml);
 }
 
 class BembaParser {
@@ -1304,6 +1333,20 @@ class BembaParser {
             styles = [styles, partialBundle.css].filter(Boolean).join('\n\n');
         }
 
+        const brandName = siteName || 'BembaJS';
+        let navShellFilledHtml = '';
+        if (partialBundle.navShell && String(partialBundle.navShell.html).trim()) {
+            if (partialBundle.navShell.css) {
+                styles = [styles, partialBundle.navShell.css].filter(Boolean).join('\n\n');
+            }
+            navShellFilledHtml = fillNavShellPlaceholders(
+                partialBundle.navShell.html,
+                brandName,
+                navLinks,
+                options.currentPath != null ? String(options.currentPath) : ''
+            );
+        }
+
         const appName = this.extractAppNameFromNewSyntax(code);
         const sections = this.extractSectionsFromNewSyntax(code, appName);
         const bodyBlocks = this.extractIfiputulwaBlocks(code);
@@ -1316,7 +1359,8 @@ class BembaParser {
             footerTagline,
             bodyBlocks,
             activePath,
-            partialsHtml: partialBundle.html
+            partialsHtml: partialBundle.html,
+            navShellFilledHtml
         });
     }
 
@@ -1354,10 +1398,12 @@ class BembaParser {
 
     loadIngisaPartials(projectRoot, names) {
         if (!projectRoot || !names || !names.length) {
-            return { html: '', css: '' };
+            return { html: '', css: '', navShell: null };
         }
         const htmlParts = [];
         const cssParts = [];
+        let navShell = null;
+        const navName = BEMBA_INGISA.NAV_BAR;
         for (const rawName of names) {
             const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
             if (!safe) continue;
@@ -1372,6 +1418,10 @@ class BembaParser {
                 continue;
             }
             const frag = this.extractPangaIcapabaPartial(src);
+            if (safe === navName) {
+                navShell = { html: frag.html || '', css: frag.css || '' };
+                continue;
+            }
             if (frag.html) {
                 htmlParts.push(
                     `<div class="bemba-ingisa" data-ingisa="${safe.replace(/"/g, '')}">${frag.html}</div>`
@@ -1379,7 +1429,7 @@ class BembaParser {
             }
             if (frag.css) cssParts.push(frag.css);
         }
-        return { html: htmlParts.join('\n'), css: cssParts.join('\n\n') };
+        return { html: htmlParts.join('\n'), css: cssParts.join('\n\n'), navShell };
     }
     
     extractAppNameFromNewSyntax(code) {
@@ -1650,7 +1700,8 @@ class BembaParser {
             footerTagline = '',
             bodyBlocks = [],
             activePath = '',
-            partialsHtml = ''
+            partialsHtml = '',
+            navShellFilledHtml = ''
         } = layoutOpts;
         const ingisaMotion = partialsHtml
             ? `
@@ -2010,9 +2061,11 @@ class BembaParser {
         }
 
         const brandName = siteName || 'BembaJS';
-        const showInnerBrand = navLinks.length === 0;
-        const navBlock =
-            navLinks.length > 0
+        const useNavShell = Boolean(siteLayout && String(navShellFilledHtml || '').trim());
+        const showInnerBrand = !useNavShell && navLinks.length === 0;
+        const navBlock = useNavShell
+            ? String(navShellFilledHtml).trim()
+            : navLinks.length > 0
                 ? `<header class="site-header">
     <div class="site-header-inner">
         <a href="/" class="nav-brand">${escapeHtml(brandName)}</a>

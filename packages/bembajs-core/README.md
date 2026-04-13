@@ -100,6 +100,7 @@ Hero copy uses top-level `umutwe` / `ilyashi` before `ifiputulwa`; body sections
 - On a **`pangaIpepa`** page, add **`ingisa: [ 'Card', 'Promo' ]`** (names without `.bemba`).
 - For each name, the compiler reads **`ifikopo/<Name>.bemba`**, or if missing, **`ifikopo/cipanda/<Name>.bemba`**, containing **`pangaIcapaba({ ibeensi: \`…HTML…\`, imikalile: \`…css…\` })`**.
 - **`ibeensi`** is trusted author HTML (not escaped). Partials get a light CSS entrance animation. **`projectRoot`** must be set (dev servers pass it).
+- Special name **`NavBar`** (see **`BEMBA_INGISA.NAV_BAR`**): not placed in the body partials region. Its HTML is merged into the **top site header**; placeholders **`{{BEMBA_NAV_BRAND}}`** and **`{{BEMBA_NAV_LINKS}}`** are filled from **`umusango.bemba`** when the page uses **`umusangoSite: ee`** (same data as the built-in navbar).
 
 ### `bemba emit-react` (CLI in `bembajs` package)
 

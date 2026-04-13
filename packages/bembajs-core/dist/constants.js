@@ -15,6 +15,15 @@ const BEMBA_FILES = {
     SITE_SHELL: 'umusango.bemba'
 };
 
+/** Special `ingisa` partial names (ifikopo/… or ifikopo/cipanda/…). */
+const BEMBA_INGISA = {
+    /**
+     * Navbar shell: `pangaIcapaba` HTML may include `{{BEMBA_NAV_BRAND}}` and `{{BEMBA_NAV_LINKS}}`.
+     * Filled from `umusango.bemba` when the page has `umusangoSite: ee` (same data as the built-in header).
+     */
+    NAV_BAR: 'NavBar'
+};
+
 // Bemba file extensions
 const BEMBA_EXTENSIONS = {
     COMPONENT: '.bemba',
@@ -119,6 +128,7 @@ const DEFAULT_CONFIG = {
 module.exports = {
     BEMBA_FOLDERS,
     BEMBA_FILES,
+    BEMBA_INGISA,
     BEMBA_EXTENSIONS,
     BEMBA_SYNTAX,
     DEFAULT_CONFIG

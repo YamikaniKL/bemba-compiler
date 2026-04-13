@@ -3,7 +3,7 @@ const BembaLexer = require('./lexer');
 const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
-const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
+const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { version: CORE_VERSION } = require('../package.json');
 
 /**
@@ -106,6 +106,7 @@ module.exports = {
     BEMBA_KEYWORDS,
     BEMBA_FOLDERS,
     BEMBA_FILES,
+    BEMBA_INGISA,
     
     // Version
     version: CORE_VERSION
