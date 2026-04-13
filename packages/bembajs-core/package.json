@@ -5,6 +5,9 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "bin": {
+    "bembajs-core": "./dist/cli.js"
+  },
   "exports": {
     ".": {
       "require": "./dist/index.js",
@@ -50,9 +53,11 @@
     "lexer",
     "ast"
   ],
-  "author": "BembaJS Team",
+  "author": "Yamikani Kalonge and Bemba Team",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "commander": "^14.0.3"
+  },
   "devDependencies": {},
   "engines": {
     "node": ">=16.0.0"
@@ -63,4 +68,3 @@
     "directory": "packages/bembajs-core"
   }
 }
-

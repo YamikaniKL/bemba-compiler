@@ -21,7 +21,7 @@
     "generator",
     "cli"
   ],
-  "author": "BembaJS Team",
+  "author": "Yamikani Kalonge and Bemba Team",
   "license": "MIT",
   "dependencies": {
     "commander": "^11.1.0",

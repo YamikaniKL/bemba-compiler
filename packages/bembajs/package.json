@@ -45,7 +45,7 @@
     "zambia",
     "cli"
   ],
-  "author": "BembaJS Team",
+  "author": "Yamikani Kalonge and Bemba Team",
   "license": "MIT",
   "dependencies": {
     "bembajs-core": "^1.3.3",
