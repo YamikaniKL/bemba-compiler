@@ -7,6 +7,7 @@
 
 const path = require('path');
 const fs = require('fs');
+const readline = require('readline');
 const { program } = require('commander');
 
 let pkgVersion = '1.0.0';
@@ -28,6 +29,44 @@ function loadDevServerModule() {
     return require(path.join(__dirname, 'dev-server'));
 }
 
+function resolveCoreCliClass() {
+    try {
+        const corePkg = path.dirname(require.resolve('bembajs-core/package.json'));
+        const CoreCli = require(path.join(corePkg, 'dist', 'cli.js'));
+        return typeof CoreCli === 'function' ? CoreCli : null;
+    } catch (_) {
+        try {
+            // Monorepo fallback when running from source without installed package.
+            const local = path.resolve(__dirname, '..', '..', 'bembajs-core', 'dist', 'cli.js');
+            if (fs.existsSync(local)) {
+                const CoreCli = require(local);
+                return typeof CoreCli === 'function' ? CoreCli : null;
+            }
+        } catch (_) {
+            /* ignore */
+        }
+        return null;
+    }
+}
+
+async function promptTemplateChoice() {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
+    try {
+        console.log('Choose a project template:');
+        console.log('  1) base - minimal starter router');
+        console.log('  2) ui   - starter UI blocks');
+        const answer = String(await ask('Template [1/2, default 1]: ')).trim().toLowerCase();
+        if (answer === '2' || answer === 'ui') return 'ui';
+        return 'base';
+    } finally {
+        rl.close();
+    }
+}
+
 // Main CLI program
 program
     .name('bemba')
@@ -46,16 +85,27 @@ program
 program
     .command('panga <name>')
     .description('Create a new BembaJS project')
-    .action((name) => {
-        console.log(`Scaffold "${name}" with the full template (shell, StarterCard, Standard JS, docs):`);
-        console.log('');
-        console.log('  bunx bembajs-core panga ' + name);
-        console.log('  # or: npx bembajs-core panga ' + name);
-        console.log('');
-        console.log('The lightweight `bembajs` package focuses on dev server + CLI wrappers;');
-        console.log('`bemba panga` above runs the core generator. Then: cd ' + name + ' && bun install && bun run dev');
-        console.log('');
-        console.log('See docs/CODE-STYLE-AND-UI.md in the new project for Google + Standard + shadcn-style UI notes.');
+    .option('-t, --template <template>', 'Project template: base | ui')
+    .option('--typescript', 'Use TypeScript')
+    .action(async (name, opts) => {
+        const CoreCli = resolveCoreCliClass();
+        if (!CoreCli) {
+            console.error('bembajs-core is required for project scaffolding. Install/reinstall bembajs-core and try again.');
+            process.exit(1);
+        }
+        let template = opts.template ? String(opts.template).trim().toLowerCase() : '';
+        if (!template) {
+            template = await promptTemplateChoice();
+        }
+        if (template !== 'base' && template !== 'ui') {
+            console.error(`Unknown template "${template}". Use --template base or --template ui.`);
+            process.exit(1);
+        }
+        const core = new CoreCli();
+        core.createProject(name, {
+            template,
+            typescript: !!opts.typescript
+        });
     });
 
 // Start dev server command
@@ -202,7 +252,7 @@ program
         console.log('BembaJS - Programming in Bemba Language');
         console.log('');
         console.log('Commands:');
-        console.log('   bemba panga <name>    - Create new project');
+        console.log('   bemba panga <name>    - Create project (prompts template)');
         console.log('   bemba tungulula       - Start dev server');
         console.log('   bemba akha            - Export static HTML (→ dist/)');
         console.log('   bemba fumya           - Export static HTML (→ out/)');
