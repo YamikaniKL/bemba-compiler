@@ -34,6 +34,29 @@ try {
  * When bemba is installed globally, use the project's node_modules/bembajs if present
  * so `bemba tungulula` matches `bun run dev` / local installs.
  */
+/** True if `dir` is a directory tree that contains at least one `.bemba` file (pages folder). */
+function directoryHasBembaPages(dir) {
+    try {
+        if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) return false;
+        const entries = fs.readdirSync(dir, { withFileTypes: true });
+        for (const ent of entries) {
+            const full = path.join(dir, ent.name);
+            if (ent.isDirectory()) {
+                if (directoryHasBembaPages(full)) return true;
+            } else if (ent.isFile() && ent.name.endsWith('.bemba')) {
+                return true;
+            }
+        }
+    } catch (_) {
+        return false;
+    }
+    return false;
+}
+
+function isBembaJsProjectCwd(cwd) {
+    return directoryHasBembaPages(path.join(cwd, 'amapeji'));
+}
+
 function loadDevServerModule() {
     const local = path.join(process.cwd(), 'node_modules', 'bembajs', 'dist', 'dev-server.js');
     if (fs.existsSync(local)) {
@@ -87,6 +110,11 @@ async function runCreateProjectFlow(name, commanderOpts) {
 }
 
 function runTungululaCli() {
+    if (!isBembaJsProjectCwd(process.cwd())) {
+        console.error(msg('devNoProject'));
+        process.exit(1);
+    }
+
     console.log(msg('startingDev'));
     console.log(msg('hotReload'));
 

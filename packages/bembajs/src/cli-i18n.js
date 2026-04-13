@@ -62,6 +62,8 @@ const EXTRA = {
         stoppingDev: 'Stopping BembaJS development server...',
         devStartErr: 'Failed to start development server:',
         devCwdHint: 'Make sure you are in a BembaJS project directory',
+        devNoProject:
+            'Not a BembaJS project here: expected amapeji/ with at least one .bemba page. Run bemba panga to create a project, then cd into it.',
         coreMissingPanga: 'bembajs-core is required for project scaffolding. Install/reinstall bembajs-core and try again.',
         unknownTemplate: (t) => `Unknown template "${t}". Use --template base or --template ui.`,
         exportMissing: 'bembajs-core with static-html-export is required.',
@@ -140,6 +142,8 @@ const EXTRA = {
         stoppingDev: 'Tuleka sava yakupanga...',
         devStartErr: 'Twashilibwesha ukutungulula sava:',
         devCwdHint: 'Ina mu bufolder bwa project ya BembaJS',
+        devNoProject:
+            'Tayali project ya BembaJS: ukufwile amapeji/ ne page .bemba. Panga project ne bemba panga, elyo ina muli.',
         coreMissingPanga: 'bembajs-core yafwile pakupanga project. Shishikishe bembajs-core.',
         unknownTemplate: (t) => `Ifishi shapusulo "${t}" tashishishiba. Ukufwile --template base nangu ui.`,
         exportMissing: 'bembajs-core ne static export yafwile.',
