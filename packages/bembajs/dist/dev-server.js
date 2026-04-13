@@ -460,6 +460,12 @@ class BembaDevServer {
         this._liveClients = new Set();
         /** Cache compiled pangaApi handlers: key maapi:relativePath */
         this._maapiHandlerCache = new Map();
+        /**
+         * Cached HTML for pangaIpepa pages (dev speed). Invalidated when any watched .bemba changes.
+         * Key: pageFilePath + currentPath (active nav depends on route).
+         */
+        this._pangaIpepaHtmlGen = 0;
+        this._pangaIpepaHtmlCache = new Map();
         this._coreApiPipeline = coreApiPipeline;
         this.setupMiddleware();
         this.setupRoutes();
@@ -527,6 +533,23 @@ class BembaDevServer {
                       pageFilePath: ''
                   };
         return this.wrapDevHtml(compileBembaToHtml(code, opts));
+    }
+
+    /**
+     * Return cached pangaIpepa HTML if still valid for this dev generation; else compile and store.
+     * @param {string} pagePath absolute path to .bemba page
+     * @param {string} currentPath request path (e.g. /about)
+     * @param {() => string} compileFn returns full HTML (including live-reload snippet)
+     */
+    getOrCompilePangaIpepaHtml(pagePath, currentPath, compileFn) {
+        const key = `${path.resolve(pagePath)}\0${currentPath || '/'}`;
+        const hit = this._pangaIpepaHtmlCache.get(key);
+        if (hit && hit.gen === this._pangaIpepaHtmlGen) {
+            return hit.html;
+        }
+        const html = compileFn();
+        this._pangaIpepaHtmlCache.set(key, { html, gen: this._pangaIpepaHtmlGen });
+        return html;
     }
 
     sendNoCacheHtml(res, html) {
@@ -723,10 +746,12 @@ class BembaDevServer {
             if (fs.existsSync(pagePath)) {
                 try {
                     const code = fs.readFileSync(pagePath, 'utf8');
-                    const html = this.compileBemba(code, {
-                        currentPath: req.path,
-                        pageFilePath: pagePath
-                    });
+                    const html = this.getOrCompilePangaIpepaHtml(pagePath, req.path, () =>
+                        this.compileBemba(code, {
+                            currentPath: req.path,
+                            pageFilePath: pagePath
+                        })
+                    );
                     this.sendNoCacheHtml(res, html);
                 } catch (error) {
                     res.status(500).send(`Error compiling page: ${error.message}`);
@@ -743,10 +768,12 @@ class BembaDevServer {
         if (fs.existsSync(indexPath)) {
             try {
                 const code = fs.readFileSync(indexPath, 'utf8');
-                const html = this.compileBemba(code, {
-                    currentPath: '/',
-                    pageFilePath: indexPath
-                });
+                const html = this.getOrCompilePangaIpepaHtml(indexPath, '/', () =>
+                    this.compileBemba(code, {
+                        currentPath: '/',
+                        pageFilePath: indexPath
+                    })
+                );
                 this.sendNoCacheHtml(res, html);
             } catch (error) {
                 res.status(500).send(`Error compiling home page: ${error.message}`);
@@ -825,6 +852,8 @@ pangaIpepa('Home', {
                                 if (rel.startsWith(`maapi${path.sep}`)) {
                                     this._maapiHandlerCache.delete(`maapi:${rel}`);
                                 }
+                                this._pangaIpepaHtmlGen += 1;
+                                this._pangaIpepaHtmlCache.clear();
                                 console.log(`${rel} changed — reloading open tabs.`);
                                 this.notifyLiveClients();
                             }
