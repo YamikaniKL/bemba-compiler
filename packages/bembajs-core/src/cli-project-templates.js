@@ -160,7 +160,7 @@ function starterCardPartial() {
       font-size: 0.8em;
       padding: 0.12em 0.4em;
       border-radius: 0.25rem;
-      background: hsl(var(--foreground) / 0.08);
+      background: color-mix(in srgb, var(--text) 9%, transparent);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
   \`
