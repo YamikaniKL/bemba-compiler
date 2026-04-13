@@ -10,6 +10,9 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
 const { version: CORE_VERSION } = require('../package.json');
+const { parseEarlyLangFromArgv, normalizeLang, t: msg } = require('./cli-i18n');
+
+process.env.BEMBA_CLI_LANG = parseEarlyLangFromArgv(process.argv);
 
 class BembaCLI {
     constructor() {
@@ -18,72 +21,80 @@ class BembaCLI {
     }
     
     setupCommands() {
+        const earlyLang = parseEarlyLangFromArgv(process.argv);
         this.program
             .name('bemba')
-            .description('BembaJS CLI - Build web applications with Bemba language')
-            .version(CORE_VERSION);
-        
+            .description(msg('rootDesc'))
+            .version(CORE_VERSION)
+            .option('-l, --lang <lang>', msg('optLang'), earlyLang);
+
+        this.program.hook('preAction', (thisCommand) => {
+            const root = thisCommand.root();
+            const opts = root.opts();
+            if (opts && opts.lang != null) {
+                process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);
+            }
+        });
+
         // Create new project
         this.program
             .command('panga <name>')
-            .description('Create a new BembaJS project')
-            .option('-t, --template <template>', 'Project template: base | ui', 'base')
-            .option('--typescript', 'Use TypeScript')
+            .description(msg('pangaDesc'))
+            .option('-t, --template <template>', msg('optTemplate'), 'base')
+            .option('--typescript', msg('optTypescript'))
             .action((name, options) => this.createProject(name, options));
-        
+
         // Alternative create command
         this.program
             .command('new <name>')
-            .description('Create a new BembaJS project (alias for panga)')
-            .option('-t, --template <template>', 'Project template: base | ui', 'base')
-            .option('--typescript', 'Use TypeScript')
+            .description(msg('newDesc'))
+            .option('-t, --template <template>', msg('optTemplate'), 'base')
+            .option('--typescript', msg('optTypescript'))
             .action((name, options) => this.createProject(name, options));
-        
+
         // Initialize project in current directory
         this.program
             .command('init')
-            .description('Initialize BembaJS project in current directory')
-            .option('-t, --template <template>', 'Project template: base | ui', 'base')
-            .option('--typescript', 'Use TypeScript')
+            .description(msg('initDesc'))
+            .option('-t, --template <template>', msg('optTemplate'), 'base')
+            .option('--typescript', msg('optTypescript'))
             .action((options) => this.initProject(options));
 
-        const templateCmd = this.program.command('template').description('Sync starter content from the installed bembajs-core package');
+        const templateCmd = this.program.command('template').description(msg('templateDesc'));
         templateCmd
             .command('sync')
-            .description(
-                'Update docs/CODE-STYLE-AND-UI.md from bembajs-core (single source). Use --starter to overwrite default .bemba pages, shell, README, etc.'
-            )
-            .option('-t, --template <template>', 'base | ui (default: ui if ifikopo/cipanda/StarterCard.bemba exists, else base)')
-            .option('--starter', 'Overwrite starter pages/shell/partials/README/.gitignore/.editorconfig (destructive)')
+            .description(msg('templateSyncDesc'))
+            .option('-t, --template <template>', msg('optTemplateSync'))
+            .option('--starter', msg('optStarter'))
             .action((options) => this.syncTemplateFromPackage(options));
 
         // Single-token alias (some runners / older help expect one subcommand)
         this.program
             .command('sync-template')
-            .description('Same as `template sync` — refresh docs/starter from this bembajs-core package')
-            .option('-t, --template <template>', 'base | ui (default: ui if ifikopo/cipanda/StarterCard.bemba exists, else base)')
-            .option('--starter', 'Overwrite starter pages/shell/partials/README/.gitignore/.editorconfig (destructive)')
+            .description(msg('syncTemplateDesc'))
+            .option('-t, --template <template>', msg('optTemplateSync'))
+            .option('--starter', msg('optStarter'))
             .action((options) => this.syncTemplateFromPackage(options));
 
         // Start development server
         this.program
             .command('tungulula')
-            .description('Start development server')
-            .option('-p, --port <port>', 'Port to run on', '3000')
-            .option('--host <host>', 'Host to bind to', 'localhost')
+            .description(msg('tungululaDesc'))
+            .option('-p, --port <port>', msg('optPort'), '3000')
+            .option('--host <host>', msg('optHost'), 'localhost')
             .action((options) => this.startDevServer(options));
-        
+
         // Build for production
         this.program
             .command('akha')
-            .description('Export static HTML (pangaIpepa) for production, or legacy Next-style build')
-            .option('-o, --output <dir>', 'Output directory', 'dist')
-            .option('--base-url <url>', 'Site origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
-            .option('--locale <code>', 'html lang (BCP 47)', 'en')
-            .option('--site-title <title>', 'RSS channel title')
-            .option('--analyze', 'Analyze bundle size (legacy build only)')
-            .option('--legacy-next', 'Run legacy Next.js scaffold build instead of HTML export')
-            .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+            .description(msg('akhaDesc'))
+            .option('-o, --output <dir>', msg('optOutput'), 'dist')
+            .option('--base-url <url>', msg('optBaseUrl'))
+            .option('--locale <code>', msg('optLocale'), 'en')
+            .option('--site-title <title>', msg('optSiteTitle'))
+            .option('--analyze', msg('optAnalyze'))
+            .option('--legacy-next', msg('optLegacyNext'))
+            .option('--no-bemba-site', msg('optNoBembaSite'))
             .action(async (options) => {
                 try {
                     await this.buildProject(options);
@@ -92,16 +103,16 @@ class BembaCLI {
                     process.exit(1);
                 }
             });
-        
+
         // Export static site
         this.program
             .command('fumya')
-            .description('Export static HTML site (pangaIpepa pages) to a folder')
-            .option('-o, --output <dir>', 'Output directory', 'out')
-            .option('--base-url <url>', 'Site origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
-            .option('--locale <code>', 'html lang (BCP 47)', 'en')
-            .option('--site-title <title>', 'RSS channel title')
-            .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+            .description(msg('fumyaDesc'))
+            .option('-o, --output <dir>', msg('optOutput'), 'out')
+            .option('--base-url <url>', msg('optBaseUrl'))
+            .option('--locale <code>', msg('optLocale'), 'en')
+            .option('--site-title <title>', msg('optSiteTitle'))
+            .option('--no-bemba-site', msg('optNoBembaSite'))
             .action(async (options) => {
                 try {
                     await this.exportStatic(options);
@@ -110,51 +121,51 @@ class BembaCLI {
                     process.exit(1);
                 }
             });
-        
+
         // Compile single file
         this.program
             .command('panga-icibukisho <file>')
-            .description('Compile a single Bemba file')
-            .option('-o, --output <file>', 'Output file')
+            .description(msg('pangaIcibukishoDesc'))
+            .option('-o, --output <file>', msg('optOutputFile'))
             .action((file, options) => this.compileFile(file, options));
-        
+
         // Generate component
         this.program
             .command('panga-icipanda <name>')
-            .description('Generate a new component')
-            .option('-t, --type <type>', 'Component type', 'functional')
+            .description(msg('pangaIcipandaDesc'))
+            .option('-t, --type <type>', msg('optComponentType'), 'functional')
             .action((name, options) => this.generateComponent(name, options));
-        
+
         // Generate page
         this.program
             .command('panga-ipepa <name>')
-            .description('Generate a new page')
-            .option('-d, --dynamic', 'Create dynamic route')
+            .description(msg('pangaIpepaDesc'))
+            .option('-d, --dynamic', msg('optDynamic'))
             .action((name, options) => this.generatePage(name, options));
-        
+
         // Lint code
         this.program
             .command('lemba')
-            .description('Lint Bemba code')
-            .option('--fix', 'Fix linting errors')
+            .description(msg('lembaDesc'))
+            .option('--fix', msg('optFix'))
             .action((options) => this.lintCode(options));
-        
+
         // Test
         this.program
             .command('esha')
-            .description('Run tests')
-            .option('--watch', 'Watch mode')
+            .description(msg('eshaDesc'))
+            .option('--watch', msg('optWatch'))
             .action((options) => this.runTests(options));
     }
     
     // Create new project
     createProject(name, options) {
-        console.log(`Creating new BembaJS project: ${name}`);
-        
+        console.log(msg('creatingProject', name));
+
         const projectPath = path.resolve(name);
-        
+
         if (fs.existsSync(projectPath)) {
-            console.error(`Directory ${name} already exists`);
+            console.error(msg('dirExists', name));
             process.exit(1);
         }
         
@@ -173,22 +184,22 @@ class BembaCLI {
         // Create configuration
         this.createConfig(projectPath);
         
-        console.log(`Project ${name} created successfully.`);
-        console.log(`Template: ${options.template || 'base'}`);
-        console.log(`Navigate to the project: cd ${name}`);
-        console.log(`Start development: bemba tungulula`);
+        console.log(msg('projectCreated', name));
+        console.log(msg('templateLine', options.template || 'base'));
+        console.log(msg('cdLine', name));
+        console.log(msg('startDevLine'));
     }
-    
+
     initProject(options) {
-        console.log(`Initializing BembaJS project in current directory`);
-        
+        console.log(msg('initInCwd'));
+
         const projectPath = process.cwd();
         const projectName = path.basename(projectPath);
-        
+
         // Check if directory is empty
         const files = fs.readdirSync(projectPath);
         if (files.length > 0) {
-            console.log(`Warning: Directory is not empty. Some files may be overwritten.`);
+            console.log(msg('dirNotEmptyWarn'));
         }
         
         // Create folder structure
@@ -203,10 +214,10 @@ class BembaCLI {
         // Create configuration
         this.createConfig(projectPath);
         
-        console.log(`Project initialized successfully.`);
-        console.log(`Template: ${options.template || 'base'}`);
-        console.log(`Location: ${projectPath}`);
-        console.log(`Start development: bemba tungulula`);
+        console.log(msg('initOk'));
+        console.log(msg('templateLine', options.template || 'base'));
+        console.log(msg('locationLine', projectPath));
+        console.log(msg('startDevLine'));
     }
     
     createFolderStructure(projectPath) {
@@ -226,17 +237,17 @@ class BembaCLI {
     }
     
     createInitialFiles(projectPath, name, options) {
-        const t = require('./cli-project-templates');
+        const templates = require('./cli-project-templates');
         const template = String(options?.template || 'base').toLowerCase();
         if (template !== 'base' && template !== 'ui') {
             throw new Error(`Unknown template "${template}". Use --template base or --template ui`);
         }
-        t.writeProjectTemplateFiles(projectPath, name, { template, scope: 'all' });
+        templates.writeProjectTemplateFiles(projectPath, name, { template, scope: 'all' });
     }
 
     /** Refresh files from the installed package so docs (and optionally starter pages) stay aligned with bembajs-core. */
     syncTemplateFromPackage(options) {
-        const t = require('./cli-project-templates');
+        const templates = require('./cli-project-templates');
         const cwd = process.cwd();
         let projectName = path.basename(cwd);
         try {
@@ -249,25 +260,23 @@ class BembaCLI {
 
         let template = String(options.template || '').toLowerCase();
         if (template !== 'base' && template !== 'ui') {
-            const starterPath = path.join(cwd, t.BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba');
+            const starterPath = path.join(cwd, templates.BEMBA_FOLDERS.COMPONENTS, 'cipanda', 'StarterCard.bemba');
             template = fs.existsSync(starterPath) ? 'ui' : 'base';
         }
 
         const scope = options.starter ? 'all' : 'docs';
         try {
-            t.writeProjectTemplateFiles(cwd, projectName, { template, scope });
+            templates.writeProjectTemplateFiles(cwd, projectName, { template, scope });
         } catch (e) {
             console.error(e.message || e);
             process.exit(1);
         }
 
         if (scope === 'docs') {
-            console.log('Updated docs/CODE-STYLE-AND-UI.md from bembajs-core package.');
-            console.log('Tip: run with --starter to replace default umusango/index/about/partials/README (overwrites your edits).');
+            console.log(msg('syncDocsOk'));
+            console.log(msg('syncDocsTip'));
         } else {
-            console.log(
-                `Synced full starter (${template}): shell, pages, docs, README, Button.bemba, global.css, .gitignore, .editorconfig.`
-            );
+            console.log(msg('syncFull', template));
         }
     }
 
@@ -329,7 +338,7 @@ class BembaCLI {
     
     // Start development server
     startDevServer(options) {
-        console.log(`Starting BembaJS development server on port ${options.port}`);
+        console.log(msg('startingDevPort', options.port));
         
         const DevServer = require('./dev-server');
         const server = new DevServer({
@@ -343,7 +352,7 @@ class BembaCLI {
     // Build project
     async buildProject(options) {
         if (options.legacyNext) {
-            console.log('Building BembaJS project (legacy Next scaffold)...');
+            console.log(msg('buildingLegacy'));
             const BuildSystem = require('./build');
             const builder = new BuildSystem({
                 outputDir: options.output,
@@ -352,7 +361,7 @@ class BembaCLI {
             return builder.build();
         }
 
-        console.log('Exporting static HTML (pangaIpepa)...');
+        console.log(msg('exportingHtml'));
         const { exportStaticHtmlSite } = require('./static-html-export');
         await exportStaticHtmlSite({
             projectRoot: process.cwd(),
@@ -366,7 +375,7 @@ class BembaCLI {
     
     // Export static site
     async exportStatic(options) {
-        console.log('Exporting static HTML site...');
+        console.log(msg('exportingSite'));
         const { exportStaticHtmlSite } = require('./static-html-export');
         await exportStaticHtmlSite({
             projectRoot: process.cwd(),
@@ -380,7 +389,7 @@ class BembaCLI {
     
     // Compile single file
     compileFile(file, options) {
-        console.log(`Compiling ${file}...`);
+        console.log(msg('compilingFile', file));
         
         const parser = new BembaParser();
         const transformer = new BembaTransformer();
@@ -393,19 +402,19 @@ class BembaCLI {
             
             if (options.output) {
                 fs.writeFileSync(options.output, generated);
-                console.log(`✅ Compiled to ${options.output}`);
+                console.log(msg('compiledTo', options.output));
             } else {
                 console.log(generated);
             }
         } catch (error) {
-            console.error(`❌ Compilation error: ${error.message}`);
+            console.error(msg('compileErr', error.message));
             process.exit(1);
         }
     }
     
     // Generate component
     generateComponent(name, options) {
-        console.log(`Generating component: ${name}`);
+        console.log(msg('genComponent', name));
         
         const componentContent = `fyambaIcipanda('${name}', {
     ifyapangwa: {
@@ -427,12 +436,12 @@ class BembaCLI {
         const outputPath = path.join(BEMBA_FOLDERS.COMPONENTS, `${name}.bemba`);
         fs.writeFileSync(outputPath, componentContent);
         
-        console.log(`✅ Component created: ${outputPath}`);
+        console.log(msg('componentCreated', outputPath));
     }
-    
+
     // Generate page
     generatePage(name, options) {
-        console.log(`Generating page: ${name}`);
+        console.log(msg('genPage', name));
         
         const pageContent = `pangaIpepa({
     ukwisulula: nokuti() {
@@ -449,23 +458,23 @@ class BembaCLI {
         const outputPath = path.join(BEMBA_FOLDERS.PAGES, fileName);
         fs.writeFileSync(outputPath, pageContent);
         
-        console.log(`✅ Page created: ${outputPath}`);
+        console.log(msg('pageCreated', outputPath));
     }
-    
+
     // Lint code
     lintCode(options) {
-        console.log('Linting Bemba code...');
-        
+        console.log(msg('linting'));
+
         // TODO: Implement linting
-        console.log('✅ Linting completed');
+        console.log(msg('lintOk'));
     }
-    
+
     // Run tests
     runTests(options) {
-        console.log('Running tests...');
-        
+        console.log(msg('runningTests'));
+
         // TODO: Implement testing
-        console.log('✅ All tests passed');
+        console.log(msg('testsOk'));
     }
     
     // Run CLI

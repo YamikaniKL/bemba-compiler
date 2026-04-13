@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
+const { parseEarlyLangFromArgv, normalizeLang, msg } = require('./cli-i18n');
 const { program } = require('commander');
 let prompts = null;
 try {
@@ -61,10 +62,10 @@ async function promptTemplateChoice() {
             {
                 type: 'select',
                 name: 'template',
-                message: 'Choose a project template',
+                message: msg('chooseTemplate'),
                 choices: [
-                    { title: 'base - minimal starter router', value: 'base' },
-                    { title: 'ui - starter UI blocks', value: 'ui' }
+                    { title: msg('tmplBase'), value: 'base' },
+                    { title: msg('tmplUi'), value: 'ui' }
                 ],
                 initial: 0
             },
@@ -83,10 +84,10 @@ async function promptTemplateChoice() {
     });
     const ask = (q) => new Promise((resolve) => rl.question(q, resolve));
     try {
-        console.log('Choose a project template:');
-        console.log('  1) base - minimal starter router');
-        console.log('  2) ui   - starter UI blocks');
-        const answer = String(await ask('Template [1/2, default 1]: ')).trim().toLowerCase();
+        console.log(msg('promptHeader'));
+        console.log(msg('promptLine1'));
+        console.log(msg('promptLine2'));
+        const answer = String(await ask(msg('tmplPrompt'))).trim().toLowerCase();
         if (answer === '2' || answer === 'ui') return 'ui';
         return 'base';
     } finally {
@@ -95,10 +96,20 @@ async function promptTemplateChoice() {
 }
 
 // Main CLI program
+const earlyLang = parseEarlyLangFromArgv(process.argv);
 program
     .name('bemba')
-    .description('BembaJS - A Next.js-like framework for programming in Bemba language')
-    .version(pkgVersion);
+    .description(msg('programDesc'))
+    .version(pkgVersion)
+    .option('-l, --lang <lang>', msg('optLang'), earlyLang);
+
+program.hook('preAction', (thisCommand) => {
+    const root = typeof thisCommand.root === 'function' ? thisCommand.root() : program;
+    const opts = root.opts && root.opts();
+    if (opts && opts.lang != null) {
+        process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);
+    }
+});
 
 // Version command
 program
@@ -111,13 +122,13 @@ program
 // Create project command
 program
     .command('panga <name>')
-    .description('Create a new BembaJS project')
-    .option('-t, --template <template>', 'Project template: base | ui')
-    .option('--typescript', 'Use TypeScript')
+    .description(msg('pangaDesc'))
+    .option('-t, --template <template>', msg('optTemplate'))
+    .option('--typescript', msg('optTypescript'))
     .action(async (name, opts) => {
         const CoreCli = resolveCoreCliClass();
         if (!CoreCli) {
-            console.error('bembajs-core is required for project scaffolding. Install/reinstall bembajs-core and try again.');
+            console.error(msg('coreMissingPanga'));
             process.exit(1);
         }
         let template = opts.template ? String(opts.template).trim().toLowerCase() : '';
@@ -125,11 +136,11 @@ program
             template = await promptTemplateChoice();
         }
         if (template !== 'base' && template !== 'ui') {
-            console.error(`Unknown template "${template}". Use --template base or --template ui.`);
+            console.error(msg('unknownTemplate', template));
             process.exit(1);
         }
-        const core = new CoreCli();
-        core.createProject(name, {
+        const coreCli = new CoreCli();
+        coreCli.createProject(name, {
             template,
             typescript: !!opts.typescript
         });
@@ -138,10 +149,10 @@ program
 // Start dev server command
 program
     .command('tungulula')
-    .description('Start development server')
+    .description(msg('tungululaDesc'))
     .action(() => {
-        console.log('Starting BembaJS development server...');
-        console.log('Hot reload on; press Ctrl+C to stop.');
+        console.log(msg('startingDev'));
+        console.log(msg('hotReload'));
 
         try {
             const BembaDevServer = loadDevServerModule();
@@ -149,12 +160,12 @@ program
             server.start();
 
             process.on('SIGINT', () => {
-                console.log('\nStopping BembaJS development server...');
+                console.log(`\n${msg('stoppingDev')}`);
                 process.exit(0);
             });
         } catch (error) {
-            console.error('Failed to start development server:', error.message);
-            console.log('Make sure you are in a BembaJS project directory');
+            console.error(msg('devStartErr'), error.message);
+            console.log(msg('devCwdHint'));
             process.exit(1);
         }
     });
@@ -171,16 +182,16 @@ function resolveCoreExport() {
 // Build command — static HTML export (pangaIpepa) to dist/
 program
     .command('akha')
-    .description('Export static HTML site for production (default: ./dist)')
-    .option('-o, --output <dir>', 'Output directory', 'dist')
-    .option('--base-url <url>', 'Origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
-    .option('--locale <code>', 'html lang (BCP 47)', 'en')
-    .option('--site-title <title>', 'RSS channel title')
-    .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+    .description(msg('akhaDesc'))
+    .option('-o, --output <dir>', msg('optOutput'), 'dist')
+    .option('--base-url <url>', msg('optBaseUrl'))
+    .option('--locale <code>', msg('optLocale'), 'en')
+    .option('--site-title <title>', msg('optSiteTitle'))
+    .option('--no-bemba-site', msg('optNoBembaSite'))
     .action(async (opts) => {
         const mod = resolveCoreExport();
         if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
-            console.error('bembajs-core with static-html-export is required.');
+            console.error(msg('exportMissing'));
             process.exit(1);
         }
         try {
@@ -200,16 +211,16 @@ program
 
 program
     .command('fumya')
-    .description('Export static HTML site (same as akha; default output ./out)')
-    .option('-o, --output <dir>', 'Output directory', 'out')
-    .option('--base-url <url>', 'Origin for sitemap.xml / feed.xml (or BEMBA_SITE_URL)')
-    .option('--locale <code>', 'html lang (BCP 47)', 'en')
-    .option('--site-title <title>', 'RSS channel title')
-    .option('--no-bemba-site', 'Do not inject or copy bemba-site.js')
+    .description(msg('fumyaDesc'))
+    .option('-o, --output <dir>', msg('optOutput'), 'out')
+    .option('--base-url <url>', msg('optBaseUrl'))
+    .option('--locale <code>', msg('optLocale'), 'en')
+    .option('--site-title <title>', msg('optSiteTitle'))
+    .option('--no-bemba-site', msg('optNoBembaSite'))
     .action(async (opts) => {
         const mod = resolveCoreExport();
         if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
-            console.error('bembajs-core with static-html-export is required.');
+            console.error(msg('exportMissing'));
             process.exit(1);
         }
         try {
@@ -242,12 +253,12 @@ function resolveEmitReactScript() {
 
 program
     .command('emit-react')
-    .description('Emit JSX from amapeji, ifikopo, maapi (and mafungulo) .bemba for Vite/esbuild + React')
-    .option('-o, --out <dir>', 'output directory', 'dist/bemba-react')
+    .description(msg('emitReactDesc'))
+    .option('-o, --out <dir>', msg('optEmitOut'), 'dist/bemba-react')
     .action((opts) => {
         const scriptPath = resolveEmitReactScript();
         if (!scriptPath) {
-            console.error('emit-react-routes.js not found. Rebuild the bembajs package.');
+            console.error(msg('emitScriptMissing'));
             process.exit(1);
         }
         require(scriptPath).run({ outDir: opts.out });
@@ -256,44 +267,46 @@ program
 // Lint command
 program
     .command('lint')
-    .description('Lint BembaJS code')
+    .description(msg('lintDesc'))
     .action(() => {
-        console.log('Linting BembaJS code...');
-        console.log('Linting complete.');
+        console.log(msg('lintRunning'));
+        console.log(msg('lintDone'));
     });
 
 // Format command
 program
     .command('format')
-    .description('Format BembaJS code')
+    .description(msg('formatDesc'))
     .action(() => {
-        console.log('Formatting BembaJS code...');
-        console.log('Formatting complete.');
+        console.log(msg('formatRunning'));
+        console.log(msg('formatDone'));
     });
 
 // Help command
 program
     .command('help')
-    .description('Show help information')
+    .description(msg('helpDesc'))
     .action(() => {
-        console.log('BembaJS - Programming in Bemba Language');
+        console.log(msg('helpTitle'));
         console.log('');
         console.log('Commands:');
-        console.log('   bemba panga <name>    - Create project (prompts template)');
-        console.log('   bemba template sync   - Refresh docs/starter from bembajs-core (run inside a project)');
-        console.log('   bemba sync-template     - Same as template sync (single command)');
-        console.log('   bemba tungulula       - Start dev server');
-        console.log('   bemba akha            - Export static HTML (→ dist/)');
-        console.log('   bemba fumya           - Export static HTML (→ out/)');
-        console.log('   bemba lint            - Lint code');
-        console.log('   bemba format          - Format code');
-        console.log('   bemba emit-react      - Emit JSX for bundler + React/motion');
-        console.log('   bemba --version       - Show version');
-        console.log('   bemba help            - Show this help');
+        console.log(`   ${msg('helpCmdPanga')}`);
+        console.log(`   ${msg('helpCmdTemplate')}`);
+        console.log(`   ${msg('helpCmdSyncTpl')}`);
+        console.log(`   ${msg('helpCmdTungulula')}`);
+        console.log(`   ${msg('helpCmdAkha')}`);
+        console.log(`   ${msg('helpCmdFumya')}`);
+        console.log(`   ${msg('helpCmdLint')}`);
+        console.log(`   ${msg('helpCmdFormat')}`);
+        console.log(`   ${msg('helpCmdEmit')}`);
+        console.log(`   ${msg('helpCmdVersion')}`);
+        console.log(`   ${msg('helpCmdHelp')}`);
         console.log('');
-        console.log('Website: https://bembajs.dev');
-        console.log('Docs: https://docs.bembajs.dev');
-        console.log('Community: https://github.com/bembajs/bembajs');
+        console.log(msg('helpLangHint'));
+        console.log('');
+        console.log(msg('helpWebsite'));
+        console.log(msg('helpDocs'));
+        console.log(msg('helpGh'));
     });
 
 // Subcommands implemented only in bembajs-core — forward so `bunx bemba` matches `bembajs-core`.
@@ -302,9 +315,7 @@ const forwardToCore = forwardArgv[0] === 'template' || forwardArgv[0] === 'sync-
 if (forwardToCore) {
     const CoreCli = resolveCoreCliClass();
     if (!CoreCli) {
-        console.error(
-            'bembajs-core is required for `bemba template` / `bemba sync-template`. In a project: bun add -d bembajs-core'
-        );
+        console.error(msg('coreMissingTemplate'));
         process.exit(1);
     }
     const coreCli = new CoreCli();

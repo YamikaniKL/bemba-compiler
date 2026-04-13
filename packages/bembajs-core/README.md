@@ -17,6 +17,10 @@ The core CLI generates a **modern static starter**: shared **`amapeji/umusango.b
 
 **Single source for the style guide:** the canonical file is **[docs/CODE-STYLE-AND-UI.md](./docs/CODE-STYLE-AND-UI.md)** inside this package. New projects copy it at create time; existing projects can refresh with **`bemba template sync`** (docs only) or **`bemba template sync --starter`** to replace default shell/pages/README as well (overwrites your edits to those files).
 
+**Dev server:** generated apps use **`bemba tungulula`** as **`bun run dev`** / **`npm run dev`** so both stay aligned.
+
+**CLI language:** pass **`--lang bem`** or **`-l bem`** (also **`bemba`** accepted) for Bemba CLI strings, or set **`BEMBA_CLI_LANG=bem`**. Default is English.
+
 ## 🚀 Quick Start
 
 ```javascript

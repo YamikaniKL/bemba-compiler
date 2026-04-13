@@ -31,15 +31,21 @@ npm create bembajs@latest my-app
 
 ```bash
 cd my-app
-npm run dev
-# Server starts at http://localhost:3000
+bun run dev
+# Same as: bemba tungulula — server at http://localhost:3000
 ```
+
+Generated projects use **`bemba tungulula`** as the `dev` script, so **`bun run dev`** and **`bemba tungulula`** always match.
+
+### CLI language
+
+Use **`bemba --lang bem …`** (or **`bemba -l bem …`**) for Bemba CLI messages, or set **`BEMBA_CLI_LANG=bem`**. Default is English. Applies to **`bemba`** and **`bembajs-core`** CLIs.
 
 ## 📚 CLI Commands
 
 ```bash
 bemba panga <name>       # Create new project
-bemba tungulula          # Start development server
+bemba tungulula          # Start development server (primary; same as bun run dev)
 bemba akha               # Export static HTML → ./dist (pangaIpepa sites)
 bemba fumya              # Same export → ./out
 bemba emit-react         # Emit JSX for Vite/esbuild + React

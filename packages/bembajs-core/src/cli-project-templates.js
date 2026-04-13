@@ -309,7 +309,11 @@ bun install
 bun run dev
 \`\`\`
 
+\`bun run dev\` runs **\`bemba tungulula\`** — that is the primary dev server entry for BembaJS (same behavior either way).
+
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
+
+CLI language (optional): **\`bemba --lang bem …\`** or **\`BEMBA_CLI_LANG=bem\`** for Bemba CLI messages; default is English.
 
 ## Code style and UI patterns
 
