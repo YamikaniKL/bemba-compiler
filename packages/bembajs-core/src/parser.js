@@ -192,6 +192,15 @@ function resolveBembaImportPath(projectRoot, pageFilePath, source) {
     return candidate;
 }
 
+/** Local binding name from a parsed import node (default preferred). */
+function staticImportBindingName(imp, basenameNoExt) {
+    if (!imp || imp.type !== 'Import') return basenameNoExt;
+    const d = imp.specifiers && imp.specifiers.find((s) => s.isDefault);
+    if (d && d.name) return d.name;
+    if (imp.specifiers && imp.specifiers[0]?.name) return imp.specifiers[0].name;
+    return basenameNoExt;
+}
+
 class BembaParser {
     constructor() {
         this.lexer = new BembaLexer();
@@ -1692,6 +1701,131 @@ class BembaParser {
         return { html, css, headFragments };
     }
 
+    /**
+     * Static HTML from fyambaIcipanda when the module includes trusted `ibeensi` (same shape as partials).
+     * JSX-only `ukwisulula` without `ibeensi` does not produce HTML here.
+     */
+    extractFyambaIcipandaStaticSurface(source) {
+        if (!/\bfyambaIcipanda\s*\(/.test(source)) {
+            return null;
+        }
+        const html = (this.extractBacktickField(source, 'ibeensi') || '').trim();
+        if (!html) return null;
+        const css = this.extractStylesFromNewSyntax(source);
+        const headFragments = this.extractImitwePaHTMLFragmentsFromSource(source);
+        return { html, css, headFragments };
+    }
+
+    /**
+     * Append one resolved module's static HTML/CSS/head into acc (pangaIcapaba, or fyambaIcipanda + ibeensi, or CSS-only component).
+     */
+    appendStaticImportedModuleSurface(projectRoot, rootAbs, resolvedAbs, fileSrc, localName, acc) {
+        const base = path.basename(resolvedAbs, '.bemba');
+        const local = localName || base;
+        const hasPartial = /\bpangaIcapaba\s*\(/.test(fileSrc);
+        const hasComponent = /\bfyambaIcipanda\s*\(/.test(fileSrc);
+        const dir = path.dirname(resolvedAbs);
+
+        if (hasPartial) {
+            const frag = this.extractPangaIcapabaPartial(fileSrc);
+            if (frag.headFragments && frag.headFragments.length) {
+                acc.headParts.push(...frag.headFragments);
+            }
+            const cssResolved = frag.css
+                ? resolveCssImports(frag.css, dir, new Set(), rootAbs)
+                : '';
+            const isNav =
+                local === BEMBA_INGISA.NAV_BAR ||
+                base === BEMBA_INGISA.NAV_BAR ||
+                (frag.html && frag.html.includes('{{BEMBA_NAV_BRAND}}'));
+
+            if (isNav && String(frag.html).trim()) {
+                acc.navShell = { html: frag.html, css: cssResolved };
+            } else {
+                const tag = String(local).replace(/"/g, '');
+                if (frag.html) {
+                    acc.htmlParts.push(
+                        `<div class="bemba-ingisa" data-ingisa="${tag}">${frag.html}</div>`
+                    );
+                }
+                if (cssResolved) acc.cssParts.push(cssResolved);
+            }
+            return;
+        }
+
+        if (hasComponent) {
+            const fyFrag = this.extractFyambaIcipandaStaticSurface(fileSrc);
+            if (fyFrag) {
+                if (fyFrag.headFragments && fyFrag.headFragments.length) {
+                    acc.headParts.push(...fyFrag.headFragments);
+                }
+                const cssResolved = fyFrag.css
+                    ? resolveCssImports(fyFrag.css, dir, new Set(), rootAbs)
+                    : '';
+                const isNav =
+                    local === BEMBA_INGISA.NAV_BAR ||
+                    base === BEMBA_INGISA.NAV_BAR ||
+                    (fyFrag.html && fyFrag.html.includes('{{BEMBA_NAV_BRAND}}'));
+
+                if (isNav && String(fyFrag.html).trim()) {
+                    acc.navShell = { html: fyFrag.html, css: cssResolved };
+                } else {
+                    const tag = String(local).replace(/"/g, '');
+                    acc.htmlParts.push(
+                        `<div class="bemba-ingisa" data-ingisa="${tag}">${fyFrag.html}</div>`
+                    );
+                    if (cssResolved) acc.cssParts.push(cssResolved);
+                }
+                return;
+            }
+
+            const cssOnlyRaw = this.extractStylesFromNewSyntax(fileSrc);
+            const cssOnly = cssOnlyRaw ? resolveCssImports(cssOnlyRaw, dir, new Set(), rootAbs) : '';
+            if (cssOnly) {
+                acc.cssParts.push(cssOnly);
+            } else {
+                acc.skippedDynamic.push(local || base);
+            }
+        }
+    }
+
+    /**
+     * Depth-first merge of a .bemba file and its leading imports (transitive). Cycle-safe.
+     */
+    mergeStaticImportSubtree(projectRoot, rootAbs, resolvedAbs, importLocalName, mergedSet, visitingSet, acc) {
+        const abs = path.normalize(path.resolve(resolvedAbs));
+        if (!abs.endsWith('.bemba') || !fs.existsSync(abs)) return;
+        if (mergedSet.has(abs)) return;
+        if (visitingSet.has(abs)) return;
+
+        let fileSrc;
+        try {
+            fileSrc = fs.readFileSync(abs, 'utf8');
+        } catch (_) {
+            return;
+        }
+
+        visitingSet.add(abs);
+        let importNodes = [];
+        try {
+            importNodes = this.parseLeadingImportStatements(fileSrc);
+        } catch (_) {
+            importNodes = [];
+        }
+        for (const imp of importNodes) {
+            if (!imp || imp.type !== 'Import') continue;
+            const child = resolveBembaImportPath(projectRoot, abs, imp.source);
+            if (!child) continue;
+            const bn = path.basename(child, '.bemba');
+            const childLocal = staticImportBindingName(imp, bn);
+            this.mergeStaticImportSubtree(projectRoot, rootAbs, child, childLocal, mergedSet, visitingSet, acc);
+        }
+        visitingSet.delete(abs);
+
+        this.appendStaticImportedModuleSurface(projectRoot, rootAbs, abs, fileSrc, importLocalName, acc);
+        mergedSet.add(abs);
+    }
+
     /** Resolve `ifikopo/<Name>.bemba` or `ifikopo/cipanda/<Name>.bemba` when present. */
     resolveIngisaPartialFilePath(projectRoot, rawName) {
         const safe = String(rawName).replace(/[^a-zA-Z0-9_-]/g, '');
@@ -1757,9 +1891,10 @@ class BembaParser {
      * Parse only leading `import … from '…'` lines (same grammar as the AST path).
      * Stops at the first non-import token so `pangaIpepa` / comments / blank lines after imports work.
      *
-     * Static HTML (`compile` + `projectRoot`): default imports of `.bemba` files that use `pangaIcapaba`
-     * are merged into the page (and `imitwePaHTML` / CSS `@import` resolve). `fyambaIcipanda`-only modules
-     * are skipped for static output — use the React/emit pipeline for components.
+     * Static HTML (`compile` + `projectRoot`): default imports of `.bemba` files are merged transitively
+     * (depth-first, like a module graph). `pangaIcapaba` partials merge; `fyambaIcipanda` merges when the
+     * module defines `ibeensi` (trusted HTML) and/or `imikalile` (CSS-only is merged). Pure JSX
+     * `ukwisulula` without `ibeensi` is listed in `skippedDynamic` — use the React/emit pipeline for that.
      */
     parseLeadingImportStatements(code) {
         this.tokens = this.lexer.tokenize(code);
@@ -1801,8 +1936,8 @@ class BembaParser {
     }
 
     /**
-     * Static HTML: resolve default imports to .bemba files; merge pangaIcapaba into layout.
-     * fyambaIcipanda-only modules are skipped here (use maapi / emit-react for dynamic UI).
+     * Static HTML: resolve leading `.bemba` imports from the page and merge transitively (each file’s
+     * imports first, then that file’s static surface). See `parseLeadingImportStatements` for merge rules.
      */
     loadStaticImportsFromPage(projectRoot, pageFilePath, code) {
         const emptyOut = () => ({
@@ -1824,71 +1959,31 @@ class BembaParser {
         if (!importNodes.length) return emptyOut();
 
         const rootAbs = path.resolve(projectRoot);
-        const htmlParts = [];
-        const cssParts = [];
-        const headParts = [];
-        const skippedDynamic = [];
-        let navShell = null;
+        const acc = {
+            navShell: null,
+            htmlParts: [],
+            cssParts: [],
+            headParts: [],
+            skippedDynamic: []
+        };
+        const mergedSet = new Set();
+        const visitingSet = new Set();
 
         for (const imp of importNodes) {
             if (!imp || imp.type !== 'Import') continue;
             const resolved = resolveBembaImportPath(projectRoot, absPage, imp.source);
             if (!resolved) continue;
-
-            let fileSrc;
-            try {
-                fileSrc = fs.readFileSync(resolved, 'utf8');
-            } catch (_) {
-                continue;
-            }
-
             const base = path.basename(resolved, '.bemba');
-            const local =
-                (imp.specifiers && imp.specifiers.find((s) => s.isDefault))?.name ||
-                (imp.specifiers && imp.specifiers[0]?.name) ||
-                base;
-
-            const hasPartial = /\bpangaIcapaba\s*\(/.test(fileSrc);
-            const hasComponent = /\bfyambaIcipanda\s*\(/.test(fileSrc);
-
-            if (hasComponent && !hasPartial) {
-                skippedDynamic.push(local || base);
-                continue;
-            }
-
-            if (hasPartial) {
-                const frag = this.extractPangaIcapabaPartial(fileSrc);
-                if (frag.headFragments && frag.headFragments.length) {
-                    headParts.push(...frag.headFragments);
-                }
-                const cssResolved = frag.css
-                    ? resolveCssImports(frag.css, path.dirname(resolved), new Set(), rootAbs)
-                    : '';
-                const isNav =
-                    local === BEMBA_INGISA.NAV_BAR ||
-                    base === BEMBA_INGISA.NAV_BAR ||
-                    (frag.html && frag.html.includes('{{BEMBA_NAV_BRAND}}'));
-
-                if (isNav && String(frag.html).trim()) {
-                    navShell = { html: frag.html, css: cssResolved };
-                } else {
-                    const tag = String(local || base).replace(/"/g, '');
-                    if (frag.html) {
-                        htmlParts.push(
-                            `<div class="bemba-ingisa" data-ingisa="${tag}">${frag.html}</div>`
-                        );
-                    }
-                    if (cssResolved) cssParts.push(cssResolved);
-                }
-            }
+            const local = staticImportBindingName(imp, base);
+            this.mergeStaticImportSubtree(projectRoot, rootAbs, resolved, local, mergedSet, visitingSet, acc);
         }
 
         return {
-            navShell,
-            bodyHtml: htmlParts.join('\n'),
-            bodyCss: cssParts.join('\n\n'),
-            headHtml: headParts.join('\n'),
-            skippedDynamic
+            navShell: acc.navShell,
+            bodyHtml: acc.htmlParts.join('\n'),
+            bodyCss: acc.cssParts.join('\n\n'),
+            headHtml: acc.headParts.join('\n'),
+            skippedDynamic: acc.skippedDynamic
         };
     }
     
