@@ -6,7 +6,7 @@
 
 **A Next.js-like framework for programming in the Bemba language**
 
-**Version 1.2.0 "React Integration" - Full React Ecosystem Support**
+**Current line: v1.3.x** — syntax expansion, React integration, static sites, and CLI tooling. **All framework documentation for this repo lives in this file and in [RELEASES.md](RELEASES.md)** (plus the VS Code extension’s `README.md` / `CHANGELOG.md` for the marketplace). Scaffolded apps still receive **`docs/CODE-STYLE-AND-UI.md`** from the CLI.
 
 [![npm version](https://badge.fury.io/js/bembajs.svg)](https://www.npmjs.com/package/bembajs)
 [![npm downloads](https://img.shields.io/npm/dm/bembajs.svg)](https://www.npmjs.com/package/bembajs)
@@ -19,53 +19,48 @@
 
 ---
 
-## What's New in v1.2.0
+## Highlights (v1.3.x)
 
-### React Ecosystem Integration
-- **Full React Compatibility** - Use any React component library
-- **NPM Package Support** - Import any npm package with Bemba syntax
-- **Component Wrappers** - Shadcn/ui, Material-UI, and more
-- **Pisha Build Tool** - Lightning-fast Vite-based development
-- **Hot Module Replacement** - Instant updates for .bemba files
-- **Mixed Components** - Use React and BembaJS components together
-
-### Pisha Build Tool
-- **Lightning Fast** - Built on Vite for instant server start
-- **Hot Reload** - Changes reflect immediately without losing state
-- **Production Builds** - Optimized bundles with code splitting
-- **CSS Framework Support** - Tailwind CSS, Bootstrap, and more
-- **TypeScript Support** - Full TypeScript support out of the box
+- **Control flow in Bemba** — `ngati` / `kapena`, `kwa` / `pamene`, `linga` / `kwata` / `paumalilo`, `lombako` / `leka` (see [RELEASES.md](RELEASES.md#v130--syntax-expansion-and-chakra-ui)).
+- **React and npm** — `ingisa` / `fumya`; wrappers for Chakra UI, Shadcn-style, MUI-style usage.
+- **CLI** — `bemba tungulula` (dev server), `bemba akha` / `bemba fumya` (static HTML export), `bemba emit-react` (emit JSX for Vite + React), `bemba template sync`, optional **`--lang bem`** / **`BEMBA_CLI_LANG=bem`** for Bemba CLI text.
+- **Static sites** — `amapeji/umusango.bemba` shared shell, `ingisa` partials / `pangaIcapaba`, sitemap & RSS when `baseUrl` / `BEMBA_SITE_URL` is set.
+- **Single documentation home** — this file plus [RELEASES.md](RELEASES.md) (version history). Generated apps still get a short **`docs/CODE-STYLE-AND-UI.md`** copy from the CLI.
 
 ---
 
-## Quick Start
+## Quick start
 
-### Create Your First BembaJS App
+### Create a project
 
 ```bash
-# Create a new project
-npm create bembajs@latest my-app
-
-# Navigate to your project
+bun create bembajs@latest my-app
 cd my-app
-
-# Install dependencies
-npm install
-
-# Start development server with Pisha
-pisha dev
+bun install
+bun run dev
 ```
 
-**That's it!** Open [http://localhost:3000](http://localhost:3000) to see your app running.
+`bun run dev` runs **`bemba tungulula`** (same as calling it directly). Open [http://localhost:3000](http://localhost:3000).
 
-### Using React Libraries
+You can also scaffold with **`bemba panga my-app`** (interactive template: `base`, `ui`, …).
+
+### Static export and React bundling
 
 ```bash
-# Install UI libraries
-npm install @shadcn/ui @mui/material
+bemba akha          # static HTML → ./dist (or use bemba fumya → ./out)
+bemba emit-react    # JSX under dist/bemba-react for Vite / esbuild + React
+```
 
-# Use in your .bemba files
-ingisa { Button } ukufuma '@shadcn/ui'
+Export options include `--base-url`, `--locale`, `--site-title`, `--no-bemba-site` (see [RELEASES.md](RELEASES.md)).
+
+### Using React libraries
+
+```bash
+bun add @chakra-ui/react @mui/material
+```
+
+```bemba
+ingisa { Button, Box } ukufuma '@chakra-ui/react'
 ingisa { TextField } ukufuma '@mui/material/TextField'
 ```
 
@@ -73,21 +68,125 @@ ingisa { TextField } ukufuma '@mui/material/TextField'
 
 ## Features
 
-- **File-based Routing** - Automatic routing based on file structure
-- **Component System** - Reusable components with props
-- **API Routes** - Server-side API endpoints
-- **State Management** - Component state with effects
-- **Event Handling** - Comprehensive event system
-- **Props Validation** - Type-safe component props
-- **Built-in Functions** - Utility functions in Bemba language
-- **Error Messages** - Complete error system in Bemba
-- **VS Code Support** - Syntax highlighting and snippets
-- **Hot Reload** - Instant updates during development
-- **Production Ready** - Optimized builds and deployment
-- **React Integration** - Use any React component library
-- **NPM Packages** - Import any npm package
-- **Pisha Build Tool** - Lightning-fast Vite-based development
-- **CSS Frameworks** - Tailwind CSS, Bootstrap, and more
+- **File-based routing** — pages under `amapeji/`, components under `ifikopo/`
+- **`pangaApi` routes** — Node handlers from `mafungulo/*.bemba` (mounted at `/api` in the core dev server)
+- **Static HTML sites** — `pangaIpepa` + optional `umusangoSite: ee` and `amapeji/umusango.bemba` shell
+- **Partials** — `ingisa` + `pangaIcapaba`, optional `NavBar` header merge, top-of-file `import` of `.bemba`
+- **State and effects** — `ukusunga`, `ukusungaKabili`, `ukuCinja`
+- **Control flow** — conditionals, loops, try/catch/finally, async/await (Bemba keywords)
+- **Events and forms** — `pakuKlikisha`, `pakuLemba`, `pakuTumina`, and related handlers
+- **Props** — `ificingilila` with types, defaults, and validation
+- **React and npm** — `ingisa` / `fumya`; UI library wrappers (e.g. Chakra, MUI, Shadcn-style)
+- **`bemba emit-react`** — emit JSX for bundlers; **`exportStaticHtmlSite`** for plain HTML
+- **Tooling** — VS Code extension, hot reload, optional experimental **Go** engine bridge in core
+- **Localized errors** — error categories and messages available in Bemba
+
+---
+
+## CLI reference
+
+Commands (**`bemba`** or **`bunx bembajs`**):
+
+```bash
+bemba panga <name>       # New project (interactive template base|ui, or --template / -t)
+bemba tungulula          # Dev server (matches bun run dev in scaffolded apps)
+bemba akha               # Static HTML export → ./dist
+bemba fumya              # Static HTML export → ./out
+bemba emit-react         # Emit JSX for Vite/esbuild + React (default out: dist/bemba-react)
+bemba lint               # Lint .bemba sources
+bemba format             # Format .bemba sources
+bemba template sync      # Refresh docs/starter from installed core (--starter overwrites shell/pages/README)
+bemba --version
+bemba help
+```
+
+**Static export flags:** `--base-url` or `BEMBA_SITE_URL`, `--locale` (`<html lang>`), `--site-title` (RSS), `--no-bemba-site` (skip `bemba-site.js`).
+
+**CLI language:** `bemba --lang bem` / `-l bem` or `BEMBA_CLI_LANG=bem` (default English; applies to **bembajs** and **bembajs-core** CLIs).
+
+## Programmatic usage (`bembajs` package)
+
+```javascript
+import { compile, createDevServer, build } from 'bembajs';
+
+const result = compile("pangaIpepa('Home', { umutwe: 'Hi', ilyashi: '…' });");
+if (result.success) console.log(result.code);
+else console.error(result.error);
+
+const server = await createDevServer({ port: 3000, watch: true });
+await build({ output: 'dist' });
+```
+
+## Code style and UI (starter projects)
+
+Scaffolded apps include **[Standard JS](https://standardjs.com/)** via **`bun run lint`** and **`bun run lint:fix`** for any **`.js` / `.jsx`** you add. Optional reading: [Google style guides](https://google.github.io/styleguide/) (JS, HTML/CSS, TS).
+
+**shadcn-like static UI:** tokens and **`.bem-card` / `.bem-btn`** patterns live in **`amapeji/umusango.bemba`**; the **`ui`** template adds **`ifikopo/cipanda/StarterCard.bemba`** to copy and adapt like [shadcn/ui](https://ui.shadcn.com/) ([overview](https://shadcnstudio.com/blog/what-is-shadcn-ui-comprehensive-guide)).
+
+The CLI writes **`docs/CODE-STYLE-AND-UI.md`** into new/synced projects (short local notes); the canonical narrative is maintained in **`cli-project-templates.js`** (`CODE_STYLE_MARKDOWN`) and summarized here.
+
+## Compiler and core API (`bembajs-core`)
+
+<details>
+<summary><strong>compile, static HTML, export, partials, dev server</strong></summary>
+
+### `compile(code, options)`
+
+Pipeline: **tokenize → parse → transform → generate**. Returns **`{ success, code }`** (or error information). Notable options: **`legacyFallback: false`**, **`engine: 'go'`** (optional **`goBinary`**; falls back to JS), and for **`pangaIpepa`** / static HTML: **`projectRoot`**, **`currentPath`**, **`pageFilePath`**, **`layoutCode`**, **`htmlLang`**, **`headExtra`**, **`bembaSiteScript`**.
+
+### Static layout (`umusangoSite: ee`)
+
+| Location | Fields |
+|----------|--------|
+| Each page | `umusangoSite: ee` plus page content |
+| `amapeji/umusango.bemba` | `ishinaLyabusite`, `ilyashiPaMusule`, `inshilaNav`, optional `inshilaCipali`, `ifiputulwaPaMusule`, `ilyashiLupwaPaMusule`, `amalinkaLupwaPaMusule` |
+
+Place **`inshilaNav` before `ifiputulwaPaMusule`**. Pass **`projectRoot`** and **`currentPath`** when compiling so the shell and active nav resolve correctly.
+
+### Design tokens
+
+**`:root`** variables include **`--bg`**, **`--surface`**, **`--text`**, **`--muted`**, **`--border`**, **`--accent`**, **`--accent-hover`**. Primary/outline actions use **`.ibatani`** and **`.ibatani.secondary`**.
+
+### `exportStaticHtmlSite`
+
+Walks **`amapeji/`**, emits HTML, copies **`amashinda/`** and **`maungu/`** when present, optionally writes **sitemap.xml** / **feed.xml** and **`bemba-site.js`**.
+
+```javascript
+const { exportStaticHtmlSite } = require('bembajs-core');
+await exportStaticHtmlSite({
+  projectRoot: process.cwd(),
+  outDir: 'out',
+  baseUrl: 'https://example.com',
+  locale: 'bem',
+  siteTitle: 'My site'
+});
+```
+
+### Meta / RSS helpers
+
+**`buildHeadMetaTags`**, **`generateSitemapXml`**, **`generateRssFeedXml`** — build a head fragment and pass it as **`compile(..., { headExtra })`**.
+
+### `listStaticPageDependencyPaths(code, { projectRoot, pageFilePath, transitive? })`
+
+Sorted absolute paths to **`.bemba`** files the static HTML for a page depends on (page, **`umusango.bemba`**, **`ingisa`** targets, top-of-file **`import`**). Used with file mtimes for dev-server HTML caching. **`BembaParser.resolveIngisaPartialFilePath(projectRoot, name)`** resolves a single partial the same way **`ingisa`** does.
+
+### Partials (`ingisa` + `pangaIcapaba`)
+
+**`ingisa: [ 'Card', 'Promo' ]`** loads **`ifikopo/<Name>.bemba`** or **`ifikopo/cipanda/<Name>.bemba`**. **`NavBar`** merges into the header (**`{{BEMBA_NAV_BRAND}}`**, **`{{BEMBA_NAV_LINKS}}`**). Top-of-file **`import './x.bemba'`** requires **`pageFilePath`**. **`fyambaIcipanda`-only** modules are skipped in static HTML unless consumed appropriately; use **`pangaApi`** or **`emit-react`** for dynamic stacks.
+
+### `bemba emit-react`
+
+Emits **`.jsx`** from **`amapeji/`**, **`ifikopo/`** (recursive), **`maapi/`**, **`mafungulo/`**; skips **`pangaIcapaba`-only** partials; rewrites **`import … .bemba`** to **`.jsx`**.
+
+### Dev server (`bemba tungulula`)
+
+**`pangaIpepa`** pages are compiled per request with **`projectRoot`** / **`currentPath`**. **`pangaApi`** files under **`mafungulo/`** mount at **`/api`** (e.g. **`hello.bemba` → `/api/hello`**), handlers run under **`vm`** with real **`require()`**. **`amapeji/umusango.bemba`** is shell-only (not a page route).
+
+### Pipeline helpers
+
+**`parse(code)`**, **`transform(ast)`**, **`generate(ast)`**. Constants **`BEMBA_KEYWORDS`**, **`BEMBA_FOLDERS`**.
+
+</details>
 
 ---
 
@@ -597,14 +696,11 @@ ukuGawanya(a, b)           // division
 
 ## VS Code Support
 
-### Automatic Installation
+### Automatic installation
 
 ```bash
-# Install BembaJS globally
-npm install -g bembajs@latest
-
-# Install VS Code language support
-bemba install-ide
+bun add -g bembajs@latest
+bemba install-ide   # VS Code language support, if available in your CLI version
 ```
 
 ### Manual Installation
@@ -623,27 +719,24 @@ bemba install-ide
 
 ---
 
-## Project Structure
+## Project structure
+
+Default Bemba folder names (override in `bemba.config.js` → `folders` if needed):
 
 ```
 my-app/
-├── amapeji/           # Pages (file-based routing)
-│   ├── index.bemba
-│   └── about.bemba
-├── ifikopo/           # Components
-│   ├── Header.bemba
-│   └── Footer.bemba
-├── mafungulo/         # API routes
-│   ├── users.bemba
-│   └── posts.bemba
-├── amashinda/         # Static assets
-│   ├── images/
-│   └── favicon.ico
-├── imikalile/         # Styles
-│   └── globals.css
-├── bemba.config.js    # Configuration
+├── amapeji/           # Pages (file-based routing); optional umusango.bemba (site shell)
+├── ifikopo/           # Components (optional ifikopo/cipanda/ for partials)
+├── mafungulo/         # API routes (pangaApi) — core dev server reads this folder
+├── amashinda/         # Static assets (served under /amashinda in dev)
+├── maungu/            # Extra public/static files (used by export tooling when present)
+├── imikalile/         # Global styles
+├── docs/              # CODE-STYLE-AND-UI.md (written by bemba panga / template sync)
+├── bemba.config.js
 └── package.json
 ```
+
+Scaffolded apps may use different folder keys in `bemba.config.js` (e.g. `api: 'maapi'`). The **bembajs-core** dev server follows **`BEMBA_FOLDERS`** in code (API default **`mafungulo`**); align your on-disk folder with that or adjust config once core reads it everywhere.
 
 ---
 
@@ -701,34 +794,24 @@ BembaJS provides error messages in the Bemba language:
 
 ## Examples
 
-Check out the `examples/` directory for:
-
-- `state-management.bemba` - Counter component with state
-- `form-handling.bemba` - Contact form with validation
-- `props-validation.bemba` - UserCard with props and validation
-- `api-route.bemba` - API endpoint example
-- `basic-component.bemba` - Simple component example
+In this repo, see the [`examples/`](https://github.com/bembajs/bembajs/tree/main/examples) folder (e.g. `syntax-expansion.bemba`, `shadcn-integration.bemba`, `state-management.bemba`, `full-app/`).
 
 ---
 
 ## Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+Issues and pull requests are welcome on **[github.com/bembajs/bembajs](https://github.com/bembajs/bembajs)** (this monorepo).
 
-### Development Setup
+### Monorepo setup
+
+The repo expects **pnpm** for workspaces (`package.json` `engines`).
 
 ```bash
-# Clone the repository
-git clone https://github.com/YamikaniKL/bemba-compiler.git
-
-# Install dependencies
-npm install
-
-# Run tests
-npm test
-
-# Build packages
-npm run build
+git clone https://github.com/bembajs/bembajs.git
+cd bembajs
+pnpm install
+pnpm run build
+pnpm test
 ```
 
 ---
@@ -741,9 +824,9 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- **Documentation**: [GitHub Wiki](https://github.com/YamikaniKL/bemba-compiler/wiki)
-- **Issues**: [GitHub Issues](https://github.com/YamikaniKL/bemba-compiler/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YamikaniKL/bemba-compiler/discussions)
+- **Releases and changelog narrative**: [RELEASES.md](RELEASES.md)
+- **Documentation**: [docs.bembajs.dev](https://docs.bembajs.dev) and this repository’s **README.md** / **RELEASES.md**
+- **Issues**: [github.com/bembajs/bembajs/issues](https://github.com/bembajs/bembajs/issues)
 
 ---
 
@@ -751,6 +834,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 **Made with ❤️ for the Bemba-speaking developer community**
 
-[Website](https://bembajs.dev) • [Documentation](https://github.com/YamikaniKL/bemba-compiler/wiki) • [Examples](https://github.com/YamikaniKL/bemba-compiler/tree/main/examples)
+[Website](https://bembajs.dev) • [Documentation](https://docs.bembajs.dev) • [Releases](RELEASES.md)
 
 </div>

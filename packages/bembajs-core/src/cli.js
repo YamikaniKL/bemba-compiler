@@ -39,7 +39,7 @@ class BembaCLI {
                 process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);
             }
         });
-
+        
         // Create new project
         this.program
             .command('panga <name>')
@@ -47,7 +47,7 @@ class BembaCLI {
             .option('-t, --template <template>', msg('optTemplate'), 'base')
             .option('--typescript', msg('optTypescript'))
             .action((name, options) => this.createProject(name, options));
-
+        
         // Alternative create command
         this.program
             .command('new <name>')
@@ -55,7 +55,7 @@ class BembaCLI {
             .option('-t, --template <template>', msg('optTemplate'), 'base')
             .option('--typescript', msg('optTypescript'))
             .action((name, options) => this.createProject(name, options));
-
+        
         // Initialize project in current directory
         this.program
             .command('init')
@@ -63,7 +63,7 @@ class BembaCLI {
             .option('-t, --template <template>', msg('optTemplate'), 'base')
             .option('--typescript', msg('optTypescript'))
             .action((options) => this.initProject(options));
-
+        
         const templateCmd = this.program.command('template').description(msg('templateDesc'));
         templateCmd
             .command('sync')
@@ -87,7 +87,7 @@ class BembaCLI {
             .option('-p, --port <port>', msg('optPort'), '3000')
             .option('--host <host>', msg('optHost'), 'localhost')
             .action((options) => this.startDevServer(options));
-
+        
         // Build for production
         this.program
             .command('akha')
@@ -107,7 +107,7 @@ class BembaCLI {
                     process.exit(1);
                 }
             });
-
+        
         // Export static site
         this.program
             .command('fumya')
@@ -125,35 +125,35 @@ class BembaCLI {
                     process.exit(1);
                 }
             });
-
+        
         // Compile single file
         this.program
             .command('panga-icibukisho <file>')
             .description(msg('pangaIcibukishoDesc'))
             .option('-o, --output <file>', msg('optOutputFile'))
             .action((file, options) => this.compileFile(file, options));
-
+        
         // Generate component
         this.program
             .command('panga-icipanda <name>')
             .description(msg('pangaIcipandaDesc'))
             .option('-t, --type <type>', msg('optComponentType'), 'functional')
             .action((name, options) => this.generateComponent(name, options));
-
+        
         // Generate page
         this.program
             .command('panga-ipepa <name>')
             .description(msg('pangaIpepaDesc'))
             .option('-d, --dynamic', msg('optDynamic'))
             .action((name, options) => this.generatePage(name, options));
-
+        
         // Lint code
         this.program
             .command('lemba')
             .description(msg('lembaDesc'))
             .option('--fix', msg('optFix'))
             .action((options) => this.lintCode(options));
-
+        
         // Test
         this.program
             .command('esha')
@@ -165,9 +165,9 @@ class BembaCLI {
     // Create new project
     createProject(name, options) {
         console.log(msg('creatingProject', name));
-
+        
         const projectPath = path.resolve(name);
-
+        
         if (fs.existsSync(projectPath)) {
             console.error(msg('dirExists', name));
             process.exit(1);
@@ -193,13 +193,13 @@ class BembaCLI {
         console.log(msg('cdLine', name));
         console.log(msg('startDevLine'));
     }
-
+    
     initProject(options) {
         console.log(msg('initInCwd'));
-
+        
         const projectPath = process.cwd();
         const projectName = path.basename(projectPath);
-
+        
         // Check if directory is empty
         const files = fs.readdirSync(projectPath);
         if (files.length > 0) {
@@ -284,7 +284,7 @@ class BembaCLI {
         }
     }
 
-
+    
     createPackageJson(projectPath, name, options) {
         const packageJson = {
             name: name,
@@ -357,11 +357,11 @@ class BembaCLI {
     async buildProject(options) {
         if (options.legacyNext) {
             console.log(msg('buildingLegacy'));
-            const BuildSystem = require('./build');
-            const builder = new BuildSystem({
-                outputDir: options.output,
-                analyze: options.analyze
-            });
+        const BuildSystem = require('./build');
+        const builder = new BuildSystem({
+            outputDir: options.output,
+            analyze: options.analyze
+        });
             return builder.build();
         }
 
@@ -442,7 +442,7 @@ class BembaCLI {
         
         console.log(msg('componentCreated', outputPath));
     }
-
+    
     // Generate page
     generatePage(name, options) {
         console.log(msg('genPage', name));
@@ -464,19 +464,19 @@ class BembaCLI {
         
         console.log(msg('pageCreated', outputPath));
     }
-
+    
     // Lint code
     lintCode(options) {
         console.log(msg('linting'));
-
+        
         // TODO: Implement linting
         console.log(msg('lintOk'));
     }
-
+    
     // Run tests
     runTests(options) {
         console.log(msg('runningTests'));
-
+        
         // TODO: Implement testing
         console.log(msg('testsOk'));
     }

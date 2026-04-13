@@ -9,7 +9,7 @@ const MSGS = {
         initDesc: 'Initialize BembaJS in the current directory',
         templateDesc: 'Sync starter content from the installed bembajs-core package',
         templateSyncDesc:
-            'Update docs/CODE-STYLE-AND-UI.md from bembajs-core. Use --starter to overwrite default .bemba pages, shell, README, etc.',
+            'Update docs/CODE-STYLE-AND-UI.md (built-in template). Use --starter to overwrite default .bemba pages, shell, README, etc.',
         syncTemplateDesc: 'Same as `template sync` — refresh docs/starter from this bembajs-core package',
         tungululaDesc: 'Start the development server (primary dev command)',
         akhaDesc: 'Export static HTML (pangaIpepa) for production, or legacy Next-style build',
@@ -49,7 +49,7 @@ const MSGS = {
         dirNotEmptyWarn: 'Warning: Directory is not empty. Some files may be overwritten.',
         initOk: 'Project initialized successfully.',
         locationLine: (p) => `Location: ${p}`,
-        syncDocsOk: 'Updated docs/CODE-STYLE-AND-UI.md from bembajs-core package.',
+        syncDocsOk: 'Updated docs/CODE-STYLE-AND-UI.md from built-in template.',
         syncDocsTip:
             'Tip: run with --starter to replace default umusango/index/about/partials/README (overwrites your edits).',
         syncFull: (template) =>
@@ -77,7 +77,7 @@ const MSGS = {
         initDesc: 'Panga BembaJS mu bufolder pali iino',
         templateDesc: 'Sansa ifishi shapusulo ukufuma mu bembajs-core',
         templateSyncDesc:
-            'Sansa docs/CODE-STYLE-AND-UI.md ukufuma ku bembajs-core. Ukufwile --starter pakulufwisha amapeji/umusango ne fye',
+            'Sansa docs/CODE-STYLE-AND-UI.md ukufuma ku template. Ukufwile --starter pakulufwisha amapeji/umusango ne fye',
         syncTemplateDesc: 'Cimo ne `template sync` — sansa docs ne starter',
         tungululaDesc: 'Gulula sava yakupanga (development server) — uyu mushinga wakupanga',
         akhaDesc: 'Fumya HTML ya pangaIpepa (production) nangu build ya kale',
@@ -117,7 +117,7 @@ const MSGS = {
         dirNotEmptyWarn: 'Ukuchema: bufolder tashile file. Ifishi shingi shingafwike.',
         initOk: 'Project yapangwa bwino.',
         locationLine: (p) => `Icifulo: ${p}`,
-        syncDocsOk: 'docs/CODE-STYLE-AND-UI.md yasanswa ukufuma ku bembajs-core.',
+        syncDocsOk: 'docs/CODE-STYLE-AND-UI.md yasanswa ukufuma ku template.',
         syncDocsTip: 'Ukuchema: ukufwile --starter pakulufwisha umusango/amapeji (kwafwisha ifyo walilemba).',
         syncFull: (template) =>
             `Ifishi shonse shasanswa (${template}): umusango, amapeji, docs, README, Button, global.css, .gitignore, .editorconfig.`,

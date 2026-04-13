@@ -148,6 +148,7 @@ async function createApp(projectDirectory, options) {
     try {
         const templatePath = path.join(__dirname, 'templates', template);
         copyDirectory(templatePath, projectPath);
+        writeProjectReadmeStub(projectPath, projectName);
         spinner.succeed('Template files copied');
     } catch (error) {
         spinner.fail('Failed to copy template files');
@@ -242,6 +243,20 @@ async function createApp(projectDirectory, options) {
     console.log();
     console.log('Happy coding with BembaJS! 🇿🇲');
     console.log();
+}
+
+/** Minimal README — full docs live in the monorepo (no template .md in repo). */
+function writeProjectReadmeStub(projectPath, projectName) {
+    const body = `# ${projectName}
+
+[BembaJS documentation](https://github.com/bembajs/bembajs/blob/main/README.md) · [Releases](https://github.com/bembajs/bembajs/blob/main/RELEASES.md)
+
+\`\`\`bash
+bun install
+bun run dev
+\`\`\`
+`;
+    fs.writeFileSync(path.join(projectPath, 'README.md'), body, 'utf8');
 }
 
 /**

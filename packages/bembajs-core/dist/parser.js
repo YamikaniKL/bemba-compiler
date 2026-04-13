@@ -80,6 +80,28 @@ function parseNavLinkObjectsFromArrayInner(inner) {
 }
 
 /**
+ * `inshilaCipali` entries may include `ikoniPaNav: 'shakisha' | 'akasheshi'` (or `search` | `bag`)
+ * for Apple-style icon-only utilities with `aria-label` from `ilembo`.
+ */
+function parseUtilityNavLinkObjectsFromArrayInner(inner) {
+    if (!inner || !String(inner).trim()) return [];
+    const objs = extractTopLevelBraceObjectsFromArrayInner(inner);
+    const out = [];
+    for (const block of objs) {
+        const lab = block.match(/\bilembo:\s*["']([^"']*)["']/);
+        const href = block.match(/\binshila:\s*["']([^"']*)["']/);
+        if (!lab || !href) continue;
+        const iconM = block.match(/\bikoniPaNav:\s*["']([a-zA-Z0-9_-]+)["']/);
+        let navIcon = iconM ? String(iconM[1]).toLowerCase().replace(/[^a-z0-9_-]/g, '') : '';
+        if (navIcon === 'search') navIcon = 'shakisha';
+        if (navIcon === 'bag') navIcon = 'akasheshi';
+        out.push({ label: lab[1], href: href[1], navIcon });
+    }
+    if (out.length > 0) return out;
+    return parseNavLinkObjectsFromArrayInner(inner).map((l) => ({ ...l, navIcon: '' }));
+}
+
+/**
  * Split the inner text of a `[ ... ]` array into top-level `{ ... }` object literals.
  */
 function extractTopLevelBraceObjectsFromArrayInner(inner) {
@@ -1734,6 +1756,10 @@ class BembaParser {
     /**
      * Parse only leading `import … from '…'` lines (same grammar as the AST path).
      * Stops at the first non-import token so `pangaIpepa` / comments / blank lines after imports work.
+     *
+     * Static HTML (`compile` + `projectRoot`): default imports of `.bemba` files that use `pangaIcapaba`
+     * are merged into the page (and `imitwePaHTML` / CSS `@import` resolve). `fyambaIcipanda`-only modules
+     * are skipped for static output — use the React/emit pipeline for components.
      */
     parseLeadingImportStatements(code) {
         this.tokens = this.lexer.tokenize(code);
@@ -2241,13 +2267,14 @@ class BembaParser {
     }
 
     /**
-     * Optional right-side nav shortcuts (`inshilaCipali`) — same shape as `inshilaNav`.
+     * Optional right-side nav shortcuts (`inshilaCipali`).
+     * Same base shape as `inshilaNav`, plus optional `ikoniPaNav: 'shakisha' | 'akasheshi'` (`search` / `bag` accepted).
      * Put `inshilaNav` before `ifiputulwaPaMusule` in `umusango.bemba` so the main nav array is matched first.
      */
     extractUtilityNavLinksFromNewSyntax(code) {
         const inner = this.extractArrayBlockAfterKey(code, 'inshilaCipali');
         if (!inner) return [];
-        return parseNavLinkObjectsFromArrayInner(inner);
+        return parseUtilityNavLinkObjectsFromArrayInner(inner);
     }
 
     /**
@@ -2688,9 +2715,16 @@ class BembaParser {
             ${navUtilityLinks
                 .map((l) => {
                     const active = navHrefIsActive(l.href, activePath);
-                    const cls = active ? 'nav-utility is-active' : 'nav-utility';
+                    let cls = active ? 'nav-utility is-active' : 'nav-utility';
                     const cur = active ? ' aria-current="page"' : '';
-                    return `<a href="${escapeHtml(l.href)}" class="${cls}"${cur}>${escapeHtml(l.label)}</a>`;
+                    const icon = String(l.navIcon || '').toLowerCase();
+                    const useIcon = icon === 'shakisha' || icon === 'akasheshi';
+                    if (useIcon) cls += ' nav-utility--icon';
+                    if (icon === 'shakisha') cls += ' nav-utility--icon-search';
+                    if (icon === 'akasheshi') cls += ' nav-utility--icon-bag';
+                    const aria = useIcon ? ` aria-label="${escapeHtml(l.label)}"` : '';
+                    const inner = useIcon ? '' : escapeHtml(l.label);
+                    return `<a href="${escapeHtml(l.href)}" class="${cls}"${aria}${cur}>${inner}</a>`;
                 })
                 .join('')}
         </nav>`
@@ -2904,6 +2938,42 @@ class BembaParser {
         .nav-utility.is-active {
             color: var(--text);
             font-weight: 400;
+        }
+
+        /* Optional ikoniPaNav on inshilaCipali: mask icons; label from aria-label */
+        .nav-utility--icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.75rem;
+            height: 2.75rem;
+            min-height: 2.75rem;
+            padding: 0;
+            font-size: 0;
+            line-height: 0;
+            color: inherit;
+            overflow: hidden;
+        }
+        .nav-utility--icon::before {
+            content: '';
+            display: block;
+            width: 15px;
+            height: 15px;
+            background-color: currentColor;
+            -webkit-mask-repeat: no-repeat;
+            mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+            mask-position: center;
+            -webkit-mask-size: contain;
+            mask-size: contain;
+        }
+        .nav-utility--icon-search::before {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M6.5 11A4.5 4.5 0 1 1 6.5 2a4.5 4.5 0 0 1 0 9zm6.2 4.3l-3.1-3.1a6 6 0 1 0-1.4 1.4l3.1 3.1 1.4-1.4z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M6.5 11A4.5 4.5 0 1 1 6.5 2a4.5 4.5 0 0 1 0 9zm6.2 4.3l-3.1-3.1a6 6 0 1 0-1.4 1.4l3.1 3.1 1.4-1.4z'/%3E%3C/svg%3E");
+        }
+        .nav-utility--icon-bag::before {
+            -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M5 5V4a3 3 0 0 1 6 0v1h2.5v9H2.5V5H5zm1 0h4V4a2 2 0 1 0-4 0v1z'/%3E%3C/svg%3E");
+            mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='black' d='M5 5V4a3 3 0 0 1 6 0v1h2.5v9H2.5V5H5zm1 0h4V4a2 2 0 1 0-4 0v1z'/%3E%3C/svg%3E");
         }
 
         .nav-link {

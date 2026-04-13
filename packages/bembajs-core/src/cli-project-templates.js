@@ -1,26 +1,45 @@
 /**
  * Default files for `bemba panga` / `bemba init` templates.
- * Canonical copy of docs/CODE-STYLE-AND-UI.md lives in this package under docs/; it is read at runtime
- * so one edit propagates to new projects and to `bemba template sync`.
+ * Code-style markdown is inlined here (no repo .md under docs/) so `bemba template sync` stays in sync.
  */
 const fs = require('fs');
 const path = require('path');
 const { BEMBA_FOLDERS } = require('./constants');
 
-/** Package root whether this file lives in src/ or dist/. */
-function bembajsCorePackageRoot() {
-    return path.resolve(__dirname, '..');
-}
-
-/** Single source for CODE-STYLE-AND-UI.md (published in npm package files). */
-function loadCodeStyleMarkdownFromPackage() {
-    const docPath = path.join(bembajsCorePackageRoot(), 'docs', 'CODE-STYLE-AND-UI.md');
-    try {
-        return fs.readFileSync(docPath, 'utf8');
-    } catch (_) {
-        return null;
-    }
-}
+/** Written to user projects as docs/CODE-STYLE-AND-UI.md — keep aligned with monorepo README § Code style and UI. */
+const CODE_STYLE_MARKDOWN = [
+    '# Code style and UI (BembaJS starter)',
+    '',
+    'This Markdown file is **for developers** (optional lint/style notes). It is **not** rendered on your site. Your visible UI comes from `amapeji/*.bemba` and `ifikopo/**/*.bemba`.',
+    '',
+    'Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` you add (scripts, emitted React, etc.).',
+    '',
+    '## Linting JavaScript (optional)',
+    '',
+    'This template can run **[Standard JS](https://standardjs.com/)** via `bun run lint` on `.js` / `.jsx` files. Auto-fix: `bun run lint:fix`. It is not required for Bemba pages themselves.',
+    '',
+    'For team reviews, you may also use **[Google’s JS / HTML / TS guides](https://google.github.io/styleguide/)** as reference.',
+    '',
+    '## UI — shadcn-like workflow for static sites',
+    '',
+    '[shadcn/ui](https://ui.shadcn.com/) is not an npm dependency you import: you **copy component source into your app** and own it. The same idea fits Bemba static pages:',
+    '',
+    '1. **Design tokens** live in `amapeji/umusango.bemba` as `:root` overrides for `--bg`, `--surface`, `--text`, `--accent`, etc. (same names the layout uses).',
+    '2. **Reusable blocks** are `pangaIcapaba` partials under `ifikopo/cipanda/`, included with `ingisa: [ \'Name\' ]`.',
+    '3. **Tweak in place** — duplicate `StarterCard.bemba`, rename, and edit HTML/CSS without fighting upstream versions.',
+    '',
+    'For rich **React** UI, use `bemba emit-react` and add [shadcn/ui](https://ui.shadcn.com/) in that Vite/React app (see BembaJS docs).',
+    '',
+    '## Accessibility',
+    '',
+    'Use real **headings**, **ARIA** attributes where needed, **visible focus** styles, and **sufficient contrast**. The starter card uses a labelled region as an example.',
+    '',
+    '## Further reading',
+    '',
+    '- [What is shadcn/ui?](https://shadcnstudio.com/blog/what-is-shadcn-ui-comprehensive-guide) — copy-to-own model explained',
+    '- [BembaJS README](https://github.com/bembajs/bembajs/blob/main/README.md) — full framework documentation',
+    ''
+].join('\n');
 
 function shellBemba(projectTitle) {
     const title = JSON.stringify(String(projectTitle));
@@ -317,7 +336,7 @@ CLI language: interactive **\`bemba panga\`** asks **language first**, then temp
 
 ## Code style and UI patterns
 
-Optional reference: **\`docs/CODE-STYLE-AND-UI.md\`** — linting for \`.js\` files you add, UI tokens, and partials workflow.
+Optional local notes: **\`docs/CODE-STYLE-AND-UI.md\`** (linting for \`.js\` you add, tokens, partials). **Full docs:** [github.com/bembajs/bembajs — README](https://github.com/bembajs/bembajs/blob/main/README.md) and [RELEASES.md](https://github.com/bembajs/bembajs/blob/main/RELEASES.md).
 
 ## Stay in sync with the scaffold
 
@@ -336,9 +355,7 @@ After upgrading **bembajs-core**, run \`bunx bemba template sync\` to refresh \`
 }
 
 function projectCodeStyleMarkdown() {
-    const fromPkg = loadCodeStyleMarkdownFromPackage();
-    if (fromPkg && fromPkg.trim()) return fromPkg;
-    return `# Code style and UI (BembaJS starter)\n\nInstall a complete **bembajs-core** package (with \`docs/CODE-STYLE-AND-UI.md\`) or see [bembajs.dev/docs](https://bembajs.dev/docs).\n`;
+    return CODE_STYLE_MARKDOWN;
 }
 
 function gitignoreContent() {
@@ -370,7 +387,7 @@ trim_trailing_whitespace = false
 }
 
 /**
- * Write scaffold files. scope `docs` updates only docs/CODE-STYLE-AND-UI.md (from package file).
+ * Write scaffold files. scope `docs` updates only docs/CODE-STYLE-AND-UI.md (inlined in this module).
  * scope `all` writes the full starter set (same as `bemba panga` / `bemba init` template files).
  *
  * @param {string} projectPath
