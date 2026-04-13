@@ -8,6 +8,7 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
+const { loadApiHandlerFromGeneratedSource } = require('./server-load-api');
 
 class BembaDevServer {
     constructor(options = {}) {
@@ -105,6 +106,7 @@ class BembaDevServer {
         // Clear compilation cache for this file
         const relativePath = path.relative(this.projectRoot, filePath);
         this.compilationCache.delete(relativePath);
+        this.compilationCache.delete(`api:${relativePath}`);
         
         // Reload router if it's a route file
         if (filePath.includes(BEMBA_FOLDERS.PAGES) || filePath.includes(BEMBA_FOLDERS.API)) {
@@ -141,13 +143,8 @@ class BembaDevServer {
                 return; // Middleware blocked the request
             }
             
-            // Compile and execute API handler
-            const handler = await this.compileFile(route.filePath);
-            if (handler && typeof handler.default === 'function') {
-                await handler.default(req, res);
-            } else {
-                res.status(500).json({ error: 'Invalid API handler' });
-            }
+            const handler = await this.compileApiHandler(route.filePath);
+            await handler(req, res);
         } catch (error) {
             console.error('API route error:', error);
             res.status(500).json({ error: error.message });
@@ -168,20 +165,57 @@ class BembaDevServer {
                 return; // Middleware blocked the request
             }
             
-            // Compile and render page
+            const rawSource = fs.readFileSync(route.filePath, 'utf8');
+            if (rawSource.includes('pangaIpepa')) {
+                this.parser.projectRoot = this.projectRoot;
+                try {
+                    const doc = this.parser.compile(rawSource, {
+                        projectRoot: this.projectRoot,
+                        currentPath: req.path || '/'
+                    });
+                    if (
+                        typeof doc === 'string' &&
+                        /^\s*<(!DOCTYPE|html)/i.test(doc.trimStart())
+                    ) {
+                        res.type('html');
+                        return res.send(doc);
+                    }
+                } catch (docErr) {
+                    console.error(`Document compile failed for ${route.filePath}:`, docErr.message);
+                }
+            }
+
             const page = await this.compileFile(route.filePath);
             if (page) {
                 const html = await this.renderPage(page, route, req);
-                res.send(html);
-            } else {
-                res.status(500).send(this.generateErrorPage('Failed to compile page'));
+                res.type('html');
+                return res.send(html);
             }
+            return res.status(500).send(this.generateErrorPage('Failed to compile page'));
         } catch (error) {
             console.error('Page route error:', error);
             res.status(500).send(this.generateErrorPage(error.message));
         }
     }
     
+    /**
+     * Compile mafungulo/*.bemba (pangaApi) to a runnable Express handler (server-side).
+     */
+    async compileApiHandler(filePath) {
+        const relativePath = path.relative(this.projectRoot, filePath);
+        const cacheKey = `api:${relativePath}`;
+        if (this.compilationCache.has(cacheKey)) {
+            return this.compilationCache.get(cacheKey);
+        }
+        this.parser.projectRoot = this.projectRoot;
+        const ast = this.parser.parseFile(filePath);
+        const transformed = this.transformer.transform(ast);
+        const generated = this.generator.generate(transformed);
+        const handler = loadApiHandlerFromGeneratedSource(generated, filePath);
+        this.compilationCache.set(cacheKey, handler);
+        return handler;
+    }
+
     async compileFile(filePath) {
         const relativePath = path.relative(this.projectRoot, filePath);
         
@@ -191,6 +225,7 @@ class BembaDevServer {
         }
         
         try {
+            this.parser.projectRoot = this.projectRoot;
             // Parse the file
             const ast = this.parser.parseFile(filePath);
             
@@ -233,8 +268,8 @@ class BembaDevServer {
             <h1>BembaJS Development Server</h1>
             <p>Route: ${route.path}</p>
             <div class="error">
-                <h3>Development Mode</h3>
-                <p>This is a simplified development server. Full SSR will be implemented in production builds.</p>
+                <h3>Server render (non–pangaIpepa pages)</h3>
+                <p><strong>pangaIpepa</strong> pages are compiled to HTML on each request (server output). This preview is for AST-generated modules (components / future React SSR).</p>
                 <p>Generated code:</p>
                 <pre>${this.escapeHtml(page)}</pre>
             </div>

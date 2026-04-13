@@ -1,5 +1,5 @@
 // File-based routing engine for BembaJS framework
-const { BEMBA_FOLDERS } = require('./constants');
+const { BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
 const fs = require('fs');
 const path = require('path');
 
@@ -51,6 +51,9 @@ class BembaRouter {
             if (stat.isDirectory()) {
                 this.scanDirectory(fullPath, routeMap, type);
             } else if (item.endsWith('.bemba')) {
+                if (type === 'page' && item === BEMBA_FILES.SITE_SHELL) {
+                    continue;
+                }
                 const route = this.createRoute(fullPath, type);
                 if (route) {
                     routeMap.set(route.path, route);

@@ -1,0 +1,14 @@
+// JSON API — runs on the server (use require('pg') etc. inside handler backticks).
+pangaApi('hello', {
+    method: 'GET',
+    handler: `
+        return {
+            status: 200,
+            data: {
+                ok: true,
+                source: 'server',
+                hint: 'Plug in SQL or any npm module via require() inside this handler.'
+            }
+        };
+    `
+});

@@ -95,6 +95,16 @@ Compile with `projectRoot` so the parser can resolve `amapeji/umusango.bemba`; p
 
 Hero copy uses top-level `umutwe` / `ilyashi` before `ifiputulwa`; body sections use `ifiputulwa` as usual.
 
+### Dynamic dev server (`bemba tungulula` → `DevServer`)
+
+The core **Express** dev server is aimed at **server-rendered, dynamic** behavior:
+
+- **`pangaIpepa` pages** — Each document request runs `BembaParser#compile` with `projectRoot` and `currentPath`, so HTML (including `umusango.bemba`) is produced **on the server**, not as a static export.
+- **`pangaApi` routes** under **`mafungulo/`** — Compiled to a Node handler and executed with `vm` + real `require()`, so you can **`require('pg')`**, ORMs, or any npm module inside the `handler` template string. Routes are mounted at **`/api`** (e.g. file `mafungulo/hello.bemba` → `GET /api/hello`).
+- **`amapeji/umusango.bemba`** is skipped as a page route (shell only).
+
+React/AST-only pages still use the development preview shell until full `renderToString` SSR exists.
+
 ### `parse(code)`
 
 Parses Bemba code into an Abstract Syntax Tree (AST).

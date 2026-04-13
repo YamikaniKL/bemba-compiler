@@ -34,6 +34,13 @@ class BembaTransformer {
         if (!node || typeof node !== 'object') {
             return node;
         }
+
+        if (node.type === 'Module' && node.program) {
+            return {
+                ...node,
+                program: this.transformNode(node.program)
+            };
+        }
         
         const transformer = this.transformers[node.type];
         if (transformer) {
