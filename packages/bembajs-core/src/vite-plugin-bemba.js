@@ -8,6 +8,7 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { ModuleNode } = require('./ast');
+const { transformWithEsbuild } = require('vite');
 
 function compileBembaFile(source, id) {
     const parser = new BembaParser();
@@ -29,7 +30,7 @@ function vitePluginBemba() {
     return {
         name: 'vite-plugin-bemba',
         enforce: 'pre',
-        load(id) {
+        async load(id) {
             if (!filter.test(id)) return null;
             let src = '';
             try {
@@ -39,7 +40,17 @@ function vitePluginBemba() {
                 throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
             }
             try {
-                return compileBembaFile(src, id);
+                const compiled = compileBembaFile(src, id);
+                // Vite import analysis expects plain JS (not raw JSX) for custom extensions.
+                const transformed = await transformWithEsbuild(compiled, id, {
+                    loader: 'jsx',
+                    jsx: 'automatic',
+                    sourcemap: true
+                });
+                return {
+                    code: transformed.code,
+                    map: transformed.map || null
+                };
             } catch (e) {
                 const msg = e && e.message ? e.message : String(e);
                 throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
