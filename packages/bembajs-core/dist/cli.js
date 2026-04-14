@@ -33,7 +33,10 @@ class BembaCLI {
         }
 
         this.program.hook('preAction', (thisCommand) => {
-            const root = thisCommand.root();
+            const root =
+                thisCommand && typeof thisCommand.root === 'function'
+                    ? thisCommand.root()
+                    : this.program;
             const opts = root.opts();
             if (opts && opts.lang != null && String(opts.lang).trim() !== '') {
                 process.env.BEMBA_CLI_LANG = normalizeLang(opts.lang);

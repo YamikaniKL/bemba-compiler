@@ -2,6 +2,7 @@
  * Vite plugin: compile `.bemba` → React/JS via lexer → parser → transformer → generator.
  */
 const path = require('path');
+const fs = require('fs');
 const BembaLexer = require('./lexer');
 const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
@@ -28,6 +29,22 @@ function vitePluginBemba() {
     return {
         name: 'vite-plugin-bemba',
         enforce: 'pre',
+        load(id) {
+            if (!filter.test(id)) return null;
+            let src = '';
+            try {
+                src = fs.readFileSync(id, 'utf8');
+            } catch (e) {
+                const msg = e && e.message ? e.message : String(e);
+                throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
+            }
+            try {
+                return compileBembaFile(src, id);
+            } catch (e) {
+                const msg = e && e.message ? e.message : String(e);
+                throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
+            }
+        },
         transform(src, id) {
             if (!filter.test(id)) return null;
             try {
