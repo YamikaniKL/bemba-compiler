@@ -19,18 +19,17 @@ pangaIpepa('Home', {
             flexDirection: 'column',
             gap: '1.5rem'
         };
-        const muted = { color: '#a1a1aa' };
         bwelela (
             <icipandwa style={shell}>
                 <icipandwa style={card}>
                     <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" aria-label="BembaJS logo">
+                        <svg width="56" height="56" viewBox="0 0 56 56" fill="none" role="img" ariaLabel="BembaJS logo">
                             <rect x="2" y="2" width="52" height="52" rx="14" fill="#111827" stroke="#2b2f3a" strokeWidth="2" />
                             <path d="M16 17h12.5c6 0 9.5 2.8 9.5 7.7 0 3.1-1.6 5.2-4.4 6.1 3.6.8 5.6 3.2 5.6 6.8 0 5.2-3.8 8.4-10.3 8.4H16V17zm11.3 12.5c2.9 0 4.6-1.3 4.6-3.6 0-2.2-1.7-3.5-4.6-3.5h-4.2v7.1h4.2zm.9 11.1c3.1 0 4.9-1.4 4.9-3.9 0-2.5-1.8-3.9-4.9-3.9h-5.1v7.8h5.1z" fill="#f9fafb"/>
                         </svg>
                     </icipandwa>
                     <icipandwa>
-                        <ukulondolola style={{ ...muted, fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+                        <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
                             bembajs v1.0.0
                         </ukulondolola>
                         <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', lineHeight: 1.05, letterSpacing: '-0.02em' }}>
@@ -38,10 +37,10 @@ pangaIpepa('Home', {
                         </umutwe_ukulu>
                     </icipandwa>
                     <icipandwa>
-                        <umutwe_ukalamba style={{ ...muted, fontWeight: 300, fontSize: 'clamp(1.125rem, 2.2vw, 1.5rem)' }}>
+                        <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.125rem, 2.2vw, 1.5rem)' }}>
                             A modern Bemba-native JavaScript framework for web development
                         </umutwe_ukalamba>
-                        <ukulondolola style={{ ...muted, maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
+                        <ukulondolola style={{ color: '#a1a1aa', maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
                             Fast, simple, and powerful. Built for developers who value clarity and performance. Start with <code>amapeji/app/page.bemba</code> and scale with layouts and components.
                         </ukulondolola>
                     </icipandwa>
