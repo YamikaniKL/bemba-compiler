@@ -309,6 +309,26 @@ body {
 `;
 }
 
+function tailwindConfigBemba() {
+    return `pangaTailwind({
+  prefix: 'tw-',
+  corePlugins: {
+    preflight: ee
+  },
+  theme: {
+    extend: {
+      colors: {
+        bemba: {
+          blue: '#0071e3',
+          ink: '#1d1d1f'
+        }
+      }
+    }
+  }
+});
+`;
+}
+
 function projectReadme(projectName) {
     return `# ${projectName}
 
@@ -465,6 +485,7 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     }
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'Button.bemba'), buttonComponentBemba());
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'global.css'), globalCss(projectName));
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'tailwind.config.bemba'), tailwindConfigBemba());
     fs.writeFileSync(path.join(projectPath, '.gitignore'), gitignoreContent());
     fs.writeFileSync(path.join(projectPath, '.editorconfig'), editorConfigContent());
     fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));

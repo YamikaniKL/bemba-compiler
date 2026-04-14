@@ -13,11 +13,16 @@ pangaIcapaba({
       Wrap optional utility-only trees:
         <div class="bemba-tw-root tw-max-w-bemba tw-mx-auto"> … </div>
 
+      Optional Bemba config file:
+        imikalile/tailwind.config.bemba
+        pangaTailwind({ ...Tailwind config object... })
+        // supports ee/iyo booleans
+
       Production: swap CDN for PostCSS build; keep prefix: 'tw-' and same theme.extend + scan **/*.bemba.
     -->
-    <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      tailwind.config = {
+      (function initBembaTailwindBridge() {
+        const DEFAULT_CONFIG = {
         prefix: 'tw-',
         theme: {
           extend: {
@@ -71,6 +76,85 @@ pangaIcapaba({
           preflight: true
         }
       };
+
+        function deepMerge(base, extra) {
+          if (!extra || typeof extra !== 'object') return base;
+          const out = Array.isArray(base) ? base.slice() : { ...base };
+          for (const [k, v] of Object.entries(extra)) {
+            if (Array.isArray(v)) out[k] = v.slice();
+            else if (v && typeof v === 'object') out[k] = deepMerge(out[k] && typeof out[k] === 'object' ? out[k] : {}, v);
+            else out[k] = v;
+          }
+          return out;
+        }
+
+        function extractPangaTailwindObject(text) {
+          const src = String(text || '');
+          const callIdx = src.search(/\bpangaTailwind\s*\(/);
+          if (callIdx === -1) return null;
+          const openParen = src.indexOf('(', callIdx);
+          if (openParen === -1) return null;
+          let i = openParen + 1;
+          while (i < src.length && /\s/.test(src[i])) i++;
+          if (src[i] !== '{') return null;
+          const startObj = i;
+          let depth = 0;
+          let quote = '';
+          for (; i < src.length; i++) {
+            const ch = src[i];
+            const prev = i > 0 ? src[i - 1] : '';
+            if (quote) {
+              if (ch === quote && prev !== '\\') quote = '';
+              continue;
+            }
+            if (ch === '"' || ch === "'" || ch === '`') {
+              quote = ch;
+              continue;
+            }
+            if (ch === '{') depth++;
+            else if (ch === '}') {
+              depth--;
+              if (depth === 0) return src.slice(startObj, i + 1);
+            }
+          }
+          return null;
+        }
+
+        function normalizeBembaBooleans(source) {
+          return String(source || '')
+            .replace(/\bee\b/g, 'true')
+            .replace(/\biyo\b/g, 'false');
+        }
+
+        async function loadUserConfig() {
+          try {
+            const resp = await fetch('/imikalile/tailwind.config.bemba?raw=' + Date.now(), { cache: 'no-store' });
+            if (!resp.ok) return null;
+            const txt = await resp.text();
+            const objSrc = extractPangaTailwindObject(txt);
+            if (!objSrc) return null;
+            const normalized = normalizeBembaBooleans(objSrc);
+            const userCfg = Function('"use strict"; return (' + normalized + ');')();
+            if (!userCfg || typeof userCfg !== 'object') return null;
+            return userCfg;
+          } catch (_) {
+            return null;
+          }
+        }
+
+        function loadTailwindCdn() {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.tailwindcss.com';
+          document.head.appendChild(s);
+        }
+
+        loadUserConfig()
+          .then((userCfg) => {
+            window.tailwind = window.tailwind || {};
+            window.tailwind.config = deepMerge(DEFAULT_CONFIG, userCfg || {});
+          })
+          .finally(loadTailwindCdn);
+      })();
     </script>
   `,
   imikalile: `
