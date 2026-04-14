@@ -223,35 +223,32 @@ function indexPage() {
 pangaIpepa('Home', {
   ukwisulula: nokuti() {
     bwelela (
-      <icipandwa style={{ minHeight: '100vh', background: '#0b0b10', color: '#f5f5f7', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-        <icipandwa style={{ width: '100%', maxWidth: '46rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <icipandwa style={{ minHeight: '100vh', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-            <svg width="56" height="56" viewBox="0 0 56 56" fill="none" role="img" ariaLabel="BembaJS logo">
-              <rect x="2" y="2" width="52" height="52" rx="14" fill="#111827" stroke="#2b2f3a" strokeWidth="2" />
-              <path d="M16 17h12.5c6 0 9.5 2.8 9.5 7.7 0 3.1-1.6 5.2-4.4 6.1 3.6.8 5.6 3.2 5.6 6.8 0 5.2-3.8 8.4-10.3 8.4H16V17zm11.3 12.5c2.9 0 4.6-1.3 4.6-3.6 0-2.2-1.7-3.5-4.6-3.5h-4.2v7.1h4.2zm.9 11.1c3.1 0 4.9-1.4 4.9-3.9 0-2.5-1.8-3.9-4.9-3.9h-5.1v7.8h5.1z" fill="#f9fafb"/>
-            </svg>
+            <img src="/amashinda/bembajs-logo.png" alt="BembaJS logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
           </icipandwa>
           <icipandwa>
             <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
               bembajs v1.0.0
             </ukulondolola>
-            <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.2rem, 5vw, 3.75rem)', lineHeight: 1.05, letterSpacing: '-0.02em' }}>
-              Build with BembaJS
+            <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.6rem, 6vw, 4rem)', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 700 }}>
+              Build with JavaScript
             </umutwe_ukulu>
           </icipandwa>
           <icipandwa>
-            <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.125rem, 2.2vw, 1.5rem)' }}>
-              A modern Bemba-native JavaScript framework for web development
+            <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.15rem, 2.3vw, 1.55rem)' }}>
+              A modern JavaScript framework for web development
             </umutwe_ukalamba>
             <ukulondolola style={{ color: '#a1a1aa', maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
-              Fast, simple, and powerful. Built for developers who value clarity and performance. Start with <code>amapeji/app/page.bemba</code> and scale with layouts and components.
+              Fast, simple, and powerful. Built for developers who value simplicity and performance. Get started in seconds with zero configuration.
             </ukulondolola>
           </icipandwa>
-          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center', paddingTop: '0.25rem' }}>
-            <a href="#" style={{ padding: '0.75rem 1.5rem', borderRadius: '0.65rem', background: '#f5f5f7', color: '#111827', fontWeight: 600, textDecoration: 'none' }}>
+          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem' }}>
+            <a href="#" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', background: '#f5f5f5', color: '#0a0a0a', fontWeight: 500, textDecoration: 'none' }}>
               Get Started
             </a>
-            <a href="https://github.com/bembajs/bembajs/blob/main/README.md" style={{ padding: '0.75rem 1.5rem', borderRadius: '0.65rem', border: '1px solid #2f3645', color: '#e4e4e7', fontWeight: 600, textDecoration: 'none' }}>
+            <a href="https://github.com/bembajs/bembajs/blob/main/README.md" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
               Documentation
             </a>
           </icipandwa>
