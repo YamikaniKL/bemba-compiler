@@ -387,13 +387,22 @@ class BembaCLI {
         const port = parseInt(String(options.port || '3000'), 10);
         const server = await createServer({
             configFile,
+            logLevel: 'silent',
             server: {
                 port,
                 host: options.host === 'localhost' ? true : options.host
             }
         });
         await server.listen();
-        server.printUrls();
+        const urls = server.resolvedUrls || {};
+        const local = Array.from(urls.local || []);
+        const network = Array.from(urls.network || []);
+        if (local.length > 0) {
+            console.log(`  ➜  Local Injini:   ${local[0]}`);
+        }
+        for (const u of network) {
+            console.log(`  ➜  Network Injini: ${u}`);
+        }
     }
 
     /** React app mode: enabled in config and vite.config.* exists (unless caller asks for legacy static path). */
