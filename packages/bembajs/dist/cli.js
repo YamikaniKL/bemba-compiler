@@ -115,6 +115,16 @@ function runTungululaCli() {
         process.exit(1);
     }
 
+    const CoreCli = resolveCoreCliClass();
+    if (CoreCli) {
+        const coreCli = new CoreCli();
+        coreCli.startDevServer({ port: 3000, host: 'localhost' }).catch((error) => {
+            console.error(msg('devStartErr'), error && error.message ? error.message : String(error));
+            process.exit(1);
+        });
+        return;
+    }
+
     console.log(msg('startingDev'));
     console.log(msg('hotReload'));
 

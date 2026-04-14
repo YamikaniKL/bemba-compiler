@@ -207,8 +207,20 @@ class BembaTransformer {
         out = out.replace(/\[\s+/g, '[').replace(/\s+\]/g, ']');
         out = out.replace(/\s+,\s+/g, ', ');
         out = out.replace(/\s+:\s+/g, ': ');
-        out = out.replace(/\s+\.\s+/g, '.');
+        out = this.normalizeBembaJsxTagNames(out);
         return out;
+    }
+
+    normalizeBembaJsxTagNames(src) {
+        const reverse = {};
+        for (const [htmlTag, bembaTag] of Object.entries(BEMBA_SYNTAX.JSX || {})) {
+            reverse[String(bembaTag)] = String(htmlTag);
+        }
+        return String(src || '').replace(/<(\/?)([A-Za-z_][A-Za-z0-9_:-]*)/g, (m, slash, tag) => {
+            const mapped = reverse[tag];
+            if (!mapped) return m;
+            return `<${slash}${mapped}`;
+        });
     }
     
     // Page transformation
