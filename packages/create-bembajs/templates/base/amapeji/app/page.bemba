@@ -1,14 +1,13 @@
 // App router home page
 pangaIpepa('Home', {
-    umusangoSite: ee,
-    umutwe: 'Panga BembaJS App',
-    ilyashi: 'Yapangwa na Injini app-router shell',
-    ifiputulwa: [
-        {
-            amalembelo: [
-                'Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">amapeji/app/page.bemba</code>.',
-                'Bika na ukumona ifyakusendeka mwangu.'
-            ]
-        }
-    ]
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
+                <umutwe_ukulu>Panga BembaJS App</umutwe_ukulu>
+                <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
+                    App-router page loaded from <code>amapeji/app/page.bemba</code>.
+                </ukulondolola>
+            </icipandwa>
+        )
+    }
 });

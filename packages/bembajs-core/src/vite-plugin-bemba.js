@@ -89,7 +89,15 @@ function vitePluginBemba() {
         },
         async load(id) {
             if (id === RESOLVED_VIRTUAL_ENTRY_ID) {
-                return virtualEntrySource();
+                const transformed = await transformWithEsbuild(virtualEntrySource(), `${VIRTUAL_ENTRY_ID}.bsx`, {
+                    loader: 'jsx',
+                    jsx: 'automatic',
+                    sourcemap: true
+                });
+                return {
+                    code: transformed.code,
+                    map: transformed.map || null
+                };
             }
             if (!bembaFilter.test(id)) return null;
             const fileId = cleanId(id);

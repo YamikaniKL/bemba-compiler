@@ -221,24 +221,16 @@ function starterCardPartial() {
 function indexPage() {
     return `// App router home page
 pangaIpepa('Home', {
-  umusangoSite: ee,
-  umutwe: 'Your BembaJS site',
-  ilyashi: 'A clear layout, shared shell, and design tokens you can tune in umusango.bemba.',
-  ifiputulwa: [
-    {
-      umutwe: 'Get started',
-      ilyashi: 'Run the dev server, edit pages under amapeji/app/, then add partials under ifikopo/cipanda/.',
-      amabatani: [
-        {
-          ilembo: 'About',
-          pakuKlikisha: 'window.location.href = "/about"'
-        }
-      ]
-    }
-  ],
-  imikalile: \`
-    /* Page-specific tweaks; shared chrome comes from umusango.bemba */
-  \`
+  ukwisulula: nokuti() {
+    bwelela (
+      <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
+        <umutwe_ukulu>Your BembaJS site</umutwe_ukulu>
+        <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
+          App-router page loaded from <code>amapeji/app/page.bemba</code>.
+        </ukulondolola>
+      </icipandwa>
+    )
+  }
 });
 `;
 }
@@ -271,22 +263,16 @@ function indexPageUi() {
 function aboutPage() {
     return `// App router about page
 pangaIpepa('About', {
-  umusangoSite: ee,
-  umutwe: 'About',
-  ilyashi: 'App router path: amapeji/app/about/page.bemba',
-  ifiputulwa: [
-    {
-      umutwe: 'About this app',
-      ilyashi: 'Edit amapeji/app/about/page.bemba or add new pages under amapeji/app/.',
-      amabatani: [
-        {
-          ilembo: 'Go home',
-          pakuKlikisha: 'window.location.href = "/"'
-        }
-      ]
-    }
-  ],
-  imikalile: \`\`
+  ukwisulula: nokuti() {
+    bwelela (
+      <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
+        <umutwe_ukulu>About BembaJS</umutwe_ukulu>
+        <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
+          App-router path: <code>amapeji/app/about/page.bemba</code>.
+        </ukulondolola>
+      </icipandwa>
+    )
+  }
 });
 `;
 }
