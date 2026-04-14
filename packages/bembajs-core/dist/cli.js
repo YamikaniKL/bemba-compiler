@@ -450,7 +450,7 @@ export default defineConfig({
             server = await createServer({
                 configFile,
                 logLevel: 'silent',
-                appType: glue.managedIndex ? 'mpa' : undefined,
+                appType: glue.managedIndex ? 'custom' : undefined,
                 server: {
                     port,
                     host: options.host === 'localhost' ? true : options.host
@@ -463,14 +463,18 @@ export default defineConfig({
             }
             throw e;
         }
-        await server.listen();
         if (glue.managedIndex) {
             server.middlewares.use(async (req, res, next) => {
                 if (!req || !req.url) return next();
-                if (req.url !== '/' && req.url !== '/index.html') return next();
+                const urlPath = String(req.url).split('?')[0];
+                const method = String(req.method || 'GET').toUpperCase();
+                if (method !== 'GET' && method !== 'HEAD') return next();
+                if (urlPath.startsWith('/@') || urlPath.startsWith('/node_modules/') || /\.[a-z0-9]+$/i.test(urlPath)) {
+                    return next();
+                }
                 try {
                     const html = fs.readFileSync(glue.managedIndex, 'utf8');
-                    const transformed = await server.transformIndexHtml(req.url, html);
+                    const transformed = await server.transformIndexHtml(urlPath || '/', html);
                     res.statusCode = 200;
                     res.setHeader('Content-Type', 'text/html');
                     res.end(transformed);
@@ -480,6 +484,7 @@ export default defineConfig({
                 }
             });
         }
+        await server.listen();
         const urls = server.resolvedUrls || {};
         const local = Array.from(urls.local || []);
         const network = Array.from(urls.network || []);
