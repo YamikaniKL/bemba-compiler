@@ -96,9 +96,23 @@ async function createApp(projectDirectory, options) {
         process.exit(1);
     }
 
-    // Get template choice if not specified
+    // Handle wrapper passthrough quirks (bun create / npm create) by inspecting raw argv too.
+    const rawArgv = process.argv.slice(2);
+    const hasFlag = (name) => rawArgv.includes(name);
+    const getFlagValue = (name) => {
+        const idx = rawArgv.indexOf(name);
+        if (idx >= 0 && idx + 1 < rawArgv.length) return rawArgv[idx + 1];
+        const prefixed = rawArgv.find((a) => a.startsWith(`${name}=`));
+        if (prefixed) return prefixed.slice(name.length + 1);
+        return undefined;
+    };
+
+    // Get template choice only when caller did not explicitly pass --template
+    const templateWasExplicit = hasFlag('--template') || getFlagValue('--template') !== undefined;
     let template = options.template;
-    if (!template || template === 'base') {
+    const explicitTemplate = getFlagValue('--template');
+    if (explicitTemplate) template = explicitTemplate;
+    if (!templateWasExplicit) {
         const response = await prompts({
             type: 'select',
             name: 'template',
@@ -112,21 +126,11 @@ async function createApp(projectDirectory, options) {
             initial: 0
         });
         
-        template = response.template || 'base';
+        template = response.template || template || 'base';
     }
 
-    // Get TypeScript preference
-    let useTypeScript = options.typescript;
-    if (useTypeScript === undefined) {
-        const response = await prompts({
-            type: 'confirm',
-            name: 'typescript',
-            message: 'Would you like to use TypeScript?',
-            initial: false
-        });
-        
-        useTypeScript = response.typescript;
-    }
+    // TypeScript is opt-in via --typescript; default false for non-interactive create flow.
+    const useTypeScript = options.typescript === true || hasFlag('--typescript');
 
     console.log();
     console.log(`Creating a new BembaJS app in ${chalk.green(projectPath)}`);
@@ -194,7 +198,8 @@ async function createApp(projectDirectory, options) {
     }
 
     // Install dependencies
-    if (options.install !== false) {
+    const shouldInstall = options.install !== false && !hasFlag('--no-install');
+    if (shouldInstall) {
         spinner.start(`Installing dependencies with ${packageManager}...`);
         try {
             const installCmd = packageManager === 'bun' ? 'bun install' : 'npm install';
@@ -209,7 +214,8 @@ async function createApp(projectDirectory, options) {
     }
 
     // Initialize git
-    if (options.git !== false) {
+    const shouldInitGit = options.git !== false && !hasFlag('--no-git');
+    if (shouldInitGit) {
         spinner.start('Initializing git repository...');
         try {
             execSync('git init', { cwd: projectPath, stdio: 'ignore' });
