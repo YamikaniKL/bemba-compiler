@@ -12,7 +12,7 @@ const CODE_STYLE_MARKDOWN = [
     '',
     'This Markdown file is **for developers** (optional lint/style notes). It is **not** rendered on your site. Your visible UI comes from `amapeji/*.bemba` and `ifikopo/**/*.bemba`.',
     '',
-    'Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` you add (scripts, emitted React, etc.).',
+    'Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` / `.bsx` you add (scripts, emitted React, etc.).',
     '',
     'Bemba-native keyword aliases are supported in parser/module syntax:',
     '- `leta ... kufuma "..."` (import/from)',
@@ -21,7 +21,7 @@ const CODE_STYLE_MARKDOWN = [
     '',
     '## Linting JavaScript (optional)',
     '',
-    'This template can run **[Standard JS](https://standardjs.com/)** via `bun run lint` on `.js` / `.jsx` files. Auto-fix: `bun run lint:fix`. It is not required for Bemba pages themselves.',
+    'This template can run **[Standard JS](https://standardjs.com/)** via `bun run lint` on `.js` / `.jsx` / `.bsx` files. Auto-fix: `bun run lint:fix`. It is not required for Bemba pages themselves.',
     '',
     'For team reviews, you may also use **[Google’s JS / HTML / TS guides](https://google.github.io/styleguide/)** as reference.',
     '',
@@ -391,9 +391,13 @@ import react from '@vitejs/plugin-react';
 import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba.js';
 
 export default defineConfig({
-  plugins: [vitePluginBemba(), react()],
+  plugins: [vitePluginBemba(), react({ include: [/\\.[jt]sx$/, /\\.bsx$/] })],
+  esbuild: {
+    include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
+    loader: 'jsx'
+  },
   resolve: {
-    extensions: ['.bemba', '.jsx', '.js', '.tsx', '.ts', '.json']
+    extensions: ['.bemba', '.bsx', '.jsx', '.js', '.tsx', '.ts', '.json']
   },
   server: { port: 3000 },
   build: { outDir: 'dist' }
@@ -412,7 +416,7 @@ function indexHtml(projectTitle) {
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="/src/main.bsx"></script>
 </body>
 </html>
 `;
@@ -542,7 +546,7 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     fs.mkdirSync(path.join(projectPath, 'src'), { recursive: true });
     fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
     fs.writeFileSync(path.join(projectPath, 'index.html'), indexHtml(projectName));
-    fs.writeFileSync(path.join(projectPath, 'src', 'main.jsx'), mainJsx());
+    fs.writeFileSync(path.join(projectPath, 'src', 'main.bsx'), mainJsx());
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
 }
 
