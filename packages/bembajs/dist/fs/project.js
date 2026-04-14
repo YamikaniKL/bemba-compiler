@@ -65,8 +65,30 @@ function writeBoilerTemplateFiles(projectPath) {
           <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
             <img src="/amashinda/bembajs-logo.png" alt="BembaJS logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
           </icipandwa>
-          <umutwe_ukulu>Build with JavaScript</umutwe_ukulu>
-          <ukulondolola style={{ color: '#a1a1aa' }}>Your SDK boilerplate is ready.</ukulondolola>
+          <icipandwa>
+            <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+              bembajs v1.0.0
+            </ukulondolola>
+            <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.6rem, 6vw, 4rem)', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 700 }}>
+              Build with JavaScript
+            </umutwe_ukulu>
+          </icipandwa>
+          <icipandwa>
+            <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.15rem, 2.3vw, 1.55rem)' }}>
+              A modern JavaScript framework for web development
+            </umutwe_ukalamba>
+            <ukulondolola style={{ color: '#a1a1aa', maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
+              Fast, simple, and powerful. Built for developers who value simplicity and performance. Get started in seconds with zero configuration.
+            </ukulondolola>
+          </icipandwa>
+          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem' }}>
+            <a href="#" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', background: '#f5f5f5', color: '#0a0a0a', fontWeight: 500, textDecoration: 'none' }}>
+              Get Started
+            </a>
+            <a href="https://github.com/bembajs/bembajs/blob/main/README.md" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
+              Documentation
+            </a>
+          </icipandwa>
         </icipandwa>
       </icipandwa>
     );
