@@ -5,6 +5,7 @@
 const fs = require('fs');
 const path = require('path');
 const { BEMBA_FOLDERS } = require('./constants');
+const BEMBAJS_LOGO_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAQAAAACQBAMAAAAVTaiiAAAAMFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPxwLAAAAD3RSTlMA3yCAQMAQ759gUDBwkK/koHcMAAABqElEQVR42u3YvUozURAG4Dcnuvoln3w/hSAWuxaCnQFFywRsBYM34IIXoChY2ETtBMGAjY2od2DuwMLCW/AqdP3HwvFEg6ybbUSYAX0fmOY0Oww77J4XREREREREREREREREXxOcX8Sw1BIZhiHXEHmIYKdfvDrs9Im3DDt/xLvCJ3y3CQyItwE7LhRJIhgaEZmHqZkzGCo14fWcwErhMQLcwiCsVKUCFOUGRgJJ4IUJrIw9wZsz3IMavDJ+qmIFHYunsDCeHOFVOVyBhV3pNNAjdzDgwkd0XCYxDBTfBz8yBRMxLAXWzfRvIWW0Dm2H0sS7UuMW2sL0hcQ11Pcg2L1BSvU5grJSHSm9NfwwLkZGEEFTYQgZx4PQVJUjfPBL98/QSZK3loqmn5AxtwpNromM3xH0zE4ix8wklIyK/EeXVvtUhQvbyVReXqXzQegkU7mnFWgoiLeWGxf9hYK3R11jbyJK17heXtUn3j0WpJauJb0JDIhXzzbQq5dXtd93qWHz34cqi15e1RJZR5djxdz6YCdGF7e/HYOIiIiIiIiIiIiIiOjzXgA1X7Msl1OuJQAAAABJRU5ErkJggg==';
 
 /** Written to user projects as docs/CODE-STYLE-AND-UI.md — keep aligned with monorepo README § Code style and UI. */
 const CODE_STYLE_MARKDOWN = [
@@ -473,6 +474,15 @@ trim_trailing_whitespace = false
 `;
 }
 
+function writeDefaultPublicAssets(projectPath) {
+    const publicDir = path.join(projectPath, BEMBA_FOLDERS.PUBLIC);
+    fs.mkdirSync(publicDir, { recursive: true });
+    fs.writeFileSync(
+        path.join(publicDir, 'bembajs-logo.png'),
+        Buffer.from(BEMBAJS_LOGO_PNG_BASE64, 'base64')
+    );
+}
+
 /**
  * Write scaffold files. scope `docs` updates only docs/CODE-STYLE-AND-UI.md (inlined in this module).
  * scope `all` writes the full starter set (same as `bemba panga` / `bemba init` template files).
@@ -514,6 +524,7 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     fs.writeFileSync(path.join(projectPath, '.gitignore'), gitignoreContent());
     fs.writeFileSync(path.join(projectPath, '.editorconfig'), editorConfigContent());
     fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));
+    writeDefaultPublicAssets(projectPath);
 
     fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app'), { recursive: true });
     fs.writeFileSync(

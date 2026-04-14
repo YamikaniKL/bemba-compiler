@@ -4,6 +4,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const BEMBAJS_LOGO_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAQAAAACQBAMAAAAVTaiiAAAAMFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPxwLAAAAD3RSTlMA3yCAQMAQ759gUDBwkK/koHcMAAABqElEQVR42u3YvUozURAG4Dcnuvoln3w/hSAWuxaCnQFFywRsBYM34IIXoChY2ETtBMGAjY2od2DuwMLCW/AqdP3HwvFEg6ybbUSYAX0fmOY0Oww77J4XREREREREREREREREXxOcX8Sw1BIZhiHXEHmIYKdfvDrs9Im3DDt/xLvCJ3y3CQyItwE7LhRJIhgaEZmHqZkzGCo14fWcwErhMQLcwiCsVKUCFOUGRgJJ4IUJrIw9wZsz3IMavDJ+qmIFHYunsDCeHOFVOVyBhV3pNNAjdzDgwkd0XCYxDBTfBz8yBRMxLAXWzfRvIWW0Dm2H0sS7UuMW2sL0hcQ11Pcg2L1BSvU5grJSHSm9NfwwLkZGEEFTYQgZx4PQVJUjfPBL98/QSZK3loqmn5AxtwpNromM3xH0zE4ix8wklIyK/EeXVvtUhQvbyVReXqXzQegkU7mnFWgoiLeWGxf9hYK3R11jbyJK17heXtUn3j0WpJauJb0JDIhXzzbQq5dXtd93qWHz34cqi15e1RJZR5djxdz6YCdGF7e/HYOIiIiIiIiIiIiIiOjzXgA1X7Msl1OuJQAAAABJRU5ErkJggg==';
 
 /**
  * Create a new BembaJS project
@@ -30,6 +31,7 @@ async function createProject(name, options = {}) {
 async function scaffold(projectPath, options = {}) {
     const folders = [
         'amapeji',
+        'amashinda',
         'ifikopo',
         'maapi',
         'imikalile',
@@ -44,8 +46,40 @@ async function scaffold(projectPath, options = {}) {
         const folderPath = path.join(projectPath, folder);
         fs.mkdirSync(folderPath, { recursive: true });
     }
+
+    writeBoilerTemplateFiles(projectPath);
     
     return { success: true };
+}
+
+function writeBoilerTemplateFiles(projectPath) {
+    const appDir = path.join(projectPath, 'amapeji', 'app');
+    fs.mkdirSync(appDir, { recursive: true });
+    fs.writeFileSync(
+        path.join(appDir, 'page.bemba'),
+        `pangaIpepa('Home', {
+  ukwisulula: nokuti() {
+    bwelela (
+      <icipandwa style={{ minHeight: '100vh', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+        <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
+            <img src="/amashinda/bembajs-logo.png" alt="BembaJS logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
+          </icipandwa>
+          <umutwe_ukulu>Build with JavaScript</umutwe_ukulu>
+          <ukulondolola style={{ color: '#a1a1aa' }}>Your SDK boilerplate is ready.</ukulondolola>
+        </icipandwa>
+      </icipandwa>
+    );
+  }
+});
+`,
+        'utf8'
+    );
+
+    fs.writeFileSync(
+        path.join(projectPath, 'amashinda', 'bembajs-logo.png'),
+        Buffer.from(BEMBAJS_LOGO_PNG_BASE64, 'base64')
+    );
 }
 
 /**
