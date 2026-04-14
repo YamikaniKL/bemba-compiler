@@ -18,7 +18,10 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 const appPages = import.meta.glob('/amapeji/app/**/page.bemba', { eager: true });
-const legacyPages = import.meta.glob('/amapeji/**/*.bemba', { eager: true });
+const legacyPages = import.meta.glob(
+  ['/amapeji/**/*.bemba', '!/amapeji/umusango*.bemba', '!/amapeji/app/**'],
+  { eager: true }
+);
 
 function filePathToPageRoute(filePath) {
   let route = String(filePath || '')
