@@ -52,12 +52,26 @@ function App() {
     const routePath = toRoute(key);
     if (routePath == null || !mod.default) continue;
     const Comp = mod.default;
-    routes.push(<Route key={routePath} path={routePath} element={<Comp />} />);
+    routes.push(React.createElement(Route, {
+      key: routePath,
+      path: routePath,
+      element: React.createElement(Comp)
+    }));
   }
-  return <Routes>{routes}<Route path="*" element={<Navigate to="/" replace />} /></Routes>;
+  return React.createElement(
+    Routes,
+    null,
+    ...routes,
+    React.createElement(Route, {
+      path: '*',
+      element: React.createElement(Navigate, { to: '/', replace: true })
+    })
+  );
 }
 
-createRoot(document.getElementById('root')).render(<BrowserRouter><App /></BrowserRouter>);
+createRoot(document.getElementById('root')).render(
+  React.createElement(BrowserRouter, null, React.createElement(App))
+);
 `;
 }
 
@@ -89,14 +103,9 @@ function vitePluginBemba() {
         },
         async load(id) {
             if (id === RESOLVED_VIRTUAL_ENTRY_ID) {
-                const transformed = await transformWithEsbuild(virtualEntrySource(), `${VIRTUAL_ENTRY_ID}.bsx`, {
-                    loader: 'jsx',
-                    jsx: 'automatic',
-                    sourcemap: true
-                });
                 return {
-                    code: transformed.code,
-                    map: transformed.map || null
+                    code: virtualEntrySource(),
+                    map: null
                 };
             }
             if (!bembaFilter.test(id)) return null;
