@@ -14,6 +14,11 @@ const CODE_STYLE_MARKDOWN = [
     '',
     'Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` you add (scripts, emitted React, etc.).',
     '',
+    'Bemba-native keyword aliases are supported in parser/module syntax:',
+    '- `leta ... kufuma "..."` (import/from)',
+    '- `fumya ca_pamushili ...` (export default)',
+    '- `cakosa` / `cilepilibuka` / `icakubika` (const/let/var)',
+    '',
     '## Linting JavaScript (optional)',
     '',
     'This template can run **[Standard JS](https://standardjs.com/)** via `bun run lint` on `.js` / `.jsx` files. Auto-fix: `bun run lint:fix`. It is not required for Bemba pages themselves.',
@@ -335,6 +340,14 @@ bun run dev
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
 
 CLI language: interactive **\`bemba panga\`** asks **language first**, then template. Or **\`bemba --lang bem panga …\`**, **\`BEMBA_CLI_LANG=bem\`**, or **\`-t base|ui\`** to skip prompts you do not need.
+
+## Bemba-native aliases
+
+You can author module/declaration syntax in Bemba form:
+
+- \`leta ... kufuma '...'\` = \`import ... from '...'\`
+- \`fumya ca_pamushili ...\` = \`export default ...\`
+- \`cakosa\` / \`cilepilibuka\` / \`icakubika\` = \`const\` / \`let\` / \`var\`
 
 ## Code style and UI patterns
 
