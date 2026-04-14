@@ -45,15 +45,10 @@ function vitePluginBemba() {
                 throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
             }
         },
-        transform(src, id) {
+        transform(_src, id) {
             if (!filter.test(id)) return null;
-            try {
-                const code = compileBembaFile(src, id);
-                return { code, map: null };
-            } catch (e) {
-                const msg = e && e.message ? e.message : String(e);
-                throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
-            }
+            // `load()` already returns compiled JS for `.bemba`.
+            return null;
         }
     };
 }
