@@ -78,7 +78,31 @@ function renderBembaPageToHtmlString(generatedJs, opts = {}) {
     return ReactDOMServer.renderToString(React.createElement(Comp));
 }
 
+/**
+ * Render app-router page with optional nested layouts.
+ * `layoutGenerated` should be ordered from root layout to nearest layout.
+ * @param {string} pageGeneratedJs
+ * @param {string[]} layoutGenerated
+ * @param {{ filePath?: string }} [opts]
+ * @returns {string}
+ */
+function renderBembaAppRouteToHtmlString(pageGeneratedJs, layoutGenerated = [], opts = {}) {
+    const React = require('react');
+    const ReactDOMServer = require('react-dom/server');
+    const Page = loadDefaultExportPageComponent(pageGeneratedJs, opts.filePath || 'bemba-page.generated.jsx');
+    let node = React.createElement(Page);
+    for (let i = 0; i < layoutGenerated.length; i++) {
+        const layoutComp = loadDefaultExportPageComponent(
+            layoutGenerated[i],
+            `${opts.filePath || 'bemba-page'}.layout.${i}.jsx`
+        );
+        node = React.createElement(layoutComp, { children: node });
+    }
+    return ReactDOMServer.renderToString(node);
+}
+
 module.exports = {
     renderBembaPageToHtmlString,
+    renderBembaAppRouteToHtmlString,
     loadDefaultExportPageComponent
 };

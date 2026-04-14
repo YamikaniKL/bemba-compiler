@@ -219,14 +219,15 @@ function starterCardPartial() {
 }
 
 function indexPage() {
-    return `pangaIpepa('Home', {
+    return `// App router home page
+pangaIpepa('Home', {
   umusangoSite: ee,
   umutwe: 'Your BembaJS site',
   ilyashi: 'A clear layout, shared shell, and design tokens you can tune in umusango.bemba.',
   ifiputulwa: [
     {
       umutwe: 'Get started',
-      ilyashi: 'Run the dev server, edit pages under amapeji/, then add partials under ifikopo/cipanda/.',
+      ilyashi: 'Run the dev server, edit pages under amapeji/app/, then add partials under ifikopo/cipanda/.',
       amabatani: [
         {
           ilembo: 'About',
@@ -268,14 +269,15 @@ function indexPageUi() {
 }
 
 function aboutPage() {
-    return `pangaIpepa('About', {
+    return `// App router about page
+pangaIpepa('About', {
   umusangoSite: ee,
   umutwe: 'About',
-  ilyashi: 'Same navigation, footer, and CSS variables as the home page — one shell for every route.',
+  ilyashi: 'App router path: amapeji/app/about/page.bemba',
   ifiputulwa: [
     {
       umutwe: 'About this app',
-      ilyashi: 'Edit amapeji/about.bemba or add new pages under amapeji/.',
+      ilyashi: 'Edit amapeji/app/about/page.bemba or add new pages under amapeji/app/.',
       amabatani: [
         {
           ilembo: 'Go home',
@@ -333,9 +335,9 @@ bun install
 bun run dev
 \`\`\`
 
-\`bun run dev\` runs **\`bemba tungulula\`** and starts **Vite** (React SPA from \`amapeji/**/*.bemba\` with \`ukwisulula\`) by default.
+\`bun run dev\` runs **\`bemba tungulula\`** and starts **Injini** with app-router pages from \`amapeji/app/**/page.bemba\`.
 
-\`bun run build\` and \`bun run export\` also use the Vite React build by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
+\`bun run build\` and \`bun run export\` also use Injini by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
 
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
 
@@ -361,7 +363,7 @@ After upgrading **bembajs-core**, run \`bunx bemba template sync\` to refresh \`
 
 ## Project structure
 
-- \`${BEMBA_FOLDERS.PAGES}/\` — Pages (\`pangaIpepa\`), including \`umusango.bemba\` shell
+- \`${BEMBA_FOLDERS.PAGES}/app/\` — App-router pages (\`page.bemba\`, optional nested \`layout.bemba\`)
 - \`${BEMBA_FOLDERS.COMPONENTS}/\` — \`fyambaIcipanda\` modules and \`pangaIcapaba\` partials (\`cipanda/\` recommended)
 - \`${BEMBA_FOLDERS.PUBLIC}/\` — Static assets
 - \`${BEMBA_FOLDERS.API}/\` — API routes
@@ -405,66 +407,6 @@ export default defineConfig({
 `;
 }
 
-function indexHtml(projectTitle) {
-    const t = JSON.stringify(String(projectTitle || 'BembaJS'));
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${t.slice(1, -1)}</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.bsx"></script>
-</body>
-</html>
-`;
-}
-
-function mainJsx() {
-    return `import React from 'react';
-import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { globKeyToPageRoute } from 'bembajs-core';
-
-const pages = import.meta.glob('../amapeji/**/*.bemba', { eager: true });
-
-function App() {
-  const routes = [];
-  for (const [key, mod] of Object.entries(pages)) {
-    const routePath = globKeyToPageRoute(key);
-    if (routePath == null || !mod.default) continue;
-    const Comp = mod.default;
-    routes.push(<Route key={routePath} path={routePath} element={<Comp />} />);
-  }
-  return (
-    <Routes>
-      {routes}
-      <Route
-        path="*"
-        element={
-          <div style={{ padding: '1.5rem', fontFamily: 'system-ui, sans-serif' }}>
-            <p>
-              No route matched. Add <code>ukwisulula</code> to a page under <code>amapeji/</code>, or open{' '}
-              <a href="/react-demo">/react-demo</a> for a sample React route.
-            </p>
-          </div>
-        }
-      />
-    </Routes>
-  );
-}
-
-const root = createRoot(document.getElementById('root'));
-root.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
-);
-`;
-}
-
 function reactDemoPage() {
     return `pangaIpepa('ReactDemo', {
   ukwisulula: nokuti() {
@@ -472,7 +414,7 @@ function reactDemoPage() {
       <icipandwa className="bemba-react-demo" style={{ padding: '2rem', maxWidth: '42rem', margin: '0 auto' }}>
         <umutwe_ukulu>Vite + React</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
-          This file is <code>amapeji/react-demo.bemba</code> → <code>/react-demo</code>.
+          This file is <code>amapeji/react-demo.bemba</code> → <code>/react-demo</code> (legacy demo route).
           Use <code>ukwisulula</code> for SPA routes. Build with <code>bemba akha</code> or <code>bemba fumya</code>{' '}
           (both run Vite by default).
         </ukulondolola>
@@ -532,21 +474,23 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
         fs.mkdirSync(cipandaDir, { recursive: true });
         fs.writeFileSync(path.join(cipandaDir, 'StarterCard.bemba'), starterCardPartial());
     }
-    fs.writeFileSync(
-        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'index.bemba'),
-        isUiTemplate ? indexPageUi() : indexPage()
-    );
-    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'about.bemba'), aboutPage());
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.COMPONENTS, 'Button.bemba'), buttonComponentBemba());
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.STYLES, 'global.css'), globalCss(projectName));
     fs.writeFileSync(path.join(projectPath, '.gitignore'), gitignoreContent());
     fs.writeFileSync(path.join(projectPath, '.editorconfig'), editorConfigContent());
     fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));
 
-    fs.mkdirSync(path.join(projectPath, 'src'), { recursive: true });
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app'), { recursive: true });
     fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
-    fs.writeFileSync(path.join(projectPath, 'index.html'), indexHtml(projectName));
-    fs.writeFileSync(path.join(projectPath, 'src', 'main.bsx'), mainJsx());
+    fs.writeFileSync(
+        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'page.bemba'),
+        isUiTemplate ? indexPageUi() : indexPage()
+    );
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about'), { recursive: true });
+    fs.writeFileSync(
+        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about', 'page.bemba'),
+        aboutPage()
+    );
     fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
 }
 

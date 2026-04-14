@@ -38,7 +38,51 @@ function globKeyToPageRoute(globKey) {
     return filePathToPageRoute(`${rel}.bemba`);
 }
 
+/**
+ * App-router mapping for files ending with `amapeji/app/<segments>/page.bemba`.
+ * Example:
+ * - `amapeji/app/page.bemba` -> `/`
+ * - `amapeji/app/about/page.bemba` -> `/about`
+ * - `amapeji/app/blog/[id]/page.bemba` -> `/blog/:id`
+ * @param {string} filePathAbsOrRel
+ * @returns {string|null}
+ */
+function appPageFileToRoute(filePathAbsOrRel) {
+    const normalized = String(filePathAbsOrRel || '').replace(/\\/g, '/');
+    if (/(?:^|\/)amapeji\/app\/page\.bemba$/i.test(normalized)) {
+        return '/';
+    }
+    const m = normalized.match(/(?:^|\/)amapeji\/app\/(.+)\/page\.bemba$/i);
+    if (!m) return null;
+    return filePathToPageRoute(`${m[1]}.bemba`);
+}
+
+/**
+ * Find app-router layouts that apply to a page.
+ * Returns nearest-first order from root to leaf.
+ * @param {string} pageFilePath
+ * @returns {string[]}
+ */
+function resolveAppLayoutsForPage(pageFilePath) {
+    const normalized = String(pageFilePath || '').replace(/\\/g, '/');
+    const m = normalized.match(/^(.*\/amapeji\/app)(?:\/(.+))\/page\.bemba$/i);
+    if (!m) return [];
+    const appRoot = m[1];
+    const relDir = m[2] || '';
+    const parts = relDir ? relDir.split('/').filter(Boolean) : [];
+    const layouts = [];
+    layouts.push(`${appRoot}/layout.bemba`);
+    let cur = appRoot;
+    for (const p of parts) {
+        cur += `/${p}`;
+        layouts.push(`${cur}/layout.bemba`);
+    }
+    return layouts;
+}
+
 module.exports = {
     filePathToPageRoute,
-    globKeyToPageRoute
+    globKeyToPageRoute,
+    appPageFileToRoute,
+    resolveAppLayoutsForPage
 };

@@ -7,3 +7,4 @@ require('./tw-bridge-smoke.js');
 require('./test-bemba-keyword-aliases.js');
 require('./test-bemba-import-alias-static.js');
 require('./test-bemba-alias-vite-compile.js');
+require('./test-next-style-core.js');

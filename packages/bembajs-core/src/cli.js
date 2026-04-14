@@ -381,19 +381,64 @@ class BembaCLI {
         return null;
     }
 
+    ensureManagedInjiniGlue(projectRoot) {
+        const root = projectRoot || process.cwd();
+        const publicIndex = path.join(root, 'index.html');
+        const hasPublicIndex = fs.existsSync(publicIndex);
+        if (hasPublicIndex) {
+            return { managedIndex: null };
+        }
+        const managedDir = path.join(root, '.bemba');
+        if (!fs.existsSync(managedDir)) fs.mkdirSync(managedDir, { recursive: true });
+        const managedIndex = path.join(managedDir, 'injini-index.html');
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BembaJS</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/@id/virtual:bemba-app-entry"></script>
+</body>
+</html>
+`;
+        fs.writeFileSync(managedIndex, html, 'utf8');
+        return { managedIndex };
+    }
+
     async startViteDevServer(options, configFile) {
         console.log(msg('viteDevReact'));
         const { createServer } = await import('vite');
+        const glue = this.ensureManagedInjiniGlue(process.cwd());
         const port = parseInt(String(options.port || '3000'), 10);
         const server = await createServer({
             configFile,
             logLevel: 'silent',
+            appType: glue.managedIndex ? 'mpa' : undefined,
             server: {
                 port,
                 host: options.host === 'localhost' ? true : options.host
             }
         });
         await server.listen();
+        if (glue.managedIndex) {
+            server.middlewares.use(async (req, res, next) => {
+                if (!req || !req.url) return next();
+                if (req.url !== '/' && req.url !== '/index.html') return next();
+                try {
+                    const html = fs.readFileSync(glue.managedIndex, 'utf8');
+                    const transformed = await server.transformIndexHtml(req.url, html);
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/html');
+                    res.end(transformed);
+                    return;
+                } catch (e) {
+                    return next(e);
+                }
+            });
+        }
         const urls = server.resolvedUrls || {};
         const local = Array.from(urls.local || []);
         const network = Array.from(urls.network || []);
@@ -452,9 +497,11 @@ class BembaCLI {
         if (viteConfig) {
             console.log(msg('viteBuildReact'));
             const { build } = await import('vite');
+            const glue = this.ensureManagedInjiniGlue(process.cwd());
             await build({
                 configFile: viteConfig,
-                build: { outDir: options.output || 'dist' }
+                ...(glue.managedIndex ? { build: { outDir: options.output || 'dist', rollupOptions: { input: glue.managedIndex } } } : {}),
+                ...(glue.managedIndex ? {} : { build: { outDir: options.output || 'dist' } })
             });
             console.log(msg('viteBuildDone'));
             return;
@@ -481,9 +528,11 @@ class BembaCLI {
         if (viteConfig) {
             console.log(msg('viteBuildReact'));
             const { build } = await import('vite');
+            const glue = this.ensureManagedInjiniGlue(process.cwd());
             await build({
                 configFile: viteConfig,
-                build: { outDir: options.output || 'out' }
+                ...(glue.managedIndex ? { build: { outDir: options.output || 'out', rollupOptions: { input: glue.managedIndex } } } : {}),
+                ...(glue.managedIndex ? {} : { build: { outDir: options.output || 'out' } })
             });
             console.log(msg('viteBuildDone'));
             return;

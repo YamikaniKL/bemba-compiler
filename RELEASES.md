@@ -40,13 +40,13 @@ These ship across recent **1.3.x** releases and sit on top of the v1.3.0 languag
 - **Legacy static HTML** is now explicit: **`bemba static-export`** (or older compatibility flows where enabled).
 - **`vite-plugin-bemba`** is published from `bembajs-core` and compiles `.bemba` directly in Vite projects.
 - **`vite-plugin-bemba`** now also handles `.bsx` source transforms, and normalizes queried `.bemba` ids before file reads for more reliable Windows/dev-server behavior.
-- Scaffolded apps now include **`vite.config.mjs`**, **`index.html`**, **`src/main.bsx`**, and a sample **`amapeji/react-demo.bemba`** route wired via React Router.
+- Scaffolded apps now include **`vite.config.mjs`** plus app-router pages under **`amapeji/app/**/page.bemba`**; Injini manages hidden runtime glue automatically.
 
 - **`bemba tungulula`** — primary dev server (generated apps use this as `bun run dev` / `npm run dev`).
 - **`bemba panga` / `bemba init`** — scaffolding with interactive template choice (`base`, `ui`, …).
 - **`bemba akha`** / **`bemba fumya`** — React/Vite build defaults; legacy static HTML export remains available via **`bemba static-export`**.
 - **`bemba emit-react`** — emit **`.jsx`** from `amapeji/`, `ifikopo/` (recursive), `maapi/`, `mafungulo/` into **`dist/bemba-react/`** for Vite/esbuild + React (skips `pangaIcapaba`-only partials).
-- **`src/main.bsx`** is now the default React entry in scaffolded apps; `amapeji/**/*.bemba` remains the source for authored pages/components.
+- **Hidden glue by default:** new projects no longer require user-managed **`index.html`** or **`src/main.*`**; Injini injects a virtual app entry internally.
 - **`bemba lint`** / **`bemba format`** — lint and format Bemba sources.
 - **`bemba template sync`** — refresh generated docs/shell from templates (`--starter` overwrites default shell/pages).
 

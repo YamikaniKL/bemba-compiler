@@ -1,0 +1,12 @@
+// App router about page
+pangaIpepa('About', {
+    umusangoSite: ee,
+    umutwe: 'About BembaJS',
+    ilyashi: 'App router path: amapeji/app/about/page.bemba',
+    ifiputulwa: [
+        {
+            umutwe: 'Get started by editing',
+            ilyashi: 'Save and see your changes instantly.'
+        }
+    ]
+});

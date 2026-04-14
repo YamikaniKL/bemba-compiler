@@ -9,6 +9,57 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { ModuleNode } = require('./ast');
 const { transformWithEsbuild } = require('vite');
+const VIRTUAL_ENTRY_ID = 'virtual:bemba-app-entry';
+const RESOLVED_VIRTUAL_ENTRY_ID = '\0virtual:bemba-app-entry';
+
+function virtualEntrySource() {
+    return `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
+const appPages = import.meta.glob('/amapeji/app/**/page.bemba', { eager: true });
+const legacyPages = import.meta.glob('/amapeji/**/*.bemba', { eager: true });
+
+function filePathToPageRoute(filePath) {
+  let route = String(filePath || '')
+    .replace(/\\\\/g, '/')
+    .replace(/\\.bemba$/, '')
+    .replace(/^\\/?index$/, '')
+    .replace(/\\/index$/, '/')
+    .replace(/\\/$/, '');
+  route = route.replace(/\\[([^\\]]+)\\]/g, ':$1');
+  route = route.replace(/\\[\\.\\.\\.([^\\]]+)\\]/g, ':$1*');
+  if (!route.startsWith('/')) route = '/' + route;
+  if (route === '') route = '/';
+  return route;
+}
+
+function toRoute(globKey) {
+  const normalized = String(globKey || '').replace(/\\\\/g, '/');
+  const appMatch = normalized.match(/\\/amapeji\\/app\\/(.+)\\/page\\.bemba$/i);
+  if (appMatch) return filePathToPageRoute(appMatch[1] + '.bemba');
+  const m = normalized.match(/\\/amapeji\\/(.+)\\.bemba$/i);
+  if (!m) return null;
+  const rel = m[1].replace(/^app\\//, '');
+  if (rel === 'umusango' || /^umusango-/.test(rel)) return null;
+  return filePathToPageRoute(rel + '.bemba');
+}
+
+function App() {
+  const routes = [];
+  const merged = { ...legacyPages, ...appPages };
+  for (const [key, mod] of Object.entries(merged)) {
+    const routePath = toRoute(key);
+    if (routePath == null || !mod.default) continue;
+    const Comp = mod.default;
+    routes.push(<Route key={routePath} path={routePath} element={<Comp />} />);
+  }
+  return <Routes>{routes}<Route path="*" element={<Navigate to="/" replace />} /></Routes>;
+}
+
+createRoot(document.getElementById('root')).render(<BrowserRouter><App /></BrowserRouter>);
+`;
+}
 
 function compileBembaFile(source, id) {
     const parser = new BembaParser();
@@ -32,7 +83,14 @@ function vitePluginBemba() {
     return {
         name: 'vite-plugin-bemba',
         enforce: 'pre',
+        resolveId(id) {
+            if (id === VIRTUAL_ENTRY_ID) return RESOLVED_VIRTUAL_ENTRY_ID;
+            return null;
+        },
         async load(id) {
+            if (id === RESOLVED_VIRTUAL_ENTRY_ID) {
+                return virtualEntrySource();
+            }
             if (!bembaFilter.test(id)) return null;
             const fileId = cleanId(id);
             let src = '';
@@ -73,8 +131,20 @@ function vitePluginBemba() {
             }
             if (bembaFilter.test(id)) return null;
             return null;
+        },
+        transformIndexHtml(html) {
+            const raw = String(html || '');
+            if (/src\/main\.(bsx|jsx|tsx|js)/i.test(raw)) return raw;
+            if (raw.includes(VIRTUAL_ENTRY_ID)) return raw;
+            const withRoot = raw.includes('id="root"')
+                ? raw
+                : raw.replace('</body>', '  <div id="root"></div>\n</body>');
+            return withRoot.replace(
+                '</body>',
+                `  <script type="module" src="/@id/${VIRTUAL_ENTRY_ID}"></script>\n</body>`
+            );
         }
     };
 }
 
-module.exports = { vitePluginBemba, compileBembaFile };
+module.exports = { vitePluginBemba, compileBembaFile, VIRTUAL_ENTRY_ID };

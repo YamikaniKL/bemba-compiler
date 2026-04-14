@@ -1,6 +1,6 @@
 // File-based routing engine for BembaJS framework
 const { BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
-const { filePathToPageRoute } = require('./bemba-route-utils');
+const { filePathToPageRoute, appPageFileToRoute, resolveAppLayoutsForPage } = require('./bemba-route-utils');
 const fs = require('fs');
 const path = require('path');
 
@@ -31,9 +31,12 @@ class BembaRouter {
     // Scan for routes in the project
     scanRoutes() {
         const pagesDir = path.join(this.projectRoot, this.config.pagesDir);
+        const appDir = path.join(pagesDir, 'app');
         const apiDir = path.join(this.projectRoot, this.config.apiDir);
-        
-        if (fs.existsSync(pagesDir)) {
+
+        if (fs.existsSync(appDir)) {
+            this.scanAppRoutes(appDir);
+        } else if (fs.existsSync(pagesDir)) {
             this.scanDirectory(pagesDir, this.routes, 'page');
         }
         
@@ -62,6 +65,31 @@ class BembaRouter {
             }
         }
     }
+
+    scanAppRoutes(appDir) {
+        const visit = (dir) => {
+            const items = fs.readdirSync(dir);
+            for (const item of items) {
+                const fullPath = path.join(dir, item);
+                const stat = fs.statSync(fullPath);
+                if (stat.isDirectory()) {
+                    visit(fullPath);
+                    continue;
+                }
+                if (!item.endsWith('.bemba')) continue;
+                if (item !== 'page.bemba') continue;
+                const routePath = appPageFileToRoute(fullPath);
+                if (!routePath) continue;
+                const route = this.createRoute(fullPath, 'page');
+                if (!route) continue;
+                route.path = routePath;
+                route.appRouter = true;
+                route.layouts = resolveAppLayoutsForPage(fullPath).filter((p) => fs.existsSync(p));
+                this.routes.set(route.path, route);
+            }
+        };
+        visit(appDir);
+    }
     
     createRoute(filePath, type) {
         const relativePath = path.relative(
@@ -73,6 +101,7 @@ class BembaRouter {
         const isDynamic = this.isDynamicRoute(routePath);
         const isApi = type === 'api';
         
+        const directives = this.extractRouteDirectives(filePath);
         return {
             path: routePath,
             filePath: filePath,
@@ -82,8 +111,22 @@ class BembaRouter {
             params: isDynamic ? this.extractParams(routePath) : [],
             middleware: [],
             component: null,
-            dataFetching: null
+            dataFetching: null,
+            runtime: directives.runtime,
+            renderMode: directives.renderMode
         };
+    }
+
+    extractRouteDirectives(filePath) {
+        let src = '';
+        try {
+            src = fs.readFileSync(filePath, 'utf8');
+        } catch (_) {
+            return { runtime: 'server', renderMode: 'ssr' };
+        }
+        const runtime = /@bemba-client\b/i.test(src) ? 'client' : 'server';
+        const renderMode = /@bemba-ssg\b/i.test(src) ? 'ssg' : 'ssr';
+        return { runtime, renderMode };
     }
     
     isDynamicRoute(route) {

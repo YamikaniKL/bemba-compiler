@@ -10,7 +10,7 @@ const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
 const { loadApiHandlerFromGeneratedSource } = require('./server-load-api');
 const { loadBembaFrameworkConfig } = require('./framework-config');
-const { renderBembaPageToHtmlString } = require('./server-load-react-page');
+const { renderBembaPageToHtmlString, renderBembaAppRouteToHtmlString } = require('./server-load-react-page');
 
 /** @param {string[]} depPaths @returns {Record<string, number>} */
 function snapshotDepMtimes(depPaths) {
@@ -263,7 +263,18 @@ class BembaDevServer {
                 if (tryReactSsr) {
                     try {
                         const generated = await this.compileFile(route.filePath);
-                        const inner = renderBembaPageToHtmlString(generated, { filePath: route.filePath });
+                        let inner;
+                        if (route.appRouter && Array.isArray(route.layouts) && route.layouts.length > 0) {
+                            const compiledLayouts = [];
+                            for (const lp of route.layouts) {
+                                compiledLayouts.push(await this.compileFile(lp));
+                            }
+                            inner = renderBembaAppRouteToHtmlString(generated, compiledLayouts, {
+                                filePath: route.filePath
+                            });
+                        } else {
+                            inner = renderBembaPageToHtmlString(generated, { filePath: route.filePath });
+                        }
                         const title = this.extractPageTitleFromSource(rawSource, route);
                         res.type('html');
                         return res.send(this.wrapDevSsrDocument(inner, title));
