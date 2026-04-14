@@ -39,6 +39,7 @@ function filePathToPageRoute(filePath) {
 
 function toRoute(globKey) {
   const normalized = String(globKey || '').replace(/\\\\/g, '/');
+  if (/\\/amapeji\\/app\\/page\\.bemba$/i.test(normalized)) return '/';
   const appMatch = normalized.match(/\\/amapeji\\/app\\/(.+)\\/page\\.bemba$/i);
   if (appMatch) return filePathToPageRoute(appMatch[1] + '.bemba');
   const m = normalized.match(/\\/amapeji\\/(.+)\\.bemba$/i);

@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.3.19",
+  "version": "1.3.21",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language with full control flow and Chakra UI support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -47,7 +47,7 @@
   "author": "Yamikani Kalonge and Bemba Team",
   "license": "MIT",
   "dependencies": {
-    "bembajs-core": "^1.3.17",
+    "bembajs-core": "^1.3.19",
     "chokidar": "^3.5.3",
     "commander": "^11.1.0",
     "express": "^4.21.2",
