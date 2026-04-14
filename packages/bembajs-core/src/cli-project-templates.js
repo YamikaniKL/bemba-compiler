@@ -336,6 +336,7 @@ bun run dev
 \`\`\`
 
 \`bun run dev\` runs **\`bemba tungulula\`** and starts **Injini** with app-router pages from \`amapeji/app/**/page.bemba\`.
+If this is a fresh scaffold, run \`bun install\` first.
 
 \`bun run build\` and \`bun run export\` also use Injini by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
 
@@ -456,9 +457,11 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     }
     const isUiTemplate = template === 'ui';
     const scope = options.scope === 'docs' ? 'docs' : 'all';
-
-    fs.mkdirSync(path.join(projectPath, 'docs'), { recursive: true });
-    fs.writeFileSync(path.join(projectPath, 'docs', 'CODE-STYLE-AND-UI.md'), projectCodeStyleMarkdown());
+    const includeDocs = options.includeDocs === true || scope === 'docs';
+    if (includeDocs) {
+        fs.mkdirSync(path.join(projectPath, 'docs'), { recursive: true });
+        fs.writeFileSync(path.join(projectPath, 'docs', 'CODE-STYLE-AND-UI.md'), projectCodeStyleMarkdown());
+    }
 
     if (scope === 'docs') {
         return;
@@ -481,17 +484,19 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));
 
     fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app'), { recursive: true });
-    fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
     fs.writeFileSync(
         path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'page.bemba'),
         isUiTemplate ? indexPageUi() : indexPage()
     );
-    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about'), { recursive: true });
-    fs.writeFileSync(
-        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about', 'page.bemba'),
-        aboutPage()
-    );
-    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
+    if (isUiTemplate) {
+        fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
+        fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about'), { recursive: true });
+        fs.writeFileSync(
+            path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about', 'page.bemba'),
+            aboutPage()
+        );
+        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
+    }
 }
 
 module.exports = {

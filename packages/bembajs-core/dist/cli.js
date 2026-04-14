@@ -259,8 +259,7 @@ class BembaCLI {
             BEMBA_FOLDERS.PUBLIC,
             BEMBA_FOLDERS.API,
             BEMBA_FOLDERS.STYLES,
-            BEMBA_FOLDERS.UTILS,
-            'src'
+            BEMBA_FOLDERS.UTILS
         ];
         
         for (const folder of folders) {
@@ -275,7 +274,7 @@ class BembaCLI {
         if (template !== 'base' && template !== 'ui') {
             throw new Error(`Unknown template "${template}". Use --template base or --template ui`);
         }
-        templates.writeProjectTemplateFiles(projectPath, name, { template, scope: 'all' });
+        templates.writeProjectTemplateFiles(projectPath, name, { template, scope: 'all', includeDocs: false });
     }
 
     /** Refresh files from the installed package so docs (and optionally starter pages) stay aligned with bembajs-core. */
@@ -378,7 +377,35 @@ class BembaCLI {
             const p = path.join(root, f);
             if (fs.existsSync(p)) return p;
         }
+        const managed = path.join(root, '.bemba', 'injini-vite.config.mjs');
+        if (fs.existsSync(managed)) return managed;
         return null;
+    }
+
+    ensureManagedInjiniViteConfig(projectRoot) {
+        const root = projectRoot || process.cwd();
+        const managedDir = path.join(root, '.bemba');
+        if (!fs.existsSync(managedDir)) fs.mkdirSync(managedDir, { recursive: true });
+        const cfgPath = path.join(managedDir, 'injini-vite.config.mjs');
+        const src = `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba';
+
+export default defineConfig({
+  plugins: [vitePluginBemba(), react({ include: [/\\.[jt]sx$/, /\\.bsx$/] })],
+  esbuild: {
+    include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
+    loader: 'jsx'
+  },
+  resolve: {
+    extensions: ['.bemba', '.bsx', '.jsx', '.js', '.tsx', '.ts', '.json']
+  },
+  server: { port: 3000 },
+  build: { outDir: 'dist' }
+});
+`;
+        fs.writeFileSync(cfgPath, src, 'utf8');
+        return cfgPath;
     }
 
     ensureManagedInjiniGlue(projectRoot) {
@@ -410,18 +437,32 @@ class BembaCLI {
 
     async startViteDevServer(options, configFile) {
         console.log(msg('viteDevReact'));
-        const { createServer } = await import('vite');
+        let createServer;
+        try {
+            ({ createServer } = await import('vite'));
+        } catch (e) {
+            throw new Error('Injini dependencies are missing. Run `bun install` in this project, then run `bemba tungulula` again.');
+        }
         const glue = this.ensureManagedInjiniGlue(process.cwd());
         const port = parseInt(String(options.port || '3000'), 10);
-        const server = await createServer({
-            configFile,
-            logLevel: 'silent',
-            appType: glue.managedIndex ? 'mpa' : undefined,
-            server: {
-                port,
-                host: options.host === 'localhost' ? true : options.host
+        let server;
+        try {
+            server = await createServer({
+                configFile,
+                logLevel: 'silent',
+                appType: glue.managedIndex ? 'mpa' : undefined,
+                server: {
+                    port,
+                    host: options.host === 'localhost' ? true : options.host
+                }
+            });
+        } catch (e) {
+            const m = String(e && e.message ? e.message : e);
+            if (/Cannot find package 'vite'|Cannot find module 'vite'|externalize-deps/i.test(m)) {
+                throw new Error('Injini dependencies are missing. Run `bun install` in this project, then run `bemba tungulula` again.');
             }
-        });
+            throw e;
+        }
         await server.listen();
         if (glue.managedIndex) {
             server.middlewares.use(async (req, res, next) => {
@@ -454,8 +495,11 @@ class BembaCLI {
     shouldUseViteReactApp(options = {}) {
         const { loadBembaFrameworkConfig } = require('./framework-config');
         const cfg = loadBembaFrameworkConfig(process.cwd());
-        const viteConfig = this.findViteConfigPath(process.cwd());
+        let viteConfig = this.findViteConfigPath(process.cwd());
         if (options.legacyStatic) return null;
+        if (!viteConfig && cfg.reactApp !== false) {
+            viteConfig = this.ensureManagedInjiniViteConfig(process.cwd());
+        }
         if (cfg.reactApp !== false && viteConfig) {
             return viteConfig;
         }
