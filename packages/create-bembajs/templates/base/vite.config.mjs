@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba.js';
+import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba';
 
 export default defineConfig({
   plugins: [vitePluginBemba(), react({ include: [/\.[jt]sx$/, /\.bsx$/] })],

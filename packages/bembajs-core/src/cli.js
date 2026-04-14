@@ -330,7 +330,7 @@ class BembaCLI {
             },
             dependencies: {
                 'bembajs': `^${CORE_VERSION}`,
-                'bembajs-core': `^${CORE_VERSION}`,
+                'bembajs-core': '^1.3.13',
                 'express': '^4.21.2',
                 'react': '^18.0.0',
                 'react-dom': '^18.0.0',
