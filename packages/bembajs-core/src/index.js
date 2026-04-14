@@ -5,6 +5,7 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { BEMBA_KEYWORDS, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { version: CORE_VERSION } = require('../package.json');
+const { filePathToPageRoute, globKeyToPageRoute } = require('./bemba-route-utils');
 const { exportStaticHtmlSite, routeToOutHtmlPath } = require('./static-html-export');
 const { resolveCssImports } = require('./css-imports');
 const { publicAssetUrl, buildPictureHtml } = require('./asset-helpers');
@@ -166,7 +167,11 @@ module.exports = {
     BEMBA_INGISA,
     
     // Version
-    version: CORE_VERSION
+    version: CORE_VERSION,
+
+    // Routing helpers (Vite / React app)
+    filePathToPageRoute,
+    globKeyToPageRoute
 };
 
 // ESM exports

@@ -9,7 +9,22 @@ const packageRoot = __dirname;
 const srcDir = path.join(packageRoot, 'src');
 const distDir = path.join(packageRoot, 'dist');
 
-const entryFiles = ['index', 'lexer', 'parser', 'transformer', 'generator', 'constants', 'ast', 'runtime', 'router', 'cli', 'build', 'app', 'dev-server'];
+const entryFiles = [
+    'index',
+    'lexer',
+    'parser',
+    'transformer',
+    'generator',
+    'constants',
+    'ast',
+    'runtime',
+    'router',
+    'cli',
+    'build',
+    'app',
+    'dev-server',
+    'vite-plugin-bemba'
+];
 const typedEntries = ['index', 'lexer', 'parser', 'transformer', 'generator'];
 
 function ensureDir(dirPath) {

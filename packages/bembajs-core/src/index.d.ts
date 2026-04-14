@@ -94,6 +94,10 @@ interface BembajsCoreExports {
     BEMBA_FILES: Record<string, string>;
     BEMBA_INGISA: Record<string, string>;
     version: string;
+    /** File path relative to `amapeji/` with `.bemba` → URL path (e.g. `about/index.bemba` → `/about`). */
+    filePathToPageRoute(relativePath: string): string;
+    /** `import.meta.glob` key → `amapeji` route path, or null for shell / unknown. */
+    globKeyToPageRoute(globKey: string): string | null;
 }
 
 declare const bembajsCore: BembajsCoreExports & { default: BembajsCoreExports };

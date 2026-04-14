@@ -33,6 +33,10 @@
       "require": "./dist/generator.js",
       "import": "./dist/generator.mjs",
       "types": "./dist/generator.d.ts"
+    },
+    "./vite-plugin-bemba": {
+      "require": "./dist/vite-plugin-bemba.js",
+      "import": "./dist/vite-plugin-bemba.mjs"
     }
   },
   "files": [
@@ -56,7 +60,20 @@
   "dependencies": {
     "commander": "^14.0.3"
   },
-  "devDependencies": {},
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "react-dom": { "optional": true }
+  },
+  "devDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.3.4"
+  },
   "engines": {
     "node": ">=16.0.0"
   },

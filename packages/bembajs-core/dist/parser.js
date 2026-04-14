@@ -19,6 +19,11 @@ const {
 } = require('./ast');
 const { BEMBA_SYNTAX, BEMBA_FOLDERS, BEMBA_FILES, BEMBA_INGISA } = require('./constants');
 const { resolveCssImports } = require('./css-imports');
+const {
+    packageRootFromBareSpecifier,
+    buildImportMapScriptHtml,
+    resolveNodeModulesPackageJson
+} = require('./npm-import-map');
 const fs = require('fs');
 const path = require('path');
 
@@ -1490,6 +1495,7 @@ class BembaParser {
                       bodyHtml: '',
                       bodyCss: '',
                       headHtml: '',
+                      importMapHtml: '',
                       skippedDynamic: []
                   };
 
@@ -1539,6 +1545,9 @@ class BembaParser {
         const pageHeadFrags = this.extractImitwePaHTMLFragmentsFromSource(code);
         if (pageHeadFrags.length) {
             headExtra = [pageHeadFrags.join('\n'), headExtra].filter(Boolean).join('\n');
+        }
+        if (importBundle.importMapHtml) {
+            headExtra = [importBundle.importMapHtml, headExtra].filter(Boolean).join('\n');
         }
         if (importBundle.headHtml) {
             headExtra = [importBundle.headHtml, headExtra].filter(Boolean).join('\n');
@@ -1625,6 +1634,10 @@ class BembaParser {
                 if (!imp || imp.type !== 'Import') continue;
                 const r = resolveBembaImportPath(projectRoot, absPage, imp.source);
                 if (r) add(r);
+                else {
+                    const pj = resolveNodeModulesPackageJson(projectRoot, imp.source);
+                    if (pj) add(pj);
+                }
             }
         }
 
@@ -1661,6 +1674,9 @@ class BembaParser {
                 if (r) {
                     add(r);
                     queue.push(r);
+                } else {
+                    const pj = resolveNodeModulesPackageJson(projectRoot, imp.source);
+                    if (pj) add(pj);
                 }
             }
 
@@ -1815,10 +1831,13 @@ class BembaParser {
         for (const imp of importNodes) {
             if (!imp || imp.type !== 'Import') continue;
             const child = resolveBembaImportPath(projectRoot, abs, imp.source);
-            if (!child) continue;
-            const bn = path.basename(child, '.bemba');
-            const childLocal = staticImportBindingName(imp, bn);
-            this.mergeStaticImportSubtree(projectRoot, rootAbs, child, childLocal, mergedSet, visitingSet, acc);
+            if (child) {
+                const bn = path.basename(child, '.bemba');
+                const childLocal = staticImportBindingName(imp, bn);
+                this.mergeStaticImportSubtree(projectRoot, rootAbs, child, childLocal, mergedSet, visitingSet, acc);
+            } else if (packageRootFromBareSpecifier(imp.source)) {
+                acc.externalSources.add(String(imp.source).trim());
+            }
         }
         visitingSet.delete(abs);
 
@@ -1895,6 +1914,10 @@ class BembaParser {
      * (depth-first, like a module graph). `pangaIcapaba` partials merge; `fyambaIcipanda` merges when the
      * module defines `ibeensi` (trusted HTML) and/or `imikalile` (CSS-only is merged). Pure JSX
      * `ukwisulula` without `ibeensi` is listed in `skippedDynamic` — use the React/emit pipeline for that.
+     *
+     * Bare npm specifiers (`react`, `@heroicons/react`, `lucide-react`, …) emit a browser `importmap`
+     * (esm.sh, version pinned from `node_modules` when present). Use `<script type="module">` in
+     * `imitwePaHTML` or a client bundle to consume those bindings; static HTML does not rewrite `ibeensi`.
      */
     parseLeadingImportStatements(code) {
         this.tokens = this.lexer.tokenize(code);
@@ -1945,6 +1968,7 @@ class BembaParser {
             bodyHtml: '',
             bodyCss: '',
             headHtml: '',
+            importMapHtml: '',
             skippedDynamic: []
         });
         if (!projectRoot || !pageFilePath) return emptyOut();
@@ -1964,7 +1988,8 @@ class BembaParser {
             htmlParts: [],
             cssParts: [],
             headParts: [],
-            skippedDynamic: []
+            skippedDynamic: [],
+            externalSources: new Set()
         };
         const mergedSet = new Set();
         const visitingSet = new Set();
@@ -1972,17 +1997,23 @@ class BembaParser {
         for (const imp of importNodes) {
             if (!imp || imp.type !== 'Import') continue;
             const resolved = resolveBembaImportPath(projectRoot, absPage, imp.source);
-            if (!resolved) continue;
-            const base = path.basename(resolved, '.bemba');
-            const local = staticImportBindingName(imp, base);
-            this.mergeStaticImportSubtree(projectRoot, rootAbs, resolved, local, mergedSet, visitingSet, acc);
+            if (resolved) {
+                const base = path.basename(resolved, '.bemba');
+                const local = staticImportBindingName(imp, base);
+                this.mergeStaticImportSubtree(projectRoot, rootAbs, resolved, local, mergedSet, visitingSet, acc);
+            } else if (packageRootFromBareSpecifier(imp.source)) {
+                acc.externalSources.add(String(imp.source).trim());
+            }
         }
+
+        const importMapHtml = buildImportMapScriptHtml(rootAbs, acc.externalSources);
 
         return {
             navShell: acc.navShell,
             bodyHtml: acc.htmlParts.join('\n'),
             bodyCss: acc.cssParts.join('\n\n'),
             headHtml: acc.headParts.join('\n'),
+            importMapHtml,
             skippedDynamic: acc.skippedDynamic
         };
     }

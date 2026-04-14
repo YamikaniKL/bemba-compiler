@@ -4,8 +4,11 @@ module.exports = {
   name: 'bemba-app',
   version: '1.0.0',
   
-  // Framework settings
-  framework: 'nextjs-like',
+  // Framework settings (see bembajs-core DEFAULT_CONFIG)
+  framework: {
+    reactSsrDev: true,
+    reactApp: true
+  },
   
   // Folder structure (using Bemba names)
   folders: {

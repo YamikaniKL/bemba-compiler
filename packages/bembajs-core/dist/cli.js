@@ -86,7 +86,14 @@ class BembaCLI {
             .description(msg('tungululaDesc'))
             .option('-p, --port <port>', msg('optPort'), '3000')
             .option('--host <host>', msg('optHost'), 'localhost')
-            .action((options) => this.startDevServer(options));
+            .action(async (options) => {
+                try {
+                    await this.startDevServer(options);
+                } catch (e) {
+                    console.error(e.message || e);
+                    process.exit(1);
+                }
+            });
         
         // Build for production
         this.program
@@ -120,6 +127,24 @@ class BembaCLI {
             .action(async (options) => {
                 try {
                     await this.exportStatic(options);
+                } catch (e) {
+                    console.error(e.message || e);
+                    process.exit(1);
+                }
+            });
+
+        // Explicit legacy static HTML export command
+        this.program
+            .command('static-export')
+            .description(msg('staticExportDesc'))
+            .option('-o, --output <dir>', msg('optOutput'), 'out')
+            .option('--base-url <url>', msg('optBaseUrl'))
+            .option('--locale <code>', msg('optLocale'), 'en')
+            .option('--site-title <title>', msg('optSiteTitle'))
+            .option('--no-bemba-site', msg('optNoBembaSite'))
+            .action(async (options) => {
+                try {
+                    await this.exportStatic({ ...options, legacyStatic: true });
                 } catch (e) {
                     console.error(e.message || e);
                     process.exit(1);
@@ -231,7 +256,8 @@ class BembaCLI {
             BEMBA_FOLDERS.PUBLIC,
             BEMBA_FOLDERS.API,
             BEMBA_FOLDERS.STYLES,
-            BEMBA_FOLDERS.UTILS
+            BEMBA_FOLDERS.UTILS,
+            'src'
         ];
         
         for (const folder of folders) {
@@ -301,13 +327,16 @@ class BembaCLI {
             },
             dependencies: {
                 'bembajs': `^${CORE_VERSION}`,
+                'bembajs-core': `^${CORE_VERSION}`,
                 'express': '^4.21.2',
                 'react': '^18.0.0',
                 'react-dom': '^18.0.0',
+                'react-router-dom': '^6.28.0',
                 'next': '^14.0.0'
             },
             devDependencies: {
-                'bembajs-core': `^${CORE_VERSION}`,
+                vite: '^6.0.0',
+                '@vitejs/plugin-react': '^4.3.4',
                 standard: '^17.1.0'
             }
         };
@@ -340,16 +369,58 @@ class BembaCLI {
         );
     }
     
-    // Start development server
-    startDevServer(options) {
+    findViteConfigPath(projectRoot) {
+        const root = projectRoot || process.cwd();
+        for (const f of ['vite.config.mjs', 'vite.config.js', 'vite.config.ts']) {
+            const p = path.join(root, f);
+            if (fs.existsSync(p)) return p;
+        }
+        return null;
+    }
+
+    async startViteDevServer(options, configFile) {
+        console.log(msg('viteDevReact'));
+        const { createServer } = await import('vite');
+        const port = parseInt(String(options.port || '3000'), 10);
+        const server = await createServer({
+            configFile,
+            server: {
+                port,
+                host: options.host === 'localhost' ? true : options.host
+            }
+        });
+        await server.listen();
+        server.printUrls();
+    }
+
+    /** React app mode: enabled in config and vite.config.* exists (unless caller asks for legacy static path). */
+    shouldUseViteReactApp(options = {}) {
+        const { loadBembaFrameworkConfig } = require('./framework-config');
+        const cfg = loadBembaFrameworkConfig(process.cwd());
+        const viteConfig = this.findViteConfigPath(process.cwd());
+        if (options.legacyStatic) return null;
+        if (cfg.reactApp !== false && viteConfig) {
+            return viteConfig;
+        }
+        return null;
+    }
+
+    // Start development server (Vite React app when vite.config.* exists, else Express)
+    async startDevServer(options) {
+        const viteConfig = this.shouldUseViteReactApp(options);
+        if (viteConfig) {
+            await this.startViteDevServer(options, viteConfig);
+            return;
+        }
+
         console.log(msg('startingDevPort', options.port));
-        
+
         const DevServer = require('./dev-server');
         const server = new DevServer({
-            port: parseInt(options.port),
+            port: parseInt(options.port, 10),
             host: options.host
         });
-        
+
         server.start();
     }
     
@@ -365,6 +436,21 @@ class BembaCLI {
             return builder.build();
         }
 
+        const viteConfig = this.shouldUseViteReactApp(options);
+        if (viteConfig) {
+            console.log(msg('viteBuildReact'));
+            const { build } = await import('vite');
+            await build({
+                configFile: viteConfig,
+                build: { outDir: options.output || 'dist' }
+            });
+            console.log(msg('viteBuildDone'));
+            return;
+        }
+
+        if (options.legacyStatic) {
+            console.log(msg('usingLegacyStatic'));
+        }
         console.log(msg('exportingHtml'));
         const { exportStaticHtmlSite } = require('./static-html-export');
         await exportStaticHtmlSite({
@@ -379,6 +465,20 @@ class BembaCLI {
     
     // Export static site
     async exportStatic(options) {
+        const viteConfig = this.shouldUseViteReactApp(options);
+        if (viteConfig) {
+            console.log(msg('viteBuildReact'));
+            const { build } = await import('vite');
+            await build({
+                configFile: viteConfig,
+                build: { outDir: options.output || 'out' }
+            });
+            console.log(msg('viteBuildDone'));
+            return;
+        }
+        if (options.legacyStatic) {
+            console.log(msg('usingLegacyStatic'));
+        }
         console.log(msg('exportingSite'));
         const { exportStaticHtmlSite } = require('./static-html-export');
         await exportStaticHtmlSite({

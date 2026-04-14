@@ -32,9 +32,18 @@ These ship across recent **1.3.x** releases and sit on top of the v1.3.0 languag
 
 ### CLI and developer workflow
 
+#### React-first command model (latest 1.3.x)
+
+- **`bemba tungulula`** runs **Vite** by default when `vite.config.*` is present and `framework.reactApp !== false`.
+- **`bemba akha`** builds production with **Vite** by default.
+- **`bemba fumya`** also exports via **Vite** by default (output folder oriented).
+- **Legacy static HTML** is now explicit: **`bemba static-export`** (or older compatibility flows where enabled).
+- **`vite-plugin-bemba`** is published from `bembajs-core` and compiles `.bemba` directly in Vite projects.
+- Scaffolded apps now include **`vite.config.mjs`**, **`index.html`**, **`src/main.jsx`**, and a sample **`amapeji/react-demo.bemba`** route wired via React Router.
+
 - **`bemba tungulula`** — primary dev server (generated apps use this as `bun run dev` / `npm run dev`).
 - **`bemba panga` / `bemba init`** — scaffolding with interactive template choice (`base`, `ui`, …).
-- **`bemba akha`** / **`bemba fumya`** — static HTML export (`exportStaticHtmlSite`): `pangaIpepa` pages, assets, optional **sitemap.xml** / **feed.xml**, optional **bemba-site.js**.
+- **`bemba akha`** / **`bemba fumya`** — React/Vite build defaults; legacy static HTML export remains available via **`bemba static-export`**.
 - **`bemba emit-react`** — emit **`.jsx`** from `amapeji/`, `ifikopo/` (recursive), `maapi/`, `mafungulo/` into **`dist/bemba-react/`** for Vite/esbuild + React (skips `pangaIcapaba`-only partials).
 - **`bemba lint`** / **`bemba format`** — lint and format Bemba sources.
 - **`bemba template sync`** — refresh generated docs/shell from templates (`--starter` overwrites default shell/pages).

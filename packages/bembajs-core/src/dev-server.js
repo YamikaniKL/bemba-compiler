@@ -9,6 +9,8 @@ const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const BembaRouter = require('./router');
 const { loadApiHandlerFromGeneratedSource } = require('./server-load-api');
+const { loadBembaFrameworkConfig } = require('./framework-config');
+const { renderBembaPageToHtmlString } = require('./server-load-react-page');
 
 /** @param {string[]} depPaths @returns {Record<string, number>} */
 function snapshotDepMtimes(depPaths) {
@@ -61,6 +63,8 @@ class BembaDevServer {
         // Hot reload clients
         this.hotReloadClients = new Set();
         
+        this.frameworkConfig = loadBembaFrameworkConfig(this.projectRoot);
+
         this.setupMiddleware();
         this.setupRoutes();
         this.setupFileWatching();
@@ -148,6 +152,48 @@ class BembaDevServer {
         this.notifyHotReload(relativePath);
     }
     
+    hotReloadClientScript() {
+        return `
+    <script>
+        const eventSource = new EventSource('/__bemba_hmr');
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.type === 'reload') {
+                window.location.reload();
+            }
+        };
+    </script>`;
+    }
+
+    /** Title from `umutwe:` or first string in `pangaIpepa('…')`, else route path. */
+    extractPageTitleFromSource(rawSource, route) {
+        const m = rawSource.match(/umutwe:\s*["']([^"']*)["']/);
+        if (m) return m[1].trim();
+        const m2 = rawSource.match(/pangaIpepa\s*\(\s*["']([^"']+)["']/);
+        if (m2) return m2[1].trim();
+        return (route && route.path) || 'BembaJS';
+    }
+
+    wrapDevSsrDocument(innerHtml, title) {
+        const safeTitle = this.escapeHtml(title || 'BembaJS');
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${safeTitle}</title>
+    <style>
+        body { font-family: system-ui, sans-serif; margin: 0; }
+        #root { min-height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="root">${innerHtml}</div>
+    ${this.hotReloadClientScript()}
+</body>
+</html>`;
+    }
+
     notifyHotReload(changedFile) {
         const message = `data: ${JSON.stringify({ type: 'reload', file: changedFile })}\n\n`;
         
@@ -199,6 +245,35 @@ class BembaDevServer {
             const rawSource = fs.readFileSync(route.filePath, 'utf8');
             if (rawSource.includes('pangaIpepa')) {
                 this.parser.projectRoot = this.projectRoot;
+
+                let tryReactSsr =
+                    this.frameworkConfig.reactSsrDev !== false && /\bukwisulula\s*:/.test(rawSource);
+                if (tryReactSsr) {
+                    try {
+                        require.resolve('react/package.json', { paths: [this.projectRoot] });
+                        require.resolve('react-dom/package.json', { paths: [this.projectRoot] });
+                    } catch (_) {
+                        tryReactSsr = false;
+                        console.warn(
+                            'BembaJS: install react and react-dom to enable dev SSR for pages with ukwisulula.'
+                        );
+                    }
+                }
+
+                if (tryReactSsr) {
+                    try {
+                        const generated = await this.compileFile(route.filePath);
+                        const inner = renderBembaPageToHtmlString(generated, { filePath: route.filePath });
+                        const title = this.extractPageTitleFromSource(rawSource, route);
+                        res.type('html');
+                        return res.send(this.wrapDevSsrDocument(inner, title));
+                    } catch (ssrErr) {
+                        console.warn(
+                            `BembaJS dev SSR skipped for ${route.filePath} (${ssrErr.message}). Trying static HTML…`
+                        );
+                    }
+                }
+
                 try {
                     const cur = req.path || '/';
                     const cacheKey = `${route.filePath}\0${cur}`;
@@ -322,25 +397,14 @@ class BembaDevServer {
             <h1>BembaJS Development Server</h1>
             <p>Route: ${route.path}</p>
             <div class="error">
-                <h3>Server render (non–pangaIpepa pages)</h3>
-                <p><strong>pangaIpepa</strong> pages are compiled to HTML on each request (server output). This preview is for AST-generated modules (components / future React SSR).</p>
+                <h3>Non–pangaIpepa module preview</h3>
+                <p><strong>pangaIpepa</strong> with <code>ukwisulula</code> uses React SSR in dev when <code>react</code> / <code>react-dom</code> are installed. Layout-first pages use the static HTML compiler.</p>
                 <p>Generated code:</p>
                 <pre>${this.escapeHtml(page)}</pre>
             </div>
         </div>
     </div>
-    
-    <script>
-        // Hot reload client
-        const eventSource = new EventSource('/__bemba_hmr');
-        eventSource.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.type === 'reload') {
-                console.log('Hot reload triggered for:', data.file);
-                window.location.reload();
-            }
-        };
-    </script>
+    ${this.hotReloadClientScript()}
 </body>
 </html>`;
         

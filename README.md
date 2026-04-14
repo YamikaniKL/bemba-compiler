@@ -23,7 +23,7 @@
 
 - **Control flow in Bemba** — `ngati` / `kapena`, `kwa` / `pamene`, `linga` / `kwata` / `paumalilo`, `lombako` / `leka` (see [RELEASES.md](RELEASES.md#v130--syntax-expansion-and-chakra-ui)).
 - **React and npm** — `ingisa` / `fumya`; wrappers for Chakra UI, Shadcn-style, MUI-style usage.
-- **CLI** — `bemba tungulula` (dev server), `bemba akha` / `bemba fumya` (static HTML export), `bemba emit-react` (emit JSX for Vite + React), `bemba template sync`, optional **`--lang bem`** / **`BEMBA_CLI_LANG=bem`** for Bemba CLI text.
+- **CLI** — React-first: `bemba tungulula` (Vite dev when configured), `bemba akha` / `bemba fumya` (Vite build/export defaults), `bemba static-export` (legacy static HTML), `bemba emit-react`, `bemba template sync`, optional **`--lang bem`** / **`BEMBA_CLI_LANG=bem`**.
 - **Static sites** — `amapeji/umusango.bemba` shared shell, `ingisa` partials / `pangaIcapaba`, sitemap & RSS when `baseUrl` / `BEMBA_SITE_URL` is set.
 - **Single documentation home** — this file plus [RELEASES.md](RELEASES.md) (version history). Generated apps still get a short **`docs/CODE-STYLE-AND-UI.md`** copy from the CLI.
 
@@ -44,14 +44,16 @@ bun run dev
 
 You can also scaffold with **`bemba panga my-app`** (interactive template: `base`, `ui`, …).
 
-### Static export and React bundling
+### Build and export
 
 ```bash
-bemba akha          # static HTML → ./dist (or use bemba fumya → ./out)
+bemba akha          # production React/Vite build → ./dist
+bemba fumya         # export build output → ./out
+bemba static-export # legacy static HTML export path
 bemba emit-react    # JSX under dist/bemba-react for Vite / esbuild + React
 ```
 
-Export options include `--base-url`, `--locale`, `--site-title`, `--no-bemba-site` (see [RELEASES.md](RELEASES.md)).
+Build/export options include `--base-url`, `--locale`, `--site-title`, `--no-bemba-site` (see [RELEASES.md](RELEASES.md)).
 
 ### Using React libraries
 
@@ -70,7 +72,8 @@ ingisa { TextField } ukufuma '@mui/material/TextField'
 
 - **File-based routing** — pages under `amapeji/`, components under `ifikopo/`
 - **`pangaApi` routes** — Node handlers from `mafungulo/*.bemba` (mounted at `/api` in the core dev server)
-- **Static HTML sites** — `pangaIpepa` + optional `umusangoSite: ee` and `amapeji/umusango.bemba` shell
+- **React-first app flow** — Vite plugin + React Router scaffolding for `.bemba` pages with `ukwisulula`
+- **Legacy static HTML sites** — `pangaIpepa` + optional `umusangoSite: ee` and `amapeji/umusango.bemba` shell via `bemba static-export`
 - **Partials** — `ingisa` + `pangaIcapaba`, optional `NavBar` header merge, top-of-file `import` of `.bemba`
 - **State and effects** — `ukusunga`, `ukusungaKabili`, `ukuCinja`
 - **Control flow** — conditionals, loops, try/catch/finally, async/await (Bemba keywords)
@@ -90,8 +93,9 @@ Commands (**`bemba`** or **`bunx bembajs`**):
 ```bash
 bemba panga <name>       # New project (interactive template base|ui, or --template / -t)
 bemba tungulula          # Dev server (matches bun run dev in scaffolded apps)
-bemba akha               # Static HTML export → ./dist
-bemba fumya              # Static HTML export → ./out
+bemba akha               # Production React/Vite build → ./dist
+bemba fumya              # Export build output → ./out
+bemba static-export      # Legacy static HTML export → ./out
 bemba emit-react         # Emit JSX for Vite/esbuild + React (default out: dist/bemba-react)
 bemba lint               # Lint .bemba sources
 bemba format             # Format .bemba sources
@@ -100,7 +104,7 @@ bemba --version
 bemba help
 ```
 
-**Static export flags:** `--base-url` or `BEMBA_SITE_URL`, `--locale` (`<html lang>`), `--site-title` (RSS), `--no-bemba-site` (skip `bemba-site.js`).
+**Build/export flags:** `--base-url` or `BEMBA_SITE_URL`, `--locale` (`<html lang>`), `--site-title` (RSS), `--no-bemba-site` (skip `bemba-site.js`).
 
 **CLI language:** `bemba --lang bem` / `-l bem` or `BEMBA_CLI_LANG=bem` (default English; applies to **bembajs** and **bembajs-core** CLIs).
 

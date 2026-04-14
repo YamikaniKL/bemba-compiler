@@ -328,7 +328,9 @@ bun install
 bun run dev
 \`\`\`
 
-\`bun run dev\` runs **\`bemba tungulula\`** — that is the primary dev server entry for BembaJS (same behavior either way).
+\`bun run dev\` runs **\`bemba tungulula\`** and starts **Vite** (React SPA from \`amapeji/**/*.bemba\` with \`ukwisulula\`) by default.
+
+\`bun run build\` and \`bun run export\` also use the Vite React build by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
 
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
 
@@ -367,6 +369,100 @@ out/
 .env
 .env.local
 .env.*.local
+`;
+}
+
+function viteConfigMjs() {
+    return `import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba.js';
+
+export default defineConfig({
+  plugins: [vitePluginBemba(), react()],
+  resolve: {
+    extensions: ['.bemba', '.jsx', '.js', '.tsx', '.ts', '.json']
+  },
+  server: { port: 3000 },
+  build: { outDir: 'dist' }
+});
+`;
+}
+
+function indexHtml(projectTitle) {
+    const t = JSON.stringify(String(projectTitle || 'BembaJS'));
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${t.slice(1, -1)}</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
+`;
+}
+
+function mainJsx() {
+    return `import React from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { globKeyToPageRoute } from 'bembajs-core';
+
+const pages = import.meta.glob('../amapeji/**/*.bemba', { eager: true });
+
+function App() {
+  const routes = [];
+  for (const [key, mod] of Object.entries(pages)) {
+    const routePath = globKeyToPageRoute(key);
+    if (routePath == null || !mod.default) continue;
+    const Comp = mod.default;
+    routes.push(<Route key={routePath} path={routePath} element={<Comp />} />);
+  }
+  return (
+    <Routes>
+      {routes}
+      <Route
+        path="*"
+        element={
+          <div style={{ padding: '1.5rem', fontFamily: 'system-ui, sans-serif' }}>
+            <p>
+              No route matched. Add <code>ukwisulula</code> to a page under <code>amapeji/</code>, or open{' '}
+              <a href="/react-demo">/react-demo</a> for a sample React route.
+            </p>
+          </div>
+        }
+      />
+    </Routes>
+  );
+}
+
+const root = createRoot(document.getElementById('root'));
+root.render(
+  <BrowserRouter>
+    <App />
+  </BrowserRouter>
+);
+`;
+}
+
+function reactDemoPage() {
+    return `pangaIpepa('ReactDemo', {
+  ukwisulula: nokuti() {
+    bwelela (
+      <icipandwa className="bemba-react-demo" style={{ padding: '2rem', maxWidth: '42rem', margin: '0 auto' }}>
+        <umutwe_ukulu>Vite + React</umutwe_ukulu>
+        <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
+          This file is <code>amapeji/react-demo.bemba</code> → <code>/react-demo</code>.
+          Use <code>ukwisulula</code> for SPA routes. Build with <code>bemba akha</code> or <code>bemba fumya</code>{' '}
+          (both run Vite by default).
+        </ukulondolola>
+      </icipandwa>
+    )
+  }
+});
 `;
 }
 
@@ -429,6 +525,12 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
     fs.writeFileSync(path.join(projectPath, '.gitignore'), gitignoreContent());
     fs.writeFileSync(path.join(projectPath, '.editorconfig'), editorConfigContent());
     fs.writeFileSync(path.join(projectPath, 'README.md'), projectReadme(projectName));
+
+    fs.mkdirSync(path.join(projectPath, 'src'), { recursive: true });
+    fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
+    fs.writeFileSync(path.join(projectPath, 'index.html'), indexHtml(projectName));
+    fs.writeFileSync(path.join(projectPath, 'src', 'main.jsx'), mainJsx());
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
 }
 
 module.exports = {

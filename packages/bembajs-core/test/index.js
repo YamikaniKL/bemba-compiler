@@ -1,4 +1,5 @@
 require('./test-static-deps.js');
+require('./test-react-ssr-loader.js');
 require('./test-footer-directory.js');
 require('./test-platform-extensions.js');
 require('./test-tailwind-partial.js');

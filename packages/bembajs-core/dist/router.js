@@ -1,5 +1,6 @@
 // File-based routing engine for BembaJS framework
 const { BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
+const { filePathToPageRoute } = require('./bemba-route-utils');
 const fs = require('fs');
 const path = require('path');
 
@@ -68,7 +69,7 @@ class BembaRouter {
             filePath
         );
         
-        const routePath = this.convertFilePathToRoute(relativePath);
+        const routePath = filePathToPageRoute(relativePath);
         const isDynamic = this.isDynamicRoute(routePath);
         const isApi = type === 'api';
         
@@ -83,34 +84,6 @@ class BembaRouter {
             component: null,
             dataFetching: null
         };
-    }
-    
-    convertFilePathToRoute(filePath) {
-        let route = filePath
-            .replace(/\\/g, '/') // Normalize path separators
-            .replace(/\.bemba$/, '') // Remove .bemba extension
-            // `amapeji/index.bemba` → `/` (not `/index`)
-            .replace(/^\/?index$/, '')
-            .replace(/\/index$/, '/') // `foo/index` → `foo/`
-            .replace(/\/$/, ''); // Remove trailing slash
-        
-        // Handle dynamic routes [param] -> :param
-        route = route.replace(/\[([^\]]+)\]/g, ':$1');
-        
-        // Handle catch-all routes [...param] -> :param*
-        route = route.replace(/\[\.\.\.([^\]]+)\]/g, ':$1*');
-        
-        // Ensure route starts with /
-        if (!route.startsWith('/')) {
-            route = '/' + route;
-        }
-        
-        // Handle root route
-        if (route === '') {
-            route = '/';
-        }
-        
-        return route;
     }
     
     isDynamicRoute(route) {

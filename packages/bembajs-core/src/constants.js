@@ -116,6 +116,16 @@ const DEFAULT_CONFIG = {
         fumyamo: './dist',
         ukukonkelesha: true
     },
+    /**
+     * React-first dev: pages with `ukwisulula` are rendered with react-dom/server (same module graph
+     * shape as production bundlers). Layout-first `pangaIpepa` pages (no `ukwisulula`) still use the
+     * static HTML compiler. Set `reactSsrDev: false` to restore legacy “static HTML first” ordering.
+     */
+    framework: {
+        reactSsrDev: true,
+        /** When true and a Vite config exists, `bemba tungulula` / `bemba akha` use Vite (full React SPA). */
+        reactApp: true
+    },
     server: {
         port: 3000
     },
