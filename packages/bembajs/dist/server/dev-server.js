@@ -177,7 +177,7 @@ function compileBembaToHtml(code, compileOpts = {}) {
                 const pageContentMatch = pageData.match(/ilyashi:\s*['"`]([^'"`]+)['"`]/);
                 
                 const pageTitle = pageTitleMatch ? pageTitleMatch[1] : pageName;
-                const pageContent = pageContentMatch ? pageContentMatch[1] : 'Welcome to BembaJS!';
+                const pageContent = pageContentMatch ? pageContentMatch[1] : 'BembaJS project page';
                 
                 // Extract sections (ifiputulwa) - improved parsing
                 let sections = '';
@@ -821,59 +821,22 @@ tick();
                 res.status(500).send(`Error compiling home page: ${error.message}`);
             }
         } else {
-            // Serve a default welcome page
-            const defaultPage = `
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>BembaJS Project</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; margin: 40px; }
-                        .container { max-width: 800px; margin: 0 auto; }
-                        .header { text-align: center; margin-bottom: 40px; }
-                        .feature { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <div class="header">
-                            <h1>Welcome to BembaJS!</h1>
-                            <p>Your BembaJS project is running successfully.</p>
-                        </div>
-                        
-                        <div class="feature">
-                            <h3>Project structure</h3>
-                            <p>Create files in these directories:</p>
-                            <ul>
-                                <li><code>amapeji/</code> - Pages (like Next.js pages/)</li>
-                                <li><code>ifikopo/</code> - Components</li>
-                                <li><code>maapi/</code> - API routes</li>
-                                <li><code>maungu/</code> - Static files</li>
-                            </ul>
-                        </div>
-                        
-                        <div class="feature">
-                            <h3>Getting started</h3>
-                            <p>Create your first page:</p>
-                            <pre><code>// amapeji/index.bemba
-pangaIpepa('Home', {
-    umutwe: 'Mwaiseni ku BembaJS!',
-    ilyashi: 'Welcome to your BembaJS project'
-});</code></pre>
-                        </div>
-                        
-                        <div class="feature">
-                            <h3>Development</h3>
-                            <p>Your development server is running at <code>http://localhost:${this.port}</code></p>
-                            <p>Hot reload is enabled - changes will be reflected automatically!</p>
-                        </div>
-                    </div>
-                </body>
-                </html>
-            `;
-            res.send(defaultPage);
+            res.status(404).type('html').send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Missing page</title>
+    <style>
+      body{font-family:system-ui,sans-serif;padding:2rem;max-width:56rem;margin:0 auto;}
+      code{background:#f3f4f6;padding:.15rem .35rem;border-radius:.35rem;}
+    </style>
+</head>
+<body>
+    <h1>No home page found</h1>
+    <p>Create <code>amapeji/index.bemba</code> (or run React app mode via Vite).</p>
+</body>
+</html>`);
         }
     }
 
