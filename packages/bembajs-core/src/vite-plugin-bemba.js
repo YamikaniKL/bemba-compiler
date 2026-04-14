@@ -26,21 +26,24 @@ function compileBembaFile(source, id) {
  * @returns {import('vite').Plugin}
  */
 function vitePluginBemba() {
-    const filter = /\.bemba$/;
+    const bembaFilter = /\.bemba(?:\?.*)?$/;
+    const bsxFilter = /\.bsx(?:\?.*)?$/;
+    const cleanId = (id) => String(id || '').replace(/\?.*$/, '');
     return {
         name: 'vite-plugin-bemba',
         enforce: 'pre',
         async load(id) {
-            if (!filter.test(id)) return null;
+            if (!bembaFilter.test(id)) return null;
+            const fileId = cleanId(id);
             let src = '';
             try {
-                src = fs.readFileSync(id, 'utf8');
+                src = fs.readFileSync(fileId, 'utf8');
             } catch (e) {
                 const msg = e && e.message ? e.message : String(e);
-                throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
+                throw new Error(`[vite-plugin-bemba] ${fileId}: ${msg}`);
             }
             try {
-                const compiled = compileBembaFile(src, id);
+                const compiled = compileBembaFile(src, fileId);
                 // Vite import analysis expects plain JS (not raw JSX) for custom extensions.
                 const transformed = await transformWithEsbuild(compiled, id, {
                     loader: 'jsx',
@@ -53,12 +56,22 @@ function vitePluginBemba() {
                 };
             } catch (e) {
                 const msg = e && e.message ? e.message : String(e);
-                throw new Error(`[vite-plugin-bemba] ${id}: ${msg}`);
+                throw new Error(`[vite-plugin-bemba] ${fileId}: ${msg}`);
             }
         },
-        transform(_src, id) {
-            if (!filter.test(id)) return null;
-            // `load()` already returns compiled JS for `.bemba`.
+        async transform(src, id) {
+            if (bsxFilter.test(id)) {
+                const transformed = await transformWithEsbuild(src, id, {
+                    loader: 'jsx',
+                    jsx: 'automatic',
+                    sourcemap: true
+                });
+                return {
+                    code: transformed.code,
+                    map: transformed.map || null
+                };
+            }
+            if (bembaFilter.test(id)) return null;
             return null;
         }
     };
