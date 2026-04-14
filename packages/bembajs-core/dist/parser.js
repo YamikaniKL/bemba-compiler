@@ -219,6 +219,15 @@ class BembaParser {
         this.dependencies = new Map();
         this.imports = new Map();
         this.exports = new Map();
+        this.keywordAliases = {
+            import: ['import', 'leta'],
+            from: ['from', 'kufuma'],
+            export: ['export', 'fumya'],
+            default: ['default', 'ca_pamushili'],
+            const: ['const', 'cakosa'],
+            let: ['let', 'cilepilibuka'],
+            var: ['var', 'icakubika']
+        };
     }
     
     // Main parsing methods
@@ -749,7 +758,7 @@ class BembaParser {
             initializer = this.parseExpression();
         }
         
-        return new VariableNode(name, initializer, kind === 'const');
+        return new VariableNode(name, initializer, this.matchesKeywordAlias(kind, 'const'));
     }
     
     // Function declaration parsing
@@ -989,7 +998,7 @@ class BembaParser {
         this.skipTrivia();
         if (this.isAtEnd()) return false;
         const token = this.peek();
-        return token.type === 'IDENTIFIER' && token.literal === keyword;
+        return token.type === 'IDENTIFIER' && this.matchesKeywordAlias(token.literal, keyword);
     }
     
     matchKeyword(keyword) {
@@ -1003,6 +1012,13 @@ class BembaParser {
     consumeKeyword(keyword, message) {
         if (this.checkKeyword(keyword)) return this.advance();
         throw new Error(message);
+    }
+
+    matchesKeywordAlias(value, canonicalKeyword) {
+        const v = String(value || '');
+        const aliases = this.keywordAliases[canonicalKeyword];
+        if (!aliases || aliases.length === 0) return v === canonicalKeyword;
+        return aliases.includes(v);
     }
     
     parseInlineObject() {

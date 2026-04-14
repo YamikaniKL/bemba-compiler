@@ -153,17 +153,85 @@ class BembaTransformer {
         if (!render) {
             return null;
         }
-        
+        const normalized = this.normalizeRenderExpression(render);
         return {
             type: 'JSXReturn',
-            expression: this.transformNode(render)
+            expression: this.transformNode(normalized)
         };
+    }
+
+    normalizeRenderExpression(render) {
+        if (!render || typeof render !== 'object') return render;
+        if (render.type === 'RawValue' && typeof render.raw === 'string') {
+            const extracted = this.extractJsxFromRenderFunctionSource(render.raw);
+            if (extracted) {
+                return { type: 'RawValue', raw: extracted };
+            }
+        }
+        return render;
+    }
+
+    extractJsxFromRenderFunctionSource(src) {
+        const s = String(src || '');
+        const idx = s.indexOf('bwelela');
+        if (idx < 0) return null;
+        const open = s.indexOf('(', idx);
+        if (open < 0) return null;
+        let depth = 0;
+        for (let i = open; i < s.length; i++) {
+            const ch = s[i];
+            if (ch === '(') depth++;
+            if (ch === ')') {
+                depth--;
+                if (depth === 0) {
+                    const inner = s.slice(open + 1, i).trim();
+                    return inner ? this.normalizeLooseJsxSource(inner) : null;
+                }
+            }
+        }
+        return null;
+    }
+
+    normalizeLooseJsxSource(src) {
+        let out = String(src || '');
+        // Fix common token-spacing emitted by loose parser fallback.
+        out = out.replace(/<\s+([A-Za-z_])/g, '<$1');
+        out = out.replace(/<\/\s+([A-Za-z_])/g, '</$1');
+        out = out.replace(/<\/\s*([A-Za-z0-9_:-]+)\s*>/g, '</$1>');
+        out = out.replace(/<\s*([A-Za-z0-9_:-]+)\s+/g, '<$1 ');
+        out = out.replace(/\s+\/\s*>/g, ' />');
+        out = out.replace(/\s+>/g, '>');
+        out = out.replace(/=\s+>/g, '=>');
+        out = out.replace(/\(\s+/g, '(').replace(/\s+\)/g, ')');
+        out = out.replace(/\{\s+/g, '{').replace(/\s+\}/g, '}');
+        out = out.replace(/\[\s+/g, '[').replace(/\s+\]/g, ']');
+        out = out.replace(/\s+,\s+/g, ', ');
+        out = out.replace(/\s+:\s+/g, ': ');
+        out = out.replace(/\s+\.\s+/g, '.');
+        return out;
     }
     
     // Page transformation
     transformPage(node) {
         let comp = node.component;
-        if (!comp) {
+        if (comp && comp.type !== 'Component') {
+            const rawName =
+                node.metadata && node.metadata.name != null && node.metadata.name !== '' ?
+                    String(node.metadata.name) :
+                    'Page';
+            const safeName = rawName.replace(/[^a-zA-Z0-9_$]/g, '_') || 'Page';
+            comp = {
+                type: 'Component',
+                name: safeName,
+                props: {},
+                state: {},
+                methods: {},
+                hooks: [],
+                lifecycle: {
+                    render: comp
+                }
+            };
+        } else if (!comp) {
             const rawName =
                 node.metadata && node.metadata.name != null && node.metadata.name !== '' ?
                     String(node.metadata.name) :

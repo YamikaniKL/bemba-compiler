@@ -40,6 +40,8 @@ class BembaGenerator {
                 return this.generateFunctionCall(node);
             case 'Expression':
                 return this.generateExpression(node);
+            case 'RawValue':
+                return node.raw || '';
             case 'Import':
                 return this.generateImport(node);
             case 'Export':
