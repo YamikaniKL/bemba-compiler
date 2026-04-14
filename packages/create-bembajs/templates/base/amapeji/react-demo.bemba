@@ -7,6 +7,8 @@ pangaIpepa('ReactDemo', {
           This file is <code>amapeji/react-demo.bemba</code> → <code>/react-demo</code>.
           Use <code>ukwisulula</code> for SPA routes. For static HTML export of layout-first pages, run{' '}
           <code>bemba fumya</code>.
+          Parser aliases are available too: <code>leta ... kufuma ...</code>, <code>fumya ca_pamushili ...</code>, and{' '}
+          <code>cakosa / cilepilibuka / icakubika</code>.
         </ukulondolola>
       </icipandwa>
     )
