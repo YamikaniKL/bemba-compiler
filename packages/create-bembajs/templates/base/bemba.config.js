@@ -15,8 +15,8 @@ module.exports = {
     pages: 'amapeji',           // Pages folder
     components: 'ifikopo',      // Components folder
     styles: 'imikalile',        // Styles folder
-    assets: 'mafungulo',        // Assets folder
-    api: 'maapi',              // API routes folder
+    public: 'amashinda',        // Static assets
+    api: 'mafungulo',           // API routes folder (pangaApi)
     utils: 'mautils',          // Utilities folder
     hooks: 'mahooks',          // Custom hooks folder
     context: 'macontext'       // Context providers folder

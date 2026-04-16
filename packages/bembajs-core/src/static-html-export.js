@@ -6,6 +6,56 @@ const BembaParser = require('./parser');
 const { generateSitemapXml, generateRssFeedXml } = require('./static-site-helpers');
 
 const BEMBA_SITE_JS = path.join(__dirname, 'bemba-site.js');
+const CACHE_FILE_REL = path.join('.bemba', 'cache', 'static-export.json');
+
+/** @param {string[]} depPaths */
+function snapshotDepMtimes(depPaths) {
+    const mtimes = {};
+    for (const p of depPaths || []) {
+        try {
+            if (fs.existsSync(p)) {
+                mtimes[p] = fs.statSync(p).mtimeMs;
+            }
+        } catch (_) {
+            /* ignore */
+        }
+    }
+    return mtimes;
+}
+
+/** @param {string[]} depPaths @param {Record<string, number>} mtimes */
+function depsStillFresh(depPaths, mtimes) {
+    if (!depPaths || !mtimes || depPaths.length === 0) return false;
+    for (const p of depPaths) {
+        try {
+            if (!fs.existsSync(p)) return false;
+            if (fs.statSync(p).mtimeMs !== mtimes[p]) return false;
+        } catch (_) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function readExportCache(projectRoot) {
+    const cachePath = path.join(projectRoot, CACHE_FILE_REL);
+    try {
+        if (!fs.existsSync(cachePath)) return { version: 1, routes: {} };
+        const json = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+        if (!json || typeof json !== 'object') return { version: 1, routes: {} };
+        if (!json.routes || typeof json.routes !== 'object') return { version: 1, routes: {} };
+        return json;
+    } catch (_) {
+        return { version: 1, routes: {} };
+    }
+}
+
+function writeExportCache(projectRoot, cache) {
+    const cachePath = path.join(projectRoot, CACHE_FILE_REL);
+    const dir = path.dirname(cachePath);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(cachePath, JSON.stringify(cache || { version: 1, routes: {} }, null, 2), 'utf8');
+}
 
 /**
  * Map URL path to file on disk under `out/` (directory-style URLs).
@@ -52,9 +102,10 @@ async function exportStaticHtmlSite(options = {}) {
     const htmlLang = options.htmlLang || options.locale || 'en';
     const bembaSiteScript = options.bembaSiteScript !== false;
 
-    if (fs.existsSync(outDir)) {
-        fs.rmSync(outDir, { recursive: true, force: true });
-    }
+    const cache = readExportCache(projectRoot);
+    const newCache = { version: 1, routes: {} };
+
+    // Keep output directory, but ensure it exists. We now do incremental writes.
     fs.mkdirSync(outDir, { recursive: true });
 
     const router = new BembaRouter(projectRoot);
@@ -63,6 +114,12 @@ async function exportStaticHtmlSite(options = {}) {
 
     const staticPaths = [];
     const rssItems = [];
+    const bench = {
+        startedAt: Date.now(),
+        compiled: 0,
+        skipped: 0,
+        totalCompileMs: 0
+    };
 
     for (const route of router.getAllRoutes()) {
         if (route.isDynamic) continue;
@@ -74,7 +131,40 @@ async function exportStaticHtmlSite(options = {}) {
         }
         if (!code.includes('pangaIpepa')) continue;
 
+        const dest = routeToOutHtmlPath(outDir, route.path);
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+
+        // Dependency-aware incremental export
+        let deps = [];
+        try {
+            if (typeof parser.listStaticPageDependencyPaths === 'function') {
+                deps = parser.listStaticPageDependencyPaths(code, {
+                    projectRoot,
+                    pageFilePath: route.filePath
+                });
+            }
+        } catch (_) {
+            deps = [];
+        }
+        if (!deps.length) deps = [path.resolve(route.filePath)];
+
+        const prev = cache.routes && cache.routes[route.path];
+        if (
+            prev &&
+            prev.outFile === dest &&
+            Array.isArray(prev.deps) &&
+            prev.mtimes &&
+            fs.existsSync(dest) &&
+            depsStillFresh(prev.deps, prev.mtimes)
+        ) {
+            bench.skipped += 1;
+            newCache.routes[route.path] = prev;
+            staticPaths.push(route.path);
+            continue;
+        }
+
         let html;
+        const t0 = Date.now();
         try {
             html = parser.compile(code, {
                 projectRoot,
@@ -87,12 +177,19 @@ async function exportStaticHtmlSite(options = {}) {
             console.warn(`Skipping ${route.path}: ${err.message}`);
             continue;
         }
+        const dt = Date.now() - t0;
+        bench.totalCompileMs += dt;
+        bench.compiled += 1;
+
         if (typeof html !== 'string' || !/^\s*</.test(html)) continue;
 
-        const dest = routeToOutHtmlPath(outDir, route.path);
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
         fs.writeFileSync(dest, html, 'utf8');
         staticPaths.push(route.path);
+        newCache.routes[route.path] = {
+            outFile: dest,
+            deps,
+            mtimes: snapshotDepMtimes(deps)
+        };
 
         const titleMatch = html.match(/<title>([^<]*)<\/title>/i);
         let mtime = new Date();
@@ -133,7 +230,12 @@ async function exportStaticHtmlSite(options = {}) {
     }
 
     const rel = path.relative(projectRoot, outDir) || '.';
-    console.log(`Exported ${staticPaths.length} static page(s) to ${rel}`);
+    writeExportCache(projectRoot, newCache);
+    const elapsed = Date.now() - bench.startedAt;
+    const avg = bench.compiled ? (bench.totalCompileMs / bench.compiled).toFixed(1) : '0.0';
+    console.log(
+        `Exported ${staticPaths.length} static page(s) to ${rel} (compiled: ${bench.compiled}, skipped: ${bench.skipped}, avg compile: ${avg}ms, total: ${elapsed}ms)`
+    );
     return { outDir, pages: staticPaths.length };
 }
 

@@ -170,12 +170,14 @@ async function createApp(projectDirectory, options) {
             scripts: {
                 dev: 'bemba tungulula',
                 build: 'bemba akha',
-                start: 'bemba start',
+                start: 'node dist/server.mjs',
+                export: 'bemba fumya',
                 lint: 'bemba lint',
                 format: 'bemba format'
             },
             dependencies: {
                 bembajs: '^1.3.15',
+                express: '^4.21.2',
                 react: '^18.2.0',
                 'react-dom': '^18.2.0'
             },
@@ -260,6 +262,19 @@ function writeProjectReadmeStub(projectPath, projectName) {
 \`\`\`bash
 bun install
 bun run dev
+\`\`\`
+
+## Production
+
+\`\`\`bash
+bun run build
+node dist/server.mjs
+\`\`\`
+
+## Static export (pangaIpepa pages)
+
+\`\`\`bash
+bun run export
 \`\`\`
 `;
     fs.writeFileSync(path.join(projectPath, 'README.md'), body, 'utf8');

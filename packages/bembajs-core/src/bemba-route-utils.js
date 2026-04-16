@@ -12,8 +12,15 @@ function filePathToPageRoute(filePath) {
         .replace(/\/index$/, '/')
         .replace(/\/$/, '');
 
-    route = route.replace(/\[([^\]]+)\]/g, ':$1');
+    // Next-like route groups: `(marketing)` segments do not affect the URL path.
+    route = route
+        .split('/')
+        .filter((seg) => seg && !/^\(.+\)$/.test(seg))
+        .join('/');
+
+    // Order matters: catch-all must be handled before `[param]`.
     route = route.replace(/\[\.\.\.([^\]]+)\]/g, ':$1*');
+    route = route.replace(/\[([^\]]+)\]/g, ':$1');
 
     if (!route.startsWith('/')) {
         route = '/' + route;
@@ -80,9 +87,39 @@ function resolveAppLayoutsForPage(pageFilePath) {
     return layouts;
 }
 
+/**
+ * Resolve app-router special files (nearest-first) that apply to a page:
+ * - `loading.bemba`
+ * - `not-found.bemba`
+ * - `error.bemba` (future)
+ *
+ * Returns candidates from root to leaf (same directory chain as layouts).
+ * Caller can pick nearest existing file by scanning from end.
+ * @param {string} pageFilePath
+ * @param {string} fileName e.g. 'not-found.bemba'
+ * @returns {string[]}
+ */
+function resolveAppSpecialFilesForPage(pageFilePath, fileName) {
+    const normalized = String(pageFilePath || '').replace(/\\/g, '/');
+    const m = normalized.match(/^(.*\/amapeji\/app)(?:\/(.+))\/page\.bemba$/i);
+    if (!m) return [];
+    const appRoot = m[1];
+    const relDir = m[2] || '';
+    const parts = relDir ? relDir.split('/').filter(Boolean) : [];
+    const files = [];
+    files.push(`${appRoot}/${fileName}`);
+    let cur = appRoot;
+    for (const p of parts) {
+        cur += `/${p}`;
+        files.push(`${cur}/${fileName}`);
+    }
+    return files;
+}
+
 module.exports = {
     filePathToPageRoute,
     globKeyToPageRoute,
     appPageFileToRoute,
-    resolveAppLayoutsForPage
+    resolveAppLayoutsForPage,
+    resolveAppSpecialFilesForPage
 };

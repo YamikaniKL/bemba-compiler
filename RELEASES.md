@@ -35,7 +35,9 @@ These ship across recent **1.3.x** releases and sit on top of the v1.3.0 languag
 #### React-first command model (latest 1.3.x)
 
 - **`bemba tungulula`** runs **Vite** by default when `vite.config.*` is present and `framework.reactApp !== false`.
+- **Dev SSR (Injini):** when `framework.reactSsrDev !== false`, pages render through Vite SSR and hydrate on the client (Next-like app flow).
 - **`bemba akha`** builds production with **Vite** by default.
+- **Production SSR:** `bemba akha` also emits a runnable **`dist/server.mjs`** (SSR server) alongside the client bundle.
 - **`bemba fumya`** also exports via **Vite** by default (output folder oriented).
 - **Legacy static HTML** is now explicit: **`bemba static-export`** (or older compatibility flows where enabled).
 - **`vite-plugin-bemba`** is published from `bembajs-core` and compiles `.bemba` directly in Vite projects.

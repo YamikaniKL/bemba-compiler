@@ -427,8 +427,8 @@ export default defineConfig({
   <link rel="icon" href="data:," />
 </head>
 <body>
-  <div id="root"></div>
-  <script type="module" src="/@id/virtual:bemba-app-entry"></script>
+  <div id="root"><!--app-html--></div>
+  <script type="module" src="/@id/virtual:bemba-app-entry-client"></script>
 </body>
 </html>
 `;
@@ -445,17 +445,21 @@ export default defineConfig({
             throw new Error('Injini dependencies are missing. Run `bun install` in this project, then run `bemba tungulula` again.');
         }
         const glue = this.ensureManagedInjiniGlue(process.cwd());
+        const { loadBembaFrameworkConfig } = require('./framework-config');
+        const fw = loadBembaFrameworkConfig(process.cwd());
         const port = parseInt(String(options.port || '3000'), 10);
         let server;
         try {
+            const serverCfg = {
+                port,
+                host: options.host === 'localhost' ? true : options.host,
+                ...(fw.reactSsrDev ? { middlewareMode: true } : {})
+            };
             server = await createServer({
                 configFile,
                 logLevel: 'silent',
                 appType: glue.managedIndex ? 'custom' : undefined,
-                server: {
-                    port,
-                    host: options.host === 'localhost' ? true : options.host
-                }
+                server: serverCfg
             });
         } catch (e) {
             const m = String(e && e.message ? e.message : e);
@@ -464,37 +468,143 @@ export default defineConfig({
             }
             throw e;
         }
-        if (glue.managedIndex) {
-            server.middlewares.use(async (req, res, next) => {
+        const express = require('express');
+        const app = express();
+        app.use(server.middlewares);
+
+        const isBembaLang = () => {
+            const s = String(process.env.BEMBA_CLI_LANG || 'en').trim().toLowerCase();
+            return s === 'bem' || s === 'bemba' || s === 'ci-bemba';
+        };
+
+        const escapeHtml = (s) =>
+            String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+
+        const renderViteSsrErrorHtml = (err, urlPath) => {
+            const bem = isBembaLang();
+            const title = bem ? 'Fyabupwa mu Injini (Vite)' : 'Injini (Vite) Error';
+            const lead = bem
+                ? 'Pali ifyo fileluba pa kupanga/ukwisulula ipena. Mone ifyo fyabupwa panshi.'
+                : 'Something failed while compiling/rendering this page. See details below.';
+            const hint = bem
+                ? 'Ukulefwaya: mona file, ukonkolole, elyo ulesanse (refresh).'
+                : 'Tip: fix the file, then refresh.';
+
+            const message = err && err.message ? String(err.message) : String(err);
+            const stack = err && err.stack ? String(err.stack) : '';
+            const plugin = err && err.plugin ? String(err.plugin) : '';
+            const id = err && err.id ? String(err.id) : (err && err.loc && err.loc.file ? String(err.loc.file) : '');
+            const frame = err && err.frame ? String(err.frame) : '';
+            const loc = err && err.loc ? err.loc : null;
+            const where =
+                id && loc && typeof loc.line === 'number' && typeof loc.column === 'number'
+                    ? `${id}:${loc.line}:${loc.column}`
+                    : id || '';
+
+            return `<!DOCTYPE html>
+<html lang="${bem ? 'bem' : 'en'}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>${escapeHtml(title)}</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
+    .card { border: 1px solid rgba(0,0,0,.12); border-radius: 12px; padding: 18px; }
+    @media (prefers-color-scheme: dark) { .card { border-color: rgba(255,255,255,.15); } }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    p { margin: 6px 0; opacity: .9; }
+    code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Code", "Courier New", monospace; }
+    pre { white-space: pre-wrap; word-break: break-word; background: rgba(0,0,0,.04); padding: 12px; border-radius: 10px; overflow: auto; }
+    @media (prefers-color-scheme: dark) { pre { background: rgba(255,255,255,.06); } }
+    .meta { font-size: 13px; opacity: .85; }
+    .pill { display:inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12); margin-right: 8px; }
+    @media (prefers-color-scheme: dark) { .pill { border-color: rgba(255,255,255,.15); } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>${escapeHtml(title)}</h1>
+      <p>${escapeHtml(lead)}</p>
+      <p class="meta">${escapeHtml(hint)}</p>
+      <p class="meta">${escapeHtml(urlPath || '/')}</p>
+      <div style="margin-top:12px">
+        ${plugin ? `<span class="pill">${escapeHtml(bem ? 'plugin' : 'plugin')}: ${escapeHtml(plugin)}</span>` : ''}
+        ${where ? `<span class="pill">${escapeHtml(bem ? 'pa' : 'at')}: ${escapeHtml(where)}</span>` : ''}
+      </div>
+      <h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Ubulubulo' : 'Error')}</h2>
+      <pre>${escapeHtml(message)}</pre>
+      ${frame ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Icipande ca code' : 'Code frame')}</h2><pre>${escapeHtml(frame)}</pre>` : ''}
+      ${stack ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Stack' : 'Stack')}</h2><pre>${escapeHtml(stack)}</pre>` : ''}
+    </div>
+  </div>
+</body>
+</html>`;
+        };
+
+        // HTML handling: SSR (Next-like) when enabled, else just serve index.html for SPA-ish behavior.
+        app.use('*', async (req, res, next) => {
+            try {
                 if (!req || !req.url) return next();
-                const urlPath = String(req.url).split('?')[0];
+                const urlPath = String(req.originalUrl || req.url);
+                const cleanPath = String(urlPath).split('?')[0] || '/';
                 const method = String(req.method || 'GET').toUpperCase();
                 if (method !== 'GET' && method !== 'HEAD') return next();
-                if (urlPath.startsWith('/@') || urlPath.startsWith('/node_modules/') || /\.[a-z0-9]+$/i.test(urlPath)) {
+                if (cleanPath.startsWith('/@') || cleanPath.startsWith('/node_modules/') || /\.[a-z0-9]+$/i.test(cleanPath)) {
                     return next();
                 }
-                try {
-                    const html = fs.readFileSync(glue.managedIndex, 'utf8');
-                    const transformed = await server.transformIndexHtml(urlPath || '/', html);
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'text/html');
-                    res.end(transformed);
+
+                const templatePath = glue.managedIndex || path.join(process.cwd(), 'index.html');
+                let template = fs.readFileSync(templatePath, 'utf8');
+                template = await server.transformIndexHtml(cleanPath, template);
+
+                if (fw.reactSsrDev) {
+                    const mod = await server.ssrLoadModule('virtual:bemba-app-entry-server');
+                    const out = await (mod && mod.render ? mod.render(urlPath) : { html: '', state: { ssr: true, urlPath: cleanPath } });
+                    const appHtml = out && typeof out.html === 'string' ? out.html : '';
+                    const state = out && out.state ? out.state : { ssr: true, urlPath: cleanPath };
+                    const stateScript = `<script>window.__BEMBA_SSR_STATE__=${JSON.stringify(state).replace(/</g, '\\u003c')};</script>`;
+                    const html = template
+                        .replace('<!--app-html-->', appHtml)
+                        .replace('</head>', `${stateScript}\n</head>`);
+                    res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
                     return;
-                } catch (e) {
-                    return next(e);
                 }
-            });
+
+                // No SSR: keep placeholder empty.
+                const html = template.replace('<!--app-html-->', '');
+                res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+            } catch (e) {
+                try {
+                    if (typeof server?.ssrFixStacktrace === 'function') {
+                        server.ssrFixStacktrace(e);
+                    }
+                } catch (_) {
+                    /* ignore */
+                }
+                const urlPath = (req && (req.originalUrl || req.url)) || '/';
+                res.status(500).setHeader('Content-Type', 'text/html');
+                res.end(renderViteSsrErrorHtml(e, urlPath));
+            }
+        });
+
+        const httpServer = app.listen(port, () => {});
+
+        if (fw.reactSsrDev) {
+            // In middleware mode, Vite does not own the HTTP server; attach WS for HMR.
+            server.ws.listen(httpServer);
+        } else {
+            await server.listen();
         }
-        await server.listen();
-        const urls = server.resolvedUrls || {};
-        const local = Array.from(urls.local || []);
-        const network = Array.from(urls.network || []);
-        if (local.length > 0) {
-            console.log(`  ➜  Local Injini:   ${local[0]}`);
-        }
-        for (const u of network) {
-            console.log(`  ➜  Network Injini: ${u}`);
-        }
+
+        console.log(`  ➜  Local Injini:   http://localhost:${port}`);
     }
 
     /** React app mode: enabled in config and vite.config.* exists (unless caller asks for legacy static path). */
@@ -548,11 +658,75 @@ export default defineConfig({
             console.log(msg('viteBuildReact'));
             const { build } = await import('vite');
             const glue = this.ensureManagedInjiniGlue(process.cwd());
+            const outDir = options.output || 'dist';
+
+            // Client build (browser/hydration)
             await build({
                 configFile: viteConfig,
-                ...(glue.managedIndex ? { build: { outDir: options.output || 'dist', rollupOptions: { input: glue.managedIndex } } } : {}),
-                ...(glue.managedIndex ? {} : { build: { outDir: options.output || 'dist' } })
+                ...(glue.managedIndex
+                    ? { build: { outDir, rollupOptions: { input: glue.managedIndex } } }
+                    : { build: { outDir } })
             });
+
+            // Server build (SSR entry)
+            await build({
+                configFile: viteConfig,
+                build: {
+                    ssr: 'virtual:bemba-app-entry-server',
+                    outDir: path.join(outDir, 'server'),
+                    rollupOptions: {
+                        output: {
+                            entryFileNames: 'entry-server.mjs',
+                            format: 'esm'
+                        }
+                    }
+                }
+            });
+
+            // Write a runnable production server entry into dist/
+            const serverEntry = `import fs from 'node:fs';
+import path from 'node:path';
+import express from 'express';
+import { fileURLToPath } from 'node:url';
+import { render } from './server/entry-server.mjs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const port = Number(process.env.PORT || 3000);
+const app = express();
+
+app.use(express.static(__dirname, { index: false }));
+
+app.use('*', async (req, res) => {
+  try {
+    const url = req.originalUrl || req.url || '/';
+    const templatePath = path.join(__dirname, 'injini-index.html');
+    const fallbackTemplatePath = path.join(__dirname, 'index.html');
+    const raw = fs.existsSync(templatePath)
+      ? fs.readFileSync(templatePath, 'utf8')
+      : fs.readFileSync(fallbackTemplatePath, 'utf8');
+    const out = await render(url);
+    const appHtml = out && typeof out.html === 'string' ? out.html : '';
+    const state = out && out.state ? out.state : { ssr: true, urlPath: '/' };
+    const stateScript = \`<script>window.__BEMBA_SSR_STATE__=\${JSON.stringify(state).replace(/</g,'\\\\u003c')};</script>\`;
+    const html = raw
+      .replace('<!--app-html-->', appHtml)
+      .replace('</head>', stateScript + '\\n</head>');
+    res.status(200).setHeader('Content-Type', 'text/html').end(html);
+  } catch (e) {
+    res.status(500).setHeader('Content-Type', 'text/plain').end(e && e.stack ? e.stack : String(e));
+  }
+});
+
+app.listen(port, () => {
+  // eslint-disable-next-line no-console
+  console.log(\`BembaJS SSR server listening on http://localhost:\${port}\`);
+});
+`;
+            const serverOutPath = path.join(process.cwd(), outDir, 'server.mjs');
+            fs.writeFileSync(serverOutPath, serverEntry, 'utf8');
+
             console.log(msg('viteBuildDone'));
             return;
         }

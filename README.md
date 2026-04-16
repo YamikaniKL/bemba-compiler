@@ -44,11 +44,12 @@ bun run dev
 
 You can also scaffold with **`bemba panga my-app`** (interactive template: `base`, `ui`, …).
 
-### Build and export
+### Build, start (production SSR), and export
 
 ```bash
-bemba akha          # production React/Vite build → ./dist
-bemba fumya         # export build output → ./out
+bemba akha          # production build → ./dist (includes dist/server.mjs for SSR)
+node dist/server.mjs # start production SSR server
+bemba fumya         # export React build output → ./out
 bemba static-export # legacy static HTML export path
 bemba emit-react    # JSX under dist/bemba-react for Vite / esbuild + React
 ```
@@ -72,7 +73,7 @@ ingisa { TextField } ukufuma '@mui/material/TextField'
 
 - **File-based routing** — pages under `amapeji/`, components under `ifikopo/`
 - **`pangaApi` routes** — Node handlers from `mafungulo/*.bemba` (mounted at `/api` in the core dev server)
-- **React-first app flow** — Vite plugin + React Router scaffolding for `.bemba` pages with `ukwisulula`
+- **React-first app flow** — Next-like App Router in `amapeji/app/**` with `layout.bemba`, `loading.bemba`, `not-found.bemba`, SSR + hydration via Injini (Vite)
 - **Legacy static HTML sites** — `pangaIpepa` + optional `umusangoSite: ee` and `amapeji/umusango.bemba` shell via `bemba static-export`
 - **Partials** — `ingisa` + `pangaIcapaba`, optional `NavBar` header merge, top-of-file `import` of `.bemba`
 - **State and effects** — `ukusunga`, `ukusungaKabili`, `ukuCinja`
@@ -185,6 +186,10 @@ Emits **`.jsx`** from **`amapeji/`**, **`ifikopo/`** (recursive), **`maapi/`**, 
 ### Dev server (`bemba tungulula`)
 
 **`pangaIpepa`** pages are compiled per request with **`projectRoot`** / **`currentPath`**. **`pangaApi`** files under **`mafungulo/`** mount at **`/api`** (e.g. **`hello.bemba` → `/api/hello`**), handlers run under **`vm`** with real **`require()`**. **`amapeji/umusango.bemba`** is shell-only (not a page route).
+
+#### Injini (Vite) error pages in Bemba
+
+If you run the CLI with **`--lang bem`** (or set **`BEMBA_CLI_LANG=bem`**), Injini dev SSR errors render as a readable **Bemba** HTML error page (what failed, where, code frame, stack trace).
 
 ### Pipeline helpers
 
@@ -730,8 +735,9 @@ Default Bemba folder names (override in `bemba.config.js` → `folders` if neede
 ```
 my-app/
 ├── amapeji/           # Pages (file-based routing); optional umusango.bemba (site shell)
+│   └── app/            # App Router (Next-like): layout.bemba, page.bemba, loading.bemba, not-found.bemba
 ├── ifikopo/           # Components (optional ifikopo/cipanda/ for partials)
-├── mafungulo/         # API routes (pangaApi) — core dev server reads this folder
+├── mafungulo/         # API routes (pangaApi) — mounted at /api
 ├── amashinda/         # Static assets (served under /amashinda in dev)
 ├── maungu/            # Extra public/static files (used by export tooling when present)
 ├── imikalile/         # Global styles
