@@ -450,16 +450,14 @@ export default defineConfig({
         const port = parseInt(String(options.port || '3000'), 10);
         let server;
         try {
-            const serverCfg = {
-                port,
-                host: options.host === 'localhost' ? true : options.host,
-                ...(fw.reactSsrDev ? { middlewareMode: true } : {})
-            };
             server = await createServer({
                 configFile,
                 logLevel: 'silent',
                 appType: glue.managedIndex ? 'custom' : undefined,
-                server: serverCfg
+                server: {
+                    port,
+                    host: options.host === 'localhost' ? true : options.host
+                }
             });
         } catch (e) {
             const m = String(e && e.message ? e.message : e);
@@ -468,9 +466,6 @@ export default defineConfig({
             }
             throw e;
         }
-        const express = require('express');
-        const app = express();
-        app.use(server.middlewares);
 
         const isBembaLang = () => {
             const s = String(process.env.BEMBA_CLI_LANG || 'en').trim().toLowerCase();
@@ -550,10 +545,11 @@ export default defineConfig({
         };
 
         // HTML handling: SSR (Next-like) when enabled, else just serve index.html for SPA-ish behavior.
-        app.use('*', async (req, res, next) => {
+        // Important: we keep a single HTTP server (Vite's) to avoid double-listen issues.
+        server.middlewares.use(async (req, res, next) => {
             try {
                 if (!req || !req.url) return next();
-                const urlPath = String(req.originalUrl || req.url);
+                const urlPath = String(req.url || '/');
                 const cleanPath = String(urlPath).split('?')[0] || '/';
                 const method = String(req.method || 'GET').toUpperCase();
                 if (method !== 'GET' && method !== 'HEAD') return next();
@@ -574,13 +570,17 @@ export default defineConfig({
                     const html = template
                         .replace('<!--app-html-->', appHtml)
                         .replace('</head>', `${stateScript}\n</head>`);
-                    res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'text/html');
+                    res.end(html);
                     return;
                 }
 
                 // No SSR: keep placeholder empty.
                 const html = template.replace('<!--app-html-->', '');
-                res.status(200).set({ 'Content-Type': 'text/html' }).end(html);
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'text/html');
+                res.end(html);
             } catch (e) {
                 try {
                     if (typeof server?.ssrFixStacktrace === 'function') {
@@ -590,21 +590,20 @@ export default defineConfig({
                     /* ignore */
                 }
                 const urlPath = (req && (req.originalUrl || req.url)) || '/';
-                res.status(500).setHeader('Content-Type', 'text/html');
+                res.statusCode = 500;
+                res.setHeader('Content-Type', 'text/html');
                 res.end(renderViteSsrErrorHtml(e, urlPath));
             }
         });
 
-        const httpServer = app.listen(port, () => {});
-
-        if (fw.reactSsrDev) {
-            // In middleware mode, Vite does not own the HTTP server; attach WS for HMR.
-            server.ws.listen(httpServer);
+        await server.listen();
+        const urls = server.resolvedUrls || {};
+        const local = Array.from(urls.local || []);
+        if (local.length > 0) {
+            console.log(`  ➜  Local Injini:   ${local[0]}`);
         } else {
-            await server.listen();
+            console.log(`  ➜  Local Injini:   http://localhost:${port}`);
         }
-
-        console.log(`  ➜  Local Injini:   http://localhost:${port}`);
     }
 
     /** React app mode: enabled in config and vite.config.* exists (unless caller asks for legacy static path). */
