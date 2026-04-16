@@ -181,11 +181,17 @@ async function createApp(projectDirectory, options) {
                 react: '^18.2.0',
                 'react-dom': '^18.2.0'
             },
-            devDependencies: useTypeScript ? {
-                typescript: '^5.0.0',
-                '@types/react': '^18.2.0',
-                '@types/react-dom': '^18.2.0'
-            } : {}
+            devDependencies: {
+                vite: '^6.0.0',
+                '@vitejs/plugin-react': '^4.3.4',
+                ...(useTypeScript
+                    ? {
+                          typescript: '^5.0.0',
+                          '@types/react': '^18.2.0',
+                          '@types/react-dom': '^18.2.0'
+                      }
+                    : {})
+            }
         };
         
         fs.writeFileSync(
