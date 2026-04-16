@@ -344,35 +344,63 @@ ${this.decreaseIndent()}}`;
     // Import/Export generation
     generateImport(node) {
         const src = this.normalizeBembaImportSource(node.source);
-        if (node.specifiers.length === 0) {
+        const specs = Array.isArray(node.specifiers) ? node.specifiers : [];
+        if (specs.length === 0) {
             return `import '${src}';`;
         }
-        
-        const defaultImport = node.specifiers.find(spec => spec.isDefault);
-        const namedImports = node.specifiers.filter(spec => !spec.isDefault);
-        
-        let importString = 'import ';
-        
-        if (defaultImport) {
-            importString += defaultImport.name;
-            if (namedImports.length > 0) {
-                importString += ', ';
-            }
+
+        // Support both legacy specifier shape and full JS-ish specifiers emitted by the parser.
+        const toType = (s) => {
+            if (!s) return 'named';
+            if (s.type) return s.type;
+            if (s.isDefault) return 'default';
+            return 'named';
+        };
+
+        const defaultSpec = specs.find((s) => toType(s) === 'default');
+        const namespaceSpec = specs.find((s) => toType(s) === 'namespace');
+        const namedSpecs = specs.filter((s) => toType(s) === 'named');
+
+        const parts = [];
+        if (defaultSpec) {
+            parts.push(defaultSpec.local || defaultSpec.name);
         }
-        
-        if (namedImports.length > 0) {
-            importString += `{ ${namedImports.map(spec => spec.name).join(', ')} }`;
+        if (namespaceSpec) {
+            const local = namespaceSpec.local || namespaceSpec.name;
+            parts.push(`* as ${local}`);
         }
-        
-        importString += ` from '${src}';`;
-        
-        return importString;
+        if (namedSpecs.length > 0) {
+            const inner = namedSpecs
+                .map((s) => {
+                    const imported = s.imported || s.name;
+                    const local = s.local || s.alias || imported;
+                    return local && local !== imported ? `${imported} as ${local}` : `${imported}`;
+                })
+                .join(', ');
+            parts.push(`{ ${inner} }`);
+        }
+
+        return `import ${parts.join(', ')} from '${src}';`;
     }
 
-    /** Map trailing .bemba in import paths to .jsx for emitted bundles (emit-react / Vite). */
+    /**
+     * Normalize `.bemba` import sources across:
+     * - Vite (needs `.bemba` so the plugin runs)
+     * - SSR (needs `.bemba` so the SSR loader can compile on the fly)
+     * - Static HTML (does its own dependency merge / import map)
+     *
+     * Rules:
+     * - Relative imports without an extension get `.bemba` appended.
+     * - Keep explicit extensions as-is (including `.bemba`).
+     */
     normalizeBembaImportSource(source) {
         if (typeof source !== 'string') return source;
-        return source.replace(/\.bemba$/i, '.jsx');
+        const s = source.trim();
+        if (!s) return source;
+        if (!s.startsWith('.')) return source; // bare specifiers, URLs, aliases: leave to bundler/runtime
+        // If the path already has an extension, keep it.
+        if (/[\\/][^\\/]+\\.[a-z0-9]+$/i.test(s) || /\\.[a-z0-9]+$/i.test(s)) return source;
+        return `${s}.bemba`;
     }
     
     generateExport(node) {

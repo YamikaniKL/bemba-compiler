@@ -1,6 +1,11 @@
 // File-based routing engine for BembaJS framework
 const { BEMBA_FOLDERS, BEMBA_FILES } = require('./constants');
-const { filePathToPageRoute, appPageFileToRoute, resolveAppLayoutsForPage } = require('./bemba-route-utils');
+const {
+    filePathToPageRoute,
+    appPageFileToRoute,
+    resolveAppLayoutsForPage,
+    resolveAppSpecialFilesForPage
+} = require('./bemba-route-utils');
 const fs = require('fs');
 const path = require('path');
 
@@ -85,6 +90,14 @@ class BembaRouter {
                 route.path = routePath;
                 route.appRouter = true;
                 route.layouts = resolveAppLayoutsForPage(fullPath).filter((p) => fs.existsSync(p));
+                const nf = resolveAppSpecialFilesForPage(fullPath, 'not-found.bemba').filter((p) =>
+                    fs.existsSync(p)
+                );
+                route.notFound = nf.length ? nf[nf.length - 1] : null;
+                const ld = resolveAppSpecialFilesForPage(fullPath, 'loading.bemba').filter((p) =>
+                    fs.existsSync(p)
+                );
+                route.loading = ld.length ? ld[ld.length - 1] : null;
                 this.routes.set(route.path, route);
             }
         };

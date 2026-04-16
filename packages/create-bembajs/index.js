@@ -176,7 +176,7 @@ async function createApp(projectDirectory, options) {
                 format: 'bemba format'
             },
             dependencies: {
-                bembajs: '^1.3.15',
+                bembajs: '^1.3.23',
                 express: '^4.21.2',
                 react: '^18.2.0',
                 'react-dom': '^18.2.0'

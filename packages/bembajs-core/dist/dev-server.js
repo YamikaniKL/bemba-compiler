@@ -233,6 +233,26 @@ class BembaDevServer {
             const route = this.router.matchRoute(req.path);
             
             if (!route) {
+                // Next-like App Router: global app `not-found.bemba` fallback (root).
+                const appNotFound = path.join(this.projectRoot, 'amapeji', 'app', 'not-found.bemba');
+                if (fs.existsSync(appNotFound)) {
+                    try {
+                        const generated = await this.compileFile(appNotFound);
+                        const layouts = [];
+                        const rootLayout = path.join(this.projectRoot, 'amapeji', 'app', 'layout.bemba');
+                        if (fs.existsSync(rootLayout)) {
+                            layouts.push(await this.compileFile(rootLayout));
+                        }
+                        const inner = renderBembaAppRouteToHtmlString(generated, layouts, {
+                            filePath: appNotFound,
+                            projectRoot: this.projectRoot
+                        });
+                        res.status(404).type('html');
+                        return res.send(this.wrapDevSsrDocument(inner, 'Not Found'));
+                    } catch (_) {
+                        // Fall back to the legacy 404 below.
+                    }
+                }
                 return res.status(404).send(this.generate404Page());
             }
             
@@ -270,10 +290,14 @@ class BembaDevServer {
                                 compiledLayouts.push(await this.compileFile(lp));
                             }
                             inner = renderBembaAppRouteToHtmlString(generated, compiledLayouts, {
-                                filePath: route.filePath
+                                filePath: route.filePath,
+                                projectRoot: this.projectRoot
                             });
                         } else {
-                            inner = renderBembaPageToHtmlString(generated, { filePath: route.filePath });
+                            inner = renderBembaPageToHtmlString(generated, {
+                                filePath: route.filePath,
+                                projectRoot: this.projectRoot
+                            });
                         }
                         const title = this.extractPageTitleFromSource(rawSource, route);
                         res.type('html');

@@ -200,9 +200,18 @@ function resolveBembaImportPath(projectRoot, pageFilePath, source) {
 /** Local binding name from a parsed import node (default preferred). */
 function staticImportBindingName(imp, basenameNoExt) {
     if (!imp || imp.type !== 'Import') return basenameNoExt;
-    const d = imp.specifiers && imp.specifiers.find((s) => s.isDefault);
-    if (d && d.name) return d.name;
-    if (imp.specifiers && imp.specifiers[0]?.name) return imp.specifiers[0].name;
+    const specs = Array.isArray(imp.specifiers) ? imp.specifiers : [];
+    const d = specs.find((s) => s && (s.isDefault || s.type === 'default'));
+    if (d) {
+        const n = d.name || d.local;
+        if (n) return n;
+    }
+    // Prefer first reasonable binding name (namespace/local/named)
+    const first = specs[0];
+    if (first) {
+        const n = first.name || first.local || first.imported;
+        if (n) return n;
+    }
     return basenameNoExt;
 }
 
@@ -715,26 +724,86 @@ class BembaParser {
     parseImport() {
         this.consumeKeyword('import', 'Expected import');
         
+        /** @type {any[]} */
         const specifiers = [];
         let source = '';
-        
-        if (this.check('LEFT_BRACE')) {
-            // Named imports
-            this.advance();
-            do {
-                const name = this.consume('IDENTIFIER', 'Expected import name').literal;
-                specifiers.push({ name, alias: null });
-            } while (this.match('COMMA'));
-            this.consume('RIGHT_BRACE', 'Expected } after import specifiers');
-        } else {
-            // Default import
-            const name = this.consume('IDENTIFIER', 'Expected import name').literal;
-            specifiers.push({ name, alias: null, isDefault: true });
+
+        // Full JS import grammar support (subset relevant to Bemba):
+        // - import 'x';
+        // - import d from 'x';
+        // - import * as ns from 'x';
+        // - import { a, b as c } from 'x';
+        // - import d, { a as b } from 'x';
+
+        // Side-effect only import
+        if (this.check('STRING')) {
+            source = this.advance().literal;
+            this.match('SEMICOLON');
+            return new ImportNode(source, specifiers);
         }
-        
+
+        const readAsKeyword = () => {
+            // "as" is not a lexer keyword in this language; it arrives as IDENTIFIER with literal "as".
+            if (this.check('IDENTIFIER') && String(this.peek().literal || '').toLowerCase() === 'as') {
+                this.advance();
+                return true;
+            }
+            return false;
+        };
+
+        // Optional default binding first: `import Foo, ... from 'x'`
+        if (this.check('IDENTIFIER')) {
+            const maybeDefault = this.peek().literal;
+            // Only treat as default import if followed by comma or "from"
+            // (in `import { ... }` / `import * ...`, we won't be here)
+            // We'll tentatively parse default, then back off if it doesn't fit.
+            const saved = this.current;
+            const nameTok = this.advance();
+            if (this.check('COMMA') || this.checkKeyword('from')) {
+                specifiers.push({ type: 'default', local: nameTok.literal });
+                if (this.match('COMMA')) {
+                    // continue parsing additional specifiers below
+                } else {
+                    // directly `from`
+                }
+            } else {
+                // Not a default import; rewind and let the other branches handle
+                this.current = saved;
+            }
+        }
+
+        // Namespace import: `import * as ns from 'x'`
+        if (this.check('MULTIPLY')) {
+            this.advance(); // *
+            if (!readAsKeyword()) {
+                throw new Error('Expected "as" in namespace import (import * as ns from "...")');
+            }
+            const local = this.consume('IDENTIFIER', 'Expected namespace import binding').literal;
+            specifiers.push({ type: 'namespace', local });
+        } else if (this.check('LEFT_BRACE')) {
+            // Named imports
+            this.advance(); // {
+            if (!this.check('RIGHT_BRACE')) {
+                do {
+                    const imported = this.consume('IDENTIFIER', 'Expected import name').literal;
+                    let local = imported;
+                    if (readAsKeyword()) {
+                        local = this.consume('IDENTIFIER', 'Expected local binding after "as"').literal;
+                    }
+                    specifiers.push({ type: 'named', imported, local });
+                } while (this.match('COMMA'));
+            }
+            this.consume('RIGHT_BRACE', 'Expected } after import specifiers');
+        } else if (specifiers.length === 0) {
+            // Default-only import (no comma branch above): `import Foo from "x"`
+            const local = this.consume('IDENTIFIER', 'Expected import name').literal;
+            specifiers.push({ type: 'default', local });
+        }
+
         this.consumeKeyword('from', 'Expected from after import');
         source = this.consume('STRING', 'Expected import source').literal;
-        
+        this.match('SEMICOLON');
+
         return new ImportNode(source, specifiers);
     }
     
