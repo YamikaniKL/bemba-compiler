@@ -22,8 +22,18 @@ const validateProjectName = require('validate-npm-package-name');
 // Package version
 const packageJson = require('./package.json');
 
-// Detect if running with Bun
-const isBun = typeof Bun !== 'undefined';
+// Detect if running with Bun (works for `bunx` and `bun create` subprocesses)
+function detectBunRuntime() {
+    if (typeof Bun !== 'undefined') return true;
+    const ua = String(process.env.npm_config_user_agent || '').toLowerCase();
+    if (ua.includes('bun/')) return true;
+    const execPath = String(process.execPath || '').toLowerCase();
+    if (execPath.includes('bun')) return true;
+    const npmExecPath = String(process.env.npm_execpath || '').toLowerCase();
+    if (npmExecPath.includes('bun')) return true;
+    return false;
+}
+const isBun = detectBunRuntime();
 const packageManager = isBun ? 'bun' : 'npm';
 
 // CLI setup
