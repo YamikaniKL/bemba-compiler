@@ -163,7 +163,7 @@ function pickAppPageForPath(urlPath) {
 
 function pickLegacyPageForPath(urlPath) {
   // Best-effort: legacy pages are file-based, no nested layouts.
-  // Map `/about` -> `/amapeji/about.bemba` and `/` -> `/amapeji/index.bemba` if present.
+  // Map \`/about\` -> \`/amapeji/about.bemba\` and \`/\` -> \`/amapeji/index.bemba\` if present.
   const want = urlPath === '/' ? '/amapeji/index.bemba' : ('/amapeji' + urlPath + '.bemba');
   const mod = legacyPages[want];
   if (mod) return { key: want, mod, params: {} };
