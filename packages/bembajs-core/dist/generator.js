@@ -552,7 +552,7 @@ module.exports = nextConfig`;
             const section = sections[0]; // Use first section
             mainContent = `
         <main class="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-            <img alt="BembaJS logo" width="180" height="38" src="/bemba-logo.svg" class="dark:invert" style="color:transparent">
+            <img alt="BembaJS logo" width="180" height="38" src="/logobemba.svg" class="dark:invert" style="color:transparent">
             <ol class="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
                 <li class="mb-2 tracking-[-.01em]">Tantika ukupanga ukulemba <code class="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">amapeji/index.bemba</code>.</li>
                 <li class="tracking-[-.01em]">Bika na ukumona ifyakusendeka mwangu.</li>
