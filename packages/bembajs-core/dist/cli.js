@@ -425,6 +425,9 @@ export default defineConfig({
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BembaJS</title>
   <link rel="icon" href="data:," />
+  <style>
+    html, body, #root { margin: 0; padding: 0; min-height: 100%; }
+  </style>
 </head>
 <body>
   <div id="root"><!--app-html--></div>

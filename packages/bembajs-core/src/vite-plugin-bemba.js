@@ -231,15 +231,17 @@ async function renderUrl(urlPath) {
   const rootEl = document.getElementById('root');
   const pickedApp = pickAppPageForPath(urlPath);
   if (pickedApp) {
-    renderLoadingFor(pickedApp.key);
+    const state = window.__BEMBA_SSR_STATE__;
+    const shouldHydrate = state && state.urlPath === urlPath && state.ssr === true && rootEl && rootEl.hasChildNodes();
+    if (!shouldHydrate) {
+      renderLoadingFor(pickedApp.key);
+    }
     const loaded = await loadMaybe(pickedApp.mod);
     const Page = loaded && loaded.default;
     if (typeof Page !== 'function') {
       // fallthrough to not-found
     } else {
     const element = composeElement(pickedApp.key, Page);
-    const state = window.__BEMBA_SSR_STATE__;
-    const shouldHydrate = state && state.urlPath === urlPath && state.ssr === true && rootEl && rootEl.hasChildNodes();
     if (shouldHydrate) {
       if (!__bembaHydrated) {
         __bembaRoot = hydrateRoot(rootEl, element);
