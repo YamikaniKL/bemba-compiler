@@ -1,10 +1,10 @@
 // Material-UI (MUI) component wrappers
-import { wrapReactComponent } from './react-wrapper.js';
+const { wrapReactComponent } = require('./react-wrapper.js');
 
 /**
  * Wrap MUI Button component
  */
-export function wrapMuiButton(bembaProps) {
+function wrapMuiButton(bembaProps) {
     const props = {
         ...bembaProps,
         onClick: bembaProps.pakuKlikisha,
@@ -22,7 +22,7 @@ export function wrapMuiButton(bembaProps) {
 /**
  * Wrap MUI TextField component
  */
-export function wrapMuiTextField(bembaProps) {
+function wrapMuiTextField(bembaProps) {
     const props = {
         ...bembaProps,
         onChange: bembaProps.pakuLemba,
@@ -44,7 +44,7 @@ export function wrapMuiTextField(bembaProps) {
 /**
  * Wrap MUI Card component
  */
-export function wrapMuiCard(bembaProps) {
+function wrapMuiCard(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -58,7 +58,7 @@ export function wrapMuiCard(bembaProps) {
 /**
  * Wrap MUI Dialog component
  */
-export function wrapMuiDialog(bembaProps) {
+function wrapMuiDialog(bembaProps) {
     const props = {
         ...bembaProps,
         open: bembaProps.open || bembaProps.wasalwa,
@@ -74,7 +74,7 @@ export function wrapMuiDialog(bembaProps) {
 /**
  * Wrap MUI Select component
  */
-export function wrapMuiSelect(bembaProps) {
+function wrapMuiSelect(bembaProps) {
     const props = {
         ...bembaProps,
         onChange: bembaProps.pakuCinja,
@@ -92,7 +92,7 @@ export function wrapMuiSelect(bembaProps) {
 /**
  * Wrap MUI Typography component
  */
-export function wrapMuiTypography(bembaProps) {
+function wrapMuiTypography(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -107,7 +107,7 @@ export function wrapMuiTypography(bembaProps) {
 /**
  * Get wrapper for MUI component
  */
-export function getMuiWrapper(componentName) {
+function getMuiWrapper(componentName) {
     const wrappers = {
         Button: wrapMuiButton,
         TextField: wrapMuiTextField,
@@ -120,7 +120,7 @@ export function getMuiWrapper(componentName) {
     return wrappers[componentName] || wrapReactComponent;
 }
 
-export default {
+module.exports = {
     wrapMuiButton,
     wrapMuiTextField,
     wrapMuiCard,
@@ -129,4 +129,6 @@ export default {
     wrapMuiTypography,
     getMuiWrapper
 };
+
+module.exports.default = module.exports;
 

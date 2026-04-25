@@ -1,6 +1,6 @@
 {
   "name": "bembajs",
-  "version": "1.3.26",
+  "version": "1.4.0",
   "description": "BembaJS - A Next.js-like framework for programming in Bemba language with full control flow and Chakra UI support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -32,7 +32,9 @@
     "build": "node build.js",
     "dev": "node bin/bemba.js tungulula",
     "test": "node test/index.js",
-    "clean": "rm -rf dist"
+    "lint": "node -e \"console.log('bembajs lint: no standalone lint target yet')\"",
+    "format": "node -e \"console.log('bembajs format: no standalone format target yet')\"",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "keywords": [
     "bemba",
@@ -47,15 +49,15 @@
   "author": "Yamikani Kalonge and Bemba Team",
   "license": "MIT",
   "dependencies": {
-    "@vitejs/plugin-react": "^4.3.4",
-    "bembajs-core": "^1.3.25",
-    "chokidar": "^3.5.3",
-    "commander": "^11.1.0",
-    "express": "^4.21.2",
+    "@vitejs/plugin-react": "^6.0.1",
+    "bembajs-core": "^1.4.0",
+    "chokidar": "^5.0.0",
+    "commander": "^14.0.3",
+    "express": "^5.2.1",
     "prompts": "^2.4.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "vite": "^6.0.0"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "vite": "^8.0.10"
   },
   "devDependencies": {},
   "engines": {

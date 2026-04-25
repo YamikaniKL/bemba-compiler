@@ -5,8 +5,7 @@
  * Create a new BembaJS application (Next.js-style)
  * 
  * Usage:
- *   npm create bembajs@latest
- *   npx create-bembajs my-app
+ *   bun create bembajs@latest
  *   bunx create-bembajs my-app
  */
 
@@ -34,7 +33,7 @@ function detectBunRuntime() {
     return false;
 }
 const isBun = detectBunRuntime();
-const packageManager = isBun ? 'bun' : 'npm';
+const packageManager = 'bun';
 
 // CLI setup
 program
@@ -128,15 +127,18 @@ async function createApp(projectDirectory, options) {
             name: 'template',
             message: 'Which template would you like to use?',
             choices: [
-                { title: 'Base (Recommended)', value: 'base', description: 'A basic BembaJS application' },
-                { title: 'Dashboard', value: 'dashboard', description: 'Admin dashboard with components' },
-                { title: 'E-commerce', value: 'ecommerce', description: 'Online store template' },
-                { title: 'Blog', value: 'blog', description: 'Blog with markdown support' }
+                { title: 'Base (Recommended)', value: 'base', description: 'React-first App Router starter' },
+                { title: 'UI Starter', value: 'ui', description: 'Base plus reusable UI starter blocks' }
             ],
             initial: 0
         });
         
         template = response.template || template || 'base';
+    }
+
+    if (template !== 'base' && template !== 'ui') {
+        console.error(chalk.red(`Unknown template "${template}". Supported templates: base, ui.`));
+        process.exit(1);
     }
 
     // TypeScript is opt-in via --typescript; default false for non-interactive create flow.
@@ -183,10 +185,12 @@ async function createApp(projectDirectory, options) {
                 start: 'node dist/server.mjs',
                 export: 'bemba fumya',
                 lint: 'bemba lint',
-                format: 'bemba format'
+                format: 'bemba format',
+                test: 'bemba test'
             },
             dependencies: {
-                bembajs: '^1.3.24',
+                bembajs: '^1.3.26',
+                'bembajs-core': '^1.3.25',
                 express: '^4.21.2',
                 react: '^18.2.0',
                 'react-dom': '^18.2.0'
@@ -220,14 +224,13 @@ async function createApp(projectDirectory, options) {
     if (shouldInstall) {
         spinner.start(`Installing dependencies with ${packageManager}...`);
         try {
-            const installCmd = packageManager === 'bun' ? 'bun install' : 'npm install';
-            execSync(installCmd, { cwd: projectPath, stdio: 'ignore' });
+            execSync('bun install', { cwd: projectPath, stdio: 'ignore' });
             spinner.succeed('Dependencies installed');
         } catch (error) {
             spinner.fail('Failed to install dependencies');
             console.warn(chalk.yellow('You can install dependencies manually by running:'));
             console.warn(chalk.cyan(`  cd ${projectName}`));
-            console.warn(chalk.cyan(`  ${packageManager} install`));
+            console.warn(chalk.cyan('  bun install'));
         }
     }
 
@@ -251,19 +254,19 @@ async function createApp(projectDirectory, options) {
     console.log();
     console.log('Inside that directory, you can run several commands:');
     console.log();
-    console.log(chalk.cyan(`  ${packageManager} run dev`));
+    console.log(chalk.cyan('  bun run dev'));
     console.log('    Starts the development server.');
     console.log();
-    console.log(chalk.cyan(`  ${packageManager} run build`));
+    console.log(chalk.cyan('  bun run build'));
     console.log('    Builds the app for production.');
     console.log();
-    console.log(chalk.cyan(`  ${packageManager} start`));
+    console.log(chalk.cyan('  bun run start'));
     console.log('    Runs the built app in production mode.');
     console.log();
     console.log('We suggest that you begin by typing:');
     console.log();
     console.log(chalk.cyan('  cd'), projectName);
-    console.log(`  ${chalk.cyan(`${packageManager} run dev`)}`);
+    console.log(`  ${chalk.cyan('bun run dev')}`);
     console.log();
     console.log('Happy coding with BembaJS! 🇿🇲');
     console.log();

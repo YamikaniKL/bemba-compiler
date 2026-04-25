@@ -1,10 +1,10 @@
 // Chakra UI component wrappers
-import { wrapReactComponent } from './react-wrapper.js';
+const { wrapReactComponent } = require('./react-wrapper.js');
 
 /**
  * Wrap Chakra Button component
  */
-export function wrapChakraButton(bembaProps) {
+function wrapChakraButton(bembaProps) {
     const props = {
         ...bembaProps,
         onClick: bembaProps.pakuKlikisha,
@@ -29,7 +29,7 @@ export function wrapChakraButton(bembaProps) {
 /**
  * Wrap Chakra Input component
  */
-export function wrapChakraInput(bembaProps) {
+function wrapChakraInput(bembaProps) {
     const props = {
         ...bembaProps,
         onChange: bembaProps.pakuLemba,
@@ -59,7 +59,7 @@ export function wrapChakraInput(bembaProps) {
 /**
  * Wrap Chakra Box component
  */
-export function wrapChakraBox(bembaProps) {
+function wrapChakraBox(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -81,7 +81,7 @@ export function wrapChakraBox(bembaProps) {
 /**
  * Wrap Chakra Stack component
  */
-export function wrapChakraStack(bembaProps) {
+function wrapChakraStack(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -101,7 +101,7 @@ export function wrapChakraStack(bembaProps) {
 /**
  * Wrap Chakra Modal component
  */
-export function wrapChakraModal(bembaProps) {
+function wrapChakraModal(bembaProps) {
     const props = {
         ...bembaProps,
         isOpen: bembaProps.open || bembaProps.wasalwa || bembaProps.isOpen,
@@ -121,7 +121,7 @@ export function wrapChakraModal(bembaProps) {
 /**
  * Wrap Chakra Select component
  */
-export function wrapChakraSelect(bembaProps) {
+function wrapChakraSelect(bembaProps) {
     const props = {
         ...bembaProps,
         onChange: bembaProps.pakuCinja,
@@ -145,7 +145,7 @@ export function wrapChakraSelect(bembaProps) {
 /**
  * Wrap Chakra Text component
  */
-export function wrapChakraText(bembaProps) {
+function wrapChakraText(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -165,7 +165,7 @@ export function wrapChakraText(bembaProps) {
 /**
  * Wrap Chakra Heading component
  */
-export function wrapChakraHeading(bembaProps) {
+function wrapChakraHeading(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile,
@@ -184,7 +184,7 @@ export function wrapChakraHeading(bembaProps) {
 /**
  * Get wrapper for Chakra UI component
  */
-export function getChakraWrapper(componentName) {
+function getChakraWrapper(componentName) {
     const wrappers = {
         Button: wrapChakraButton,
         Input: wrapChakraInput,
@@ -199,7 +199,7 @@ export function getChakraWrapper(componentName) {
     return wrappers[componentName] || wrapReactComponent;
 }
 
-export default {
+module.exports = {
     wrapChakraButton,
     wrapChakraInput,
     wrapChakraBox,
@@ -210,4 +210,6 @@ export default {
     wrapChakraHeading,
     getChakraWrapper
 };
+
+module.exports.default = module.exports;
 

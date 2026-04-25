@@ -1,3 +1,36 @@
+# BembaJS Monorepo
+
+BembaJS is a React-first framework and compiler for writing web apps in Bemba syntax.
+
+This monorepo contains:
+
+- `packages/bembajs` - framework runtime + CLI (`bemba`)
+- `packages/bembajs-core` - compiler, parser, transformer, Vite plugin
+- `packages/create-bembajs` - app scaffolder (`create-bembajs`)
+- `packages/pisha` - lightweight Vite build tool integration
+
+## Release Highlights (v1.4.0 line)
+
+- React-first runtime path is now the default flow.
+- Package export contracts are stabilized for CJS, ESM, and TypeScript consumers.
+- Import syntax and alias handling are hardened (`leta`, `kufuma`, `fumya ca_pamushili`).
+- Component event prop mapping is fixed for React output (`pakuKlikisha` -> `onClick`, etc.).
+- Workspace dependencies are upgraded (React 19, Vite 8, Express 5, TypeScript 6 where applicable).
+
+## Development
+
+```bash
+bun install
+bunx pnpm -r build
+bunx pnpm -r test
+```
+
+## Packages
+
+- [`bembajs`](./packages/bembajs/README.md)
+- [`bembajs-core`](./packages/bembajs-core/README.md)
+- [`create-bembajs`](./packages/create-bembajs/README.md)
+- [`pisha`](./packages/pisha/README.md)
 # BembaJS
 
 <div align="center">

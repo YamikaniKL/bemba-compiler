@@ -4,6 +4,7 @@
 const { Command } = require('commander');
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 const { BEMBA_FOLDERS, DEFAULT_CONFIG } = require('./constants');
 const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
@@ -321,25 +322,22 @@ class BembaCLI {
             scripts: {
                 dev: 'bemba tungulula',
                 build: 'bemba akha',
-                start: 'node dist/server.js',
+                start: 'node dist/server.mjs',
                 export: 'bemba fumya',
-                lint: 'standard',
-                'lint:fix': 'standard --fix',
-                'lint:bemba': 'bemba lemba'
+                lint: 'bemba lint',
+                format: 'bemba format',
+                test: 'bemba test'
             },
             dependencies: {
                 'bembajs': `^${CORE_VERSION}`,
-                'bembajs-core': '^1.3.13',
+                'bembajs-core': `^${CORE_VERSION}`,
                 'express': '^4.21.2',
                 'react': '^18.0.0',
-                'react-dom': '^18.0.0',
-                'react-router-dom': '^6.28.0',
-                'next': '^14.0.0'
+                'react-dom': '^18.0.0'
             },
             devDependencies: {
                 vite: '^6.0.0',
-                '@vitejs/plugin-react': '^4.3.4',
-                standard: '^17.1.0'
+                '@vitejs/plugin-react': '^4.3.4'
             }
         };
         
@@ -855,16 +853,31 @@ app.listen(port, () => {
     // Lint code
     lintCode(options) {
         console.log(msg('linting'));
-        
-        // TODO: Implement linting
+        const root = process.cwd();
+        const eslintBin = path.join(root, 'node_modules', '.bin', process.platform === 'win32' ? 'eslint.cmd' : 'eslint');
+        if (!fs.existsSync(eslintBin)) {
+            console.log('ESLint is not installed in this project. Install it to enable lint checks.');
+            return;
+        }
+        const args = ['.'];
+        if (options && options.fix) args.push('--fix');
+        const result = spawnSync(eslintBin, args, { stdio: 'inherit' });
+        if (result.status !== 0) {
+            process.exit(result.status || 1);
+        }
         console.log(msg('lintOk'));
     }
     
     // Run tests
     runTests(options) {
         console.log(msg('runningTests'));
-        
-        // TODO: Implement testing
+        const root = process.cwd();
+        const nodeArgs = ['--test'];
+        if (options && options.watch) nodeArgs.push('--watch');
+        const result = spawnSync(process.execPath, nodeArgs, { stdio: 'inherit', cwd: root });
+        if (result.status !== 0) {
+            process.exit(result.status || 1);
+        }
         console.log(msg('testsOk'));
     }
     

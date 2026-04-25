@@ -1,6 +1,6 @@
 {
   "name": "pisha",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Pisha - The Vite-based build tool for BembaJS",
   "main": "./src/index.js",
   "type": "module",
@@ -10,7 +10,11 @@
   "scripts": {
     "dev": "node src/cli.js dev",
     "build": "node src/cli.js build",
-    "preview": "node src/cli.js preview"
+    "preview": "node src/cli.js preview",
+    "test": "node -e \"console.log('pisha: tests are not configured yet')\"",
+    "lint": "node -e \"console.log('pisha lint: no standalone lint target yet')\"",
+    "format": "node -e \"console.log('pisha format: no standalone format target yet')\"",
+    "clean": "node -e \"console.log('pisha clean: nothing to clean')\""
   },
   "keywords": [
     "bembajs",
@@ -28,15 +32,15 @@
     "url": "https://github.com/YamikaniKL/bemba-compiler.git"
   },
   "dependencies": {
-    "vite": "^5.0.0",
-    "bembajs": "^1.1.0"
+    "vite": "^8.0.10",
+    "bembajs": "^1.4.0"
   },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^25.6.0"
   },
   "engines": {
     "node": ">=18.0.0"

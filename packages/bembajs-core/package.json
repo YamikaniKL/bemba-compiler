@@ -1,6 +1,6 @@
 {
   "name": "bembajs-core",
-  "version": "1.3.25",
+  "version": "1.4.0",
   "description": "BembaJS Core - Compiler and runtime for Bemba language with conditionals, loops, and async/await support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -46,7 +46,9 @@
     "build": "node build.js",
     "dev": "node build.js --watch",
     "test": "node test/index.js && node test/smoke-export.js",
-    "clean": "rm -rf dist"
+    "lint": "node -e \"console.log('bembajs-core lint: no standalone lint target yet')\"",
+    "format": "node -e \"console.log('bembajs-core format: no standalone format target yet')\"",
+    "clean": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\""
   },
   "keywords": [
     "bemba",
@@ -59,7 +61,7 @@
   "license": "MIT",
   "dependencies": {
     "commander": "^14.0.3",
-    "esbuild": "^0.25.9"
+    "esbuild": "^0.28.0"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
@@ -70,10 +72,10 @@
     "react-dom": { "optional": true }
   },
   "devDependencies": {
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "vite": "^6.0.0",
-    "@vitejs/plugin-react": "^4.3.4"
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
+    "vite": "^8.0.10",
+    "@vitejs/plugin-react": "^6.0.1"
   },
   "engines": {
     "node": ">=16.0.0"

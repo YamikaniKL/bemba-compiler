@@ -531,15 +531,13 @@ function writeProjectTemplateFiles(projectPath, projectName, options = {}) {
         path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'page.bemba'),
         isUiTemplate ? indexPageUi() : indexPage()
     );
-    if (isUiTemplate) {
-        fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
-        fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about'), { recursive: true });
-        fs.writeFileSync(
-            path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about', 'page.bemba'),
-            aboutPage()
-        );
-        fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
-    }
+    fs.writeFileSync(path.join(projectPath, 'vite.config.mjs'), viteConfigMjs());
+    fs.mkdirSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about'), { recursive: true });
+    fs.writeFileSync(
+        path.join(projectPath, BEMBA_FOLDERS.PAGES, 'app', 'about', 'page.bemba'),
+        aboutPage()
+    );
+    fs.writeFileSync(path.join(projectPath, BEMBA_FOLDERS.PAGES, 'react-demo.bemba'), reactDemoPage());
 }
 
 module.exports = {

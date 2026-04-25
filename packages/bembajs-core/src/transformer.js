@@ -20,6 +20,16 @@ class BembaTransformer {
             AwaitExpression: this.transformAwaitExpression.bind(this),
             FunctionDeclaration: this.transformFunctionDeclaration.bind(this)
         };
+        this.jsxEventPropMap = {
+            pakuKlikisha: 'onClick',
+            pakuLemba: 'onChange',
+            pakuTumina: 'onSubmit',
+            pakuCinja: 'onChange',
+            pakuIngia: 'onFocus',
+            pakuFuma: 'onBlur',
+            pakuKwesha: 'onMouseEnter',
+            pakuSiya: 'onMouseLeave'
+        };
     }
     
     transform(ast) {
@@ -331,12 +341,8 @@ class BembaTransformer {
         const reactProps = {};
         for (const [key, value] of Object.entries(props)) {
             // Transform Bemba event handlers to React event handlers
-            if (key.startsWith('paku')) {
-                const eventName = key.replace('paku', 'on').toLowerCase();
-                reactProps[eventName] = this.transformNode(value);
-            } else {
-                reactProps[key] = this.transformNode(value);
-            }
+            const mappedKey = this.jsxEventPropMap[key] || key;
+            reactProps[mappedKey] = this.transformNode(value);
         }
         
         return reactProps;

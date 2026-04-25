@@ -1,13 +1,13 @@
 // Component wrapper registry
-import * as reactWrapper from './react-wrapper.js';
-import * as shadcnWrapper from './shadcn-wrapper.js';
-import * as muiWrapper from './mui-wrapper.js';
-import * as chakraWrapper from './chakra-wrapper.js';
+const reactWrapper = require('./react-wrapper.js');
+const shadcnWrapper = require('./shadcn-wrapper.js');
+const muiWrapper = require('./mui-wrapper.js');
+const chakraWrapper = require('./chakra-wrapper.js');
 
 /**
  * Wrapper registry for different UI libraries
  */
-export const WRAPPER_REGISTRY = {
+const WRAPPER_REGISTRY = {
     react: reactWrapper,
     shadcn: shadcnWrapper,
     mui: muiWrapper,
@@ -17,7 +17,7 @@ export const WRAPPER_REGISTRY = {
 /**
  * Get wrapper for a component from a specific library
  */
-export function getWrapper(library, componentName) {
+function getWrapper(library, componentName) {
     const libraryWrappers = WRAPPER_REGISTRY[library];
     
     if (!libraryWrappers) {
@@ -38,7 +38,7 @@ export function getWrapper(library, componentName) {
 /**
  * Wrap a component with appropriate wrapper
  */
-export function wrapComponent(library, componentName, bembaProps) {
+function wrapComponent(library, componentName, bembaProps) {
     const wrapper = getWrapper(library, componentName);
     return wrapper(bembaProps);
 }
@@ -46,7 +46,7 @@ export function wrapComponent(library, componentName, bembaProps) {
 /**
  * Register custom wrapper
  */
-export function registerWrapper(library, componentName, wrapperFunction) {
+function registerWrapper(library, componentName, wrapperFunction) {
     if (!WRAPPER_REGISTRY[library]) {
         WRAPPER_REGISTRY[library] = {};
     }
@@ -62,18 +62,16 @@ function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-// Export individual wrappers
-export { reactWrapper, shadcnWrapper, muiWrapper, chakraWrapper };
-
-// Export wrapper functions
-export * from './react-wrapper.js';
-export * from './shadcn-wrapper.js';
-export * from './mui-wrapper.js';
-
-export default {
+module.exports = {
+    reactWrapper,
+    shadcnWrapper,
+    muiWrapper,
+    chakraWrapper,
+    WRAPPER_REGISTRY,
     getWrapper,
     wrapComponent,
-    registerWrapper,
-    WRAPPER_REGISTRY
+    registerWrapper
 };
+
+module.exports.default = module.exports;
 

@@ -1,10 +1,10 @@
 // Shadcn/ui component wrappers
-import { wrapReactComponent } from './react-wrapper.js';
+const { wrapReactComponent } = require('./react-wrapper.js');
 
 /**
  * Wrap Shadcn/ui Button component
  */
-export function wrapShadcnButton(bembaProps) {
+function wrapShadcnButton(bembaProps) {
     const props = {
         ...bembaProps,
         onClick: bembaProps.pakuKlikisha,
@@ -20,7 +20,7 @@ export function wrapShadcnButton(bembaProps) {
 /**
  * Wrap Shadcn/ui Input component
  */
-export function wrapShadcnInput(bembaProps) {
+function wrapShadcnInput(bembaProps) {
     const props = {
         ...bembaProps,
         onChange: bembaProps.pakuLemba,
@@ -39,7 +39,7 @@ export function wrapShadcnInput(bembaProps) {
 /**
  * Wrap Shadcn/ui Card component
  */
-export function wrapShadcnCard(bembaProps) {
+function wrapShadcnCard(bembaProps) {
     const props = {
         ...bembaProps,
         className: bembaProps.imikalile || 'rounded-lg border bg-card text-card-foreground shadow-sm',
@@ -52,7 +52,7 @@ export function wrapShadcnCard(bembaProps) {
 /**
  * Wrap Shadcn/ui Dialog component
  */
-export function wrapShadcnDialog(bembaProps) {
+function wrapShadcnDialog(bembaProps) {
     const props = {
         ...bembaProps,
         open: bembaProps.open || bembaProps.wasalwa,
@@ -66,7 +66,7 @@ export function wrapShadcnDialog(bembaProps) {
 /**
  * Wrap Shadcn/ui Select component
  */
-export function wrapShadcnSelect(bembaProps) {
+function wrapShadcnSelect(bembaProps) {
     const props = {
         ...bembaProps,
         onValueChange: bembaProps.pakuCinja,
@@ -81,7 +81,7 @@ export function wrapShadcnSelect(bembaProps) {
 /**
  * Get wrapper for Shadcn/ui component
  */
-export function getShadcnWrapper(componentName) {
+function getShadcnWrapper(componentName) {
     const wrappers = {
         Button: wrapShadcnButton,
         Input: wrapShadcnInput,
@@ -93,7 +93,7 @@ export function getShadcnWrapper(componentName) {
     return wrappers[componentName] || wrapReactComponent;
 }
 
-export default {
+module.exports = {
     wrapShadcnButton,
     wrapShadcnInput,
     wrapShadcnCard,
@@ -101,4 +101,6 @@ export default {
     wrapShadcnSelect,
     getShadcnWrapper
 };
+
+module.exports.default = module.exports;
 

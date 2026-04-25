@@ -8,6 +8,7 @@
 const path = require('path');
 const fs = require('fs');
 const readline = require('readline');
+const { spawnSync } = require('child_process');
 const {
     normalizeLang,
     msg,
@@ -517,6 +518,13 @@ program
     .description(msg('lintDesc'))
     .action(() => {
         console.log(msg('lintRunning'));
+        const eslintBin = path.join(process.cwd(), 'node_modules', '.bin', process.platform === 'win32' ? 'eslint.cmd' : 'eslint');
+        if (!fs.existsSync(eslintBin)) {
+            console.log('ESLint is not installed in this project. Install it to run `bemba lint`.');
+            return;
+        }
+        const result = spawnSync(eslintBin, ['.'], { stdio: 'inherit' });
+        if (result.status !== 0) process.exit(result.status || 1);
         console.log(msg('lintDone'));
     });
 
@@ -526,7 +534,25 @@ program
     .description(msg('formatDesc'))
     .action(() => {
         console.log(msg('formatRunning'));
+        const prettierBin = path.join(process.cwd(), 'node_modules', '.bin', process.platform === 'win32' ? 'prettier.cmd' : 'prettier');
+        if (!fs.existsSync(prettierBin)) {
+            console.log('Prettier is not installed in this project. Install it to run `bemba format`.');
+            return;
+        }
+        const result = spawnSync(prettierBin, ['--write', '.'], { stdio: 'inherit' });
+        if (result.status !== 0) process.exit(result.status || 1);
         console.log(msg('formatDone'));
+    });
+
+program
+    .command('test')
+    .description('Run project tests')
+    .option('--watch', 'Run tests in watch mode')
+    .action((opts) => {
+        const args = ['--test'];
+        if (opts && opts.watch) args.push('--watch');
+        const result = spawnSync(process.execPath, args, { stdio: 'inherit' });
+        if (result.status !== 0) process.exit(result.status || 1);
     });
 
 // Help command

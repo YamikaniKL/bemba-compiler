@@ -1,7 +1,9 @@
 // Vite plugin for .bemba files
-import { BembaParser } from 'bembajs/src/parser.js';
-import { BembaTransformer } from 'bembajs/src/transformer.js';
-import { BembaGenerator } from 'bembajs/src/generator.js';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+const bembaCore = require('bembajs-core');
+const { BembaParser, BembaTransformer, BembaGenerator } = bembaCore;
 
 /**
  * Vite plugin to transform .bemba files to JSX

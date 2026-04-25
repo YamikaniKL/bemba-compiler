@@ -33,7 +33,7 @@ const PROP_MAP = {
 /**
  * Wrap Bemba props for React component
  */
-export function wrapReactComponent(Component, bembaProps) {
+function wrapReactComponent(Component, bembaProps) {
     const reactProps = {};
     
     // Convert Bemba props to React props
@@ -48,7 +48,7 @@ export function wrapReactComponent(Component, bembaProps) {
 /**
  * Convert event handler string to function
  */
-export function convertEventHandler(handlerString) {
+function convertEventHandler(handlerString) {
     if (typeof handlerString === 'function') {
         return handlerString;
     }
@@ -60,7 +60,7 @@ export function convertEventHandler(handlerString) {
 /**
  * Validate component props
  */
-export function validateProps(props, schema) {
+function validateProps(props, schema) {
     const errors = [];
     
     for (const [key, definition] of Object.entries(schema)) {
@@ -87,10 +87,12 @@ export function validateProps(props, schema) {
     return errors.length === 0;
 }
 
-export default {
+module.exports = {
     wrapReactComponent,
     convertEventHandler,
     validateProps,
     PROP_MAP
 };
+
+module.exports.default = module.exports;
 
