@@ -82,7 +82,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/bembajs/bembajs.git",
+    "url": "https://github.com/YamikaniKL/bemba-compiler.git",
     "directory": "packages/bembajs-core"
   }
 }
