@@ -1,11 +1,11 @@
-# pisha
+# bembajs-pisha
 
 Vite-based build tool integration for BembaJS projects.
 
 ## Install
 
 ```bash
-bun add pisha
+bun add bembajs-pisha
 ```
 
 ## Commands
