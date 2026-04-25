@@ -391,6 +391,12 @@ import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba';
 
 export default defineConfig({
   plugins: [vitePluginBemba(), react({ include: [/\\.[jt]sx$/, /\\.bsx$/] })],
+  css: {
+    // Avoid parent-directory postcss config bleed in generated/managed Injini projects.
+    postcss: {
+      plugins: []
+    }
+  },
   esbuild: {
     include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
     loader: 'jsx'

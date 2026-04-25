@@ -427,6 +427,12 @@ import { vitePluginBemba } from 'bembajs-core/vite-plugin-bemba';
 
 export default defineConfig({
   plugins: [vitePluginBemba(), react({ include: [/\\.[jt]sx$/, /\\.bsx$/] })],
+  css: {
+    // Prevent inherited parent postcss configs from breaking scaffolded apps.
+    postcss: {
+      plugins: []
+    }
+  },
   esbuild: {
     include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
     loader: 'jsx'
