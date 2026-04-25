@@ -1,0 +1,13 @@
+// App router about page
+pangaIpepa('About', {
+    ukwisulula: nokuti() {
+        bwelela (
+            <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
+                <umutwe_ukulu>About BembaJS</umutwe_ukulu>
+                <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
+                    App-router path: <code>amapeji/app/about/page.bemba</code>.
+                </ukulondolola>
+            </icipandwa>
+        )
+    }
+});

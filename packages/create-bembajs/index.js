@@ -11,12 +11,14 @@
 
 const { program } = require('commander');
 const prompts = require('prompts');
-const chalk = require('chalk');
-const ora = require('ora');
+const chalkImport = require('chalk');
+const oraImport = require('ora');
 const path = require('path');
 const fs = require('fs');
 const { execSync } = require('child_process');
 const validateProjectName = require('validate-npm-package-name');
+const chalk = chalkImport.default ?? chalkImport;
+const ora = oraImport.default ?? oraImport;
 
 // Package version
 const packageJson = require('./package.json');
@@ -172,49 +174,28 @@ async function createApp(projectDirectory, options) {
         process.exit(1);
     }
 
-    // Create package.json
-    spinner.start('Creating package.json...');
+    // Update package.json
+    spinner.start('Updating package metadata...');
     try {
-        const packageJsonContent = {
-            name: projectName,
-            version: '0.1.0',
-            private: true,
-            scripts: {
-                dev: 'bemba tungulula',
-                build: 'bemba akha',
-                start: 'node dist/server.mjs',
-                export: 'bemba fumya',
-                lint: 'bemba lint',
-                format: 'bemba format',
-                test: 'bemba test'
-            },
-            dependencies: {
-                bembajs: '^1.3.26',
-                'bembajs-core': '^1.3.25',
-                express: '^4.21.2',
-                react: '^18.2.0',
-                'react-dom': '^18.2.0'
-            },
-            devDependencies: {
-                vite: '^6.0.0',
-                '@vitejs/plugin-react': '^4.3.4',
-                ...(useTypeScript
-                    ? {
-                          typescript: '^5.0.0',
-                          '@types/react': '^18.2.0',
-                          '@types/react-dom': '^18.2.0'
-                      }
-                    : {})
-            }
-        };
-        
-        fs.writeFileSync(
-            path.join(projectPath, 'package.json'),
-            JSON.stringify(packageJsonContent, null, 2)
-        );
-        spinner.succeed('package.json created');
+        const packageJsonPath = path.join(projectPath, 'package.json');
+        const packageJsonContent = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+        packageJsonContent.name = projectName;
+        packageJsonContent.version = packageJsonContent.version || '1.0.0';
+        packageJsonContent.private = true;
+
+        if (useTypeScript) {
+            packageJsonContent.devDependencies = {
+                ...(packageJsonContent.devDependencies || {}),
+                typescript: packageJsonContent.devDependencies?.typescript || '^5.0.0',
+                '@types/react': packageJsonContent.devDependencies?.['@types/react'] || '^18.2.0',
+                '@types/react-dom': packageJsonContent.devDependencies?.['@types/react-dom'] || '^18.2.0'
+            };
+        }
+
+        fs.writeFileSync(packageJsonPath, JSON.stringify(packageJsonContent, null, 2));
+        spinner.succeed('Package metadata updated');
     } catch (error) {
-        spinner.fail('Failed to create package.json');
+        spinner.fail('Failed to update package metadata');
         console.error(chalk.red(error.message));
         process.exit(1);
     }
