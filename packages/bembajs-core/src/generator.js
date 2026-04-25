@@ -407,8 +407,8 @@ ${this.decreaseIndent()}}`;
         const s = source.trim();
         if (!s) return source;
         if (!s.startsWith('.')) return source; // bare specifiers, URLs, aliases: leave to bundler/runtime
-        // If the path already has an extension, keep it.
-        if (/[\\/][^\\/]+\\.[a-z0-9]+$/i.test(s) || /\\.[a-z0-9]+$/i.test(s)) return source;
+        // If the path already has a file extension (e.g. .bemba), keep it.
+        if (/\.[a-z0-9]+$/i.test(s)) return s;
         return `${s}.bemba`;
     }
     
