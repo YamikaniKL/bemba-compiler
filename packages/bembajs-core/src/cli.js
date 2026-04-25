@@ -315,6 +315,9 @@ class BembaCLI {
 
     
     createPackageJson(projectPath, name, options) {
+        // Floor at major.minor.0 so `^` always matches published patch lines (avoids Bun/npm edge cases on ^X.Y.Z when Z is brand-new).
+        const coreParts = String(CORE_VERSION).split('.');
+        const bembajsRange = `^${coreParts[0] || '1'}.${coreParts[1] || '4'}.0`;
         const packageJson = {
             name: name,
             version: '0.1.0',
@@ -329,8 +332,8 @@ class BembaCLI {
                 test: 'bemba test'
             },
             dependencies: {
-                'bembajs': `^${CORE_VERSION}`,
-                'bembajs-core': `^${CORE_VERSION}`,
+                bembajs: bembajsRange,
+                'bembajs-core': bembajsRange,
                 'express': '^4.21.2',
                 'react': '^18.0.0',
                 'react-dom': '^18.0.0'
@@ -449,7 +452,9 @@ export default defineConfig({
         try {
             ({ createServer } = await import('vite'));
         } catch (e) {
-            throw new Error('Injini dependencies are missing. Run `bun install` in this project, then run `bemba tungulula` again.');
+            throw new Error(
+                'Injini dependencies are missing. Run `bun install` in this project (if resolution fails, try `bun install --registry https://registry.npmjs.org/`), then run `bemba tungulula` again.'
+            );
         }
         const glue = this.ensureManagedInjiniGlue(process.cwd());
         const { loadBembaFrameworkConfig } = require('./framework-config');
@@ -469,7 +474,9 @@ export default defineConfig({
         } catch (e) {
             const m = String(e && e.message ? e.message : e);
             if (/Cannot find package 'vite'|Cannot find module 'vite'|externalize-deps/i.test(m)) {
-                throw new Error('Injini dependencies are missing. Run `bun install` in this project, then run `bemba tungulula` again.');
+                throw new Error(
+                    'Injini dependencies are missing. Run `bun install` in this project (if resolution fails, try `bun install --registry https://registry.npmjs.org/`), then run `bemba tungulula` again.'
+                );
             }
             throw e;
         }

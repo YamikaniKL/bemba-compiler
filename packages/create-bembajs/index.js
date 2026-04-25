@@ -148,6 +148,16 @@ function gitEnv() {
     };
 }
 
+/** Prefer the public npm registry so installs resolve (avoids stale mirrors / misconfigured default registry). */
+const NPM_PUBLIC_REGISTRY = 'https://registry.npmjs.org/';
+
+function installEnv() {
+    return {
+        ...gitEnv(),
+        NPM_CONFIG_REGISTRY: NPM_PUBLIC_REGISTRY
+    };
+}
+
 /**
  * @param {CliLang} lang
  * @param {string} key
@@ -422,13 +432,27 @@ async function createApp(projectDirectory, options) {
     if (shouldInstall) {
         logDoing(lang, 'spinnerInstall', packageManager);
         try {
-            execSync('bun install', { cwd: projectPath, stdio: 'ignore', env: gitEnv() });
+            execSync(`bun install --registry ${NPM_PUBLIC_REGISTRY}`, {
+                cwd: projectPath,
+                stdio: 'ignore',
+                env: installEnv()
+            });
             logDone(lang, 'spinnerInstallOk');
         } catch (error) {
-            console.error(chalk.red(t(lang, 'spinnerInstallFail')));
-            console.warn(chalk.yellow(t(lang, 'installManual')));
-            console.warn(chalk.cyan(`  cd ${projectName}`));
-            console.warn(chalk.cyan('  bun install'));
+            try {
+                execSync(`npm install --registry=${NPM_PUBLIC_REGISTRY}`, {
+                    cwd: projectPath,
+                    stdio: 'ignore',
+                    env: installEnv()
+                });
+                logDone(lang, 'spinnerInstallOk');
+            } catch (_) {
+                console.error(chalk.red(t(lang, 'spinnerInstallFail')));
+                console.warn(chalk.yellow(t(lang, 'installManual')));
+                console.warn(chalk.cyan(`  cd ${projectName}`));
+                console.warn(chalk.cyan(`  bun install --registry ${NPM_PUBLIC_REGISTRY}`));
+                console.warn(chalk.gray(`  npm install --registry=${NPM_PUBLIC_REGISTRY}`));
+            }
         }
     }
 
