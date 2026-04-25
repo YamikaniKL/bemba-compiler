@@ -1,0 +1,10 @@
+// Shared site shell for every page with umusangoSite: ee — navbar, footer, optional imikalile for shell-only CSS.
+// Not served as a route (/umusango returns 404). Edit once; all pages stay aligned.
+pangaUmusango({
+    ishinaLyabusite: 'My BembaJS App',
+    ilyashiPaMusule: 'Built with BembaJS',
+    inshilaNav: [
+        { ilembo: 'Home', inshila: '/' },
+        { ilembo: 'About', inshila: '/about' }
+    ]
+});

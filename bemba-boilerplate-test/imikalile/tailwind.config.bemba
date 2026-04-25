@@ -1,0 +1,16 @@
+pangaTailwind({
+  prefix: 'tw-',
+  corePlugins: {
+    preflight: ee
+  },
+  theme: {
+    extend: {
+      colors: {
+        bemba: {
+          blue: '#0071e3',
+          ink: '#1d1d1f'
+        }
+      }
+    }
+  }
+})
