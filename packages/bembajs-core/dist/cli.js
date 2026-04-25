@@ -672,9 +672,10 @@ export default defineConfig({
             await build({
                 configFile: viteConfig,
                 build: {
-                    ssr: 'virtual:bemba-app-entry-server',
+                    ssr: true,
                     outDir: path.join(outDir, 'server'),
                     rollupOptions: {
+                        input: 'virtual:bemba-app-entry-server',
                         output: {
                             entryFileNames: 'entry-server.mjs',
                             format: 'esm'
