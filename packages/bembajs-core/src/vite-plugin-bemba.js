@@ -434,14 +434,27 @@ function vitePluginBemba() {
         transformIndexHtml(html) {
             const raw = String(html || '');
             if (/src\/main\.(bsx|jsx|tsx|js)/i.test(raw)) return raw;
-            if (raw.includes(VIRTUAL_ENTRY_ID) || raw.includes(VIRTUAL_CLIENT_ENTRY_ID)) return raw;
-            const withRoot = raw.includes('id="root"')
-                ? raw
-                : raw.replace('</body>', '  <div id="root"></div>\n</body>');
-            return withRoot.replace(
-                '</body>',
-                `  <script type="module" src="/@id/${VIRTUAL_CLIENT_ENTRY_ID}"></script>\n</body>`
-            );
+
+            // Browsers cannot load `virtual:` URLs. Managed `injini-index.html` used a bare
+            // `src="virtual:bemba-app-entry-client"`; normalize to Vite's /@id/ form (dev + build).
+            const viteClientSrc = `/@id/${VIRTUAL_CLIENT_ENTRY_ID}`;
+            const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            let out = raw.replace(/\r\n/g, '\n');
+            for (const vid of [VIRTUAL_CLIENT_ENTRY_ID, VIRTUAL_ENTRY_ID]) {
+                out = out.replace(new RegExp(`src=(["'])${escRe(vid)}\\1`, 'gi'), `src=$1${viteClientSrc}$1`);
+            }
+
+            if (!out.includes(viteClientSrc)) {
+                const withRoot = out.includes('id="root"')
+                    ? out
+                    : out.replace('</body>', '  <div id="root"></div>\n</body>');
+                out = withRoot.replace(
+                    '</body>',
+                    `  <script type="module" src="${viteClientSrc}"></script>\n</body>`
+                );
+            }
+
+            return out;
         }
     };
 }

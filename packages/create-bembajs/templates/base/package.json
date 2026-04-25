@@ -22,8 +22,8 @@
   "author": "BembaJS Developer",
   "license": "MIT",
   "dependencies": {
-    "bembajs": "^1.4.1",
-    "bembajs-core": "^1.4.1",
+    "bembajs": "^1.4.3",
+    "bembajs-core": "^1.4.3",
     "express": "^5.2.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
@@ -35,7 +35,7 @@
     "prettier": "^3.8.3"
   },
   "bemba": {
-    "version": "1.4.1",
+    "version": "1.4.3",
     "framework": "nextjs-like",
     "features": [
       "ssr",
