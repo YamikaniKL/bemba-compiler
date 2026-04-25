@@ -8,7 +8,35 @@ const BembaParser = require('./parser');
 const BembaTransformer = require('./transformer');
 const BembaGenerator = require('./generator');
 const { ModuleNode } = require('./ast');
-const { transformWithEsbuild } = require('vite');
+const { transformWithOxc, transformWithEsbuild } = require('vite');
+
+/**
+ * JSX transform for emitted `.bemba` JS. Prefer Oxc (Vite 6+) to avoid deprecated `transformWithEsbuild`.
+ * @param {string} code
+ * @param {string} id
+ * @returns {Promise<{ code: string; map?: object | null }>}
+ */
+async function transformEmittedJsx(code, id) {
+    if (typeof transformWithOxc === 'function') {
+        return transformWithOxc(
+            code,
+            id,
+            {
+                lang: 'jsx',
+                jsx: { runtime: 'automatic' },
+                sourcemap: true
+            },
+            undefined,
+            undefined,
+            undefined
+        );
+    }
+    return transformWithEsbuild(code, id, {
+        loader: 'jsx',
+        jsx: 'automatic',
+        sourcemap: true
+    });
+}
 // Client + server virtual entries (Vite SSR)
 const VIRTUAL_CLIENT_ENTRY_ID = 'virtual:bemba-app-entry-client';
 const RESOLVED_VIRTUAL_CLIENT_ENTRY_ID = '\0virtual:bemba-app-entry-client';
@@ -402,11 +430,7 @@ function vitePluginBemba() {
             try {
                 const compiled = compileBembaFile(src, fileId);
                 // Vite import analysis expects plain JS (not raw JSX) for custom extensions.
-                const transformed = await transformWithEsbuild(compiled, id, {
-                    loader: 'jsx',
-                    jsx: 'automatic',
-                    sourcemap: true
-                });
+                const transformed = await transformEmittedJsx(compiled, id);
                 return {
                     code: transformed.code,
                     map: transformed.map || null
@@ -418,11 +442,7 @@ function vitePluginBemba() {
         },
         async transform(src, id) {
             if (bsxFilter.test(id)) {
-                const transformed = await transformWithEsbuild(src, id, {
-                    loader: 'jsx',
-                    jsx: 'automatic',
-                    sourcemap: true
-                });
+                const transformed = await transformEmittedJsx(src, id);
                 return {
                     code: transformed.code,
                     map: transformed.map || null

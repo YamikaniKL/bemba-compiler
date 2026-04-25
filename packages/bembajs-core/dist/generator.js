@@ -1,4 +1,15 @@
 // Code Generator - generates React components from Bemba AST
+
+/** Leading `import` nodes live on `program.statements` (not `program.imports`, which stays empty). */
+function programImportsFromReact(program) {
+    const isReact = (n) =>
+        n &&
+        n.type === 'Import' &&
+        String(n.source || '').replace(/^['"]|['"]$/g, '') === 'react';
+    const stmts = program && Array.isArray(program.statements) ? program.statements : [];
+    const headImports = program && Array.isArray(program.imports) ? program.imports : [];
+    return stmts.some(isReact) || headImports.some(isReact);
+}
 const { BEMBA_SYNTAX } = require('./constants');
 
 class BembaGenerator {
@@ -75,14 +86,12 @@ class BembaGenerator {
     // React Component generation
     generateReactComponent(node, options = {}) {
         const { omitDefaultExport = false } = options;
-        const imports = this.generateReactImports();
+        const imports = this._skipBundledReactImportFromReact ? '' : this.generateReactImports();
         const hooks = (node.hooks || []).map(hook => this.generateReactHook(hook)).join('\n');
         const methods = this.generateMethods(node.methods);
         const render = this.generateJSXReturn(node.render);
-        
-        const body = `${imports}
-
-${this.generateComponentComment(node.name)}
+        const importBlock = imports ? `${imports}\n\n` : '';
+        const body = `${importBlock}${this.generateComponentComment(node.name)}
 function ${node.name}({ ${this.generatePropsSignature(node.props)} }) {
 ${this.increaseIndent()}${hooks}
 ${methods}
@@ -417,10 +426,15 @@ ${this.decreaseIndent()}}`;
     // Program and Module generation
     generateProgram(node) {
         const imports = node.imports.map(imp => this.generateImport(imp)).join('\n');
-        const statements = node.statements.map(stmt => this.generateNode(stmt)).join('\n\n');
-        const exports = node.exports.map(exp => this.generateExport(exp)).join('\n');
-        
-        return [imports, statements, exports].filter(Boolean).join('\n\n');
+        const prev = this._skipBundledReactImportFromReact;
+        this._skipBundledReactImportFromReact = programImportsFromReact(node);
+        try {
+            const statements = node.statements.map((stmt) => this.generateNode(stmt)).join('\n\n');
+            const exports = node.exports.map((exp) => this.generateExport(exp)).join('\n');
+            return [imports, statements, exports].filter(Boolean).join('\n\n');
+        } finally {
+            this._skipBundledReactImportFromReact = prev;
+        }
     }
     
     generateModule(node) {

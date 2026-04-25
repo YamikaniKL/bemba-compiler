@@ -1,5 +1,4 @@
-ingisa React ukufuma 'react'
-leta { useState } kufuma 'react'
+ingisa React, { useState } ukufuma 'react'
 
 pangaIpepa('ReactDemo', {
   ukwisulula: nokuti() {

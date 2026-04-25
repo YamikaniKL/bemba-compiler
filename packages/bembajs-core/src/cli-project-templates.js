@@ -293,8 +293,7 @@ function indexPageUi() {
 
 function aboutPage() {
     return `// App router about page
-ingisa React ukufuma 'react'
-leta { useMemo } kufuma 'react'
+ingisa React, { useMemo } ukufuma 'react'
 
 pangaIpepa('About', {
   ukwisulula: nokuti() {
@@ -458,8 +457,7 @@ export default defineConfig({
 }
 
 function reactDemoPage() {
-    return `ingisa React ukufuma 'react'
-leta { useState } kufuma 'react'
+    return `ingisa React, { useState } ukufuma 'react'
 
 pangaIpepa('ReactDemo', {
   ukwisulula: nokuti() {

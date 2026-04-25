@@ -1,6 +1,5 @@
 // App router about page
-ingisa React ukufuma 'react'
-leta { useMemo } kufuma 'react'
+ingisa React, { useMemo } ukufuma 'react'
 
 pangaIpepa('About', {
   ukwisulula: nokuti() {
