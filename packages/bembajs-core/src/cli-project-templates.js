@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const { BEMBA_FOLDERS } = require('./constants');
 const BEMBAJS_LOGO_PNG_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAQAAAACQBAMAAAAVTaiiAAAAMFBMVEUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABaPxwLAAAAD3RSTlMA3yCAQMAQ759gUDBwkK/koHcMAAABqElEQVR42u3YvUozURAG4Dcnuvoln3w/hSAWuxaCnQFFywRsBYM34IIXoChY2ETtBMGAjY2od2DuwMLCW/AqdP3HwvFEg6ybbUSYAX0fmOY0Oww77J4XREREREREREREREREXxOcX8Sw1BIZhiHXEHmIYKdfvDrs9Im3DDt/xLvCJ3y3CQyItwE7LhRJIhgaEZmHqZkzGCo14fWcwErhMQLcwiCsVKUCFOUGRgJJ4IUJrIw9wZsz3IMavDJ+qmIFHYunsDCeHOFVOVyBhV3pNNAjdzDgwkd0XCYxDBTfBz8yBRMxLAXWzfRvIWW0Dm2H0sS7UuMW2sL0hcQ11Pcg2L1BSvU5grJSHSm9NfwwLkZGEEFTYQgZx4PQVJUjfPBL98/QSZK3loqmn5AxtwpNromM3xH0zE4ix8wklIyK/EeXVvtUhQvbyVReXqXzQegkU7mnFWgoiLeWGxf9hYK3R11jbyJK17heXtUn3j0WpJauJb0JDIhXzzbQq5dXtd93qWHz34cqi15e1RJZR5djxdz6YCdGF7e/HYOIiIiIiIiIiIiIiOjzXgA1X7Msl1OuJQAAAABJRU5ErkJggg==';
+const BEMBA_BRAND_LOGO_URL = 'https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350';
+const BEMBA_COMPILER_REPO_URL = 'https://github.com/YamikaniKL/bemba-compiler';
 
 /** Written to user projects as docs/CODE-STYLE-AND-UI.md — keep aligned with monorepo README § Code style and UI. */
 const CODE_STYLE_MARKDOWN = [
@@ -43,7 +45,7 @@ const CODE_STYLE_MARKDOWN = [
     '## Further reading',
     '',
     '- [What is shadcn/ui?](https://shadcnstudio.com/blog/what-is-shadcn-ui-comprehensive-guide) — copy-to-own model explained',
-    '- [BembaJS README](https://github.com/bembajs/bembajs/blob/main/README.md) — full framework documentation',
+    '- [Bemba compiler documentation](https://github.com/YamikaniKL/bemba-compiler) — full framework documentation',
     ''
 ].join('\n');
 
@@ -224,10 +226,10 @@ function indexPage() {
 pangaIpepa('Home', {
   ukwisulula: nokuti() {
     bwelela (
-      <icipandwa style={{ minHeight: '100vh', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <icipandwa style={{ height: '100dvh', overflow: 'hidden', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box' }}>
         <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
           <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-            <img src="/amashinda/bembajs-logo.png" alt="BembaJS logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
+            <img src="${BEMBA_BRAND_LOGO_URL}" alt="Bemba logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
           </icipandwa>
           <icipandwa>
             <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
@@ -249,7 +251,7 @@ pangaIpepa('Home', {
             <a href="#" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', background: '#f5f5f5', color: '#0a0a0a', fontWeight: 500, textDecoration: 'none' }}>
               Get Started
             </a>
-            <a href="https://github.com/bembajs/bembajs/blob/main/README.md" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
+            <a href="${BEMBA_COMPILER_REPO_URL}" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
               Documentation
             </a>
           </icipandwa>
@@ -386,7 +388,7 @@ You can author module/declaration syntax in Bemba form:
 
 ## Code style and UI patterns
 
-Optional local notes: **\`docs/CODE-STYLE-AND-UI.md\`** (linting for \`.js\` you add, tokens, partials). **Full docs:** [github.com/bembajs/bembajs — README](https://github.com/bembajs/bembajs/blob/main/README.md) and [RELEASES.md](https://github.com/bembajs/bembajs/blob/main/RELEASES.md).
+Optional local notes: **\`docs/CODE-STYLE-AND-UI.md\`** (linting for \`.js\` you add, tokens, partials). **Full docs:** [Bemba compiler on GitHub](${BEMBA_COMPILER_REPO_URL}).
 
 ## Stay in sync with the scaffold
 

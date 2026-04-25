@@ -1,6 +1,6 @@
 # bemba-boilerplate-new
 
-[BembaJS documentation](https://github.com/bembajs/bembajs/blob/main/README.md) · [Releases](https://github.com/bembajs/bembajs/blob/main/RELEASES.md)
+[Bemba compiler documentation](https://github.com/YamikaniKL/bemba-compiler)
 
 ```bash
 bun install

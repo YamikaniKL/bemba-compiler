@@ -2,10 +2,10 @@
 pangaIpepa('Home', {
     ukwisulula: nokuti() {
         bwelela (
-            <icipandwa style={{ minHeight: '100vh', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+            <icipandwa style={{ height: '100dvh', overflow: 'hidden', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box' }}>
                 <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                     <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-                        <img src="/amashinda/bembajs-logo.png" alt="BembaJS logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
+                        <img src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" alt="Bemba logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
                     </icipandwa>
                     <icipandwa>
                         <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
@@ -27,7 +27,7 @@ pangaIpepa('Home', {
                         <a href="#" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', background: '#f5f5f5', color: '#0a0a0a', fontWeight: 500, textDecoration: 'none' }}>
                             Get Started
                         </a>
-                        <a href="https://github.com/bembajs/bembajs/blob/main/README.md" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
+                        <a href="https://github.com/YamikaniKL/bemba-compiler" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
                             Documentation
                         </a>
                     </icipandwa>

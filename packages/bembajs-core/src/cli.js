@@ -428,7 +428,7 @@ export default defineConfig({
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BembaJS</title>
-  <link rel="icon" href="data:," />
+  <link rel="icon" href="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" />
   <style>
     html, body, #root { margin: 0; padding: 0; min-height: 100%; }
   </style>
