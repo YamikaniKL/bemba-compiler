@@ -1,4 +1,6 @@
 // Reusable Card component
+ingisa React ukufuma 'react'
+
 fyambaIcipanda('Card', {
     // Component props
     ifyapangwa: {

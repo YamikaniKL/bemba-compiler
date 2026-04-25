@@ -18,7 +18,7 @@ const CODE_STYLE_MARKDOWN = [
     'Bemba `.bemba` files are the source of your pages; keep **readable indentation** and **small helpers**. Optional tooling below applies only to `.js` / `.jsx` / `.bsx` you add (scripts, emitted React, etc.).',
     '',
     'Bemba-native keyword aliases are supported in parser/module syntax:',
-    '- `leta ... kufuma "..."` (import/from)',
+    '- `leta … kufuma "…"` or `ingisa … ukufuma "…"` (import/from)',
     '- `fumya ca_pamushili ...` (export default)',
     '- `cakosa` / `cilepilibuka` / `icakubika` (const/let/var)',
     '',
@@ -222,9 +222,14 @@ function starterCardPartial() {
 }
 
 function indexPage() {
-    return `// App router home page
+    return `// App router home page — Bemba imports: ingisa … ukufuma / leta … kufuma (same as import/from)
+ingisa React ukufuma 'react'
+leta { useId } kufuma 'react'
+ingisa Button ukufuma '../../ifikopo/Button.bemba'
+
 pangaIpepa('Home', {
   ukwisulula: nokuti() {
+    cakosa reactId = useId()
     bwelela (
             <icipandwa style={{ height: '100dvh', overflow: 'hidden', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box' }}>
         <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
@@ -233,7 +238,7 @@ pangaIpepa('Home', {
           </icipandwa>
           <icipandwa>
             <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
-              bembajs v1.0.0
+              bembajs v1.0.0 <span hidden id={reactId}>app-root</span>
             </ukulondolola>
             <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.6rem, 6vw, 4rem)', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 700 }}>
               Build with JavaScript
@@ -247,10 +252,8 @@ pangaIpepa('Home', {
               Fast, simple, and powerful. Built for developers who value simplicity and performance. Get started in seconds with zero configuration.
             </ukulondolola>
           </icipandwa>
-          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem' }}>
-            <a href="#" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', background: '#f5f5f5', color: '#0a0a0a', fontWeight: 500, textDecoration: 'none' }}>
-              Get Started
-            </a>
+          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem', alignItems: 'center' }}>
+            <Button ilembo="Get started" pakuKlikisha={() => londolola('Get started')} umutindo="primary" />
             <a href="${BEMBA_COMPILER_REPO_URL}" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
               Documentation
             </a>
@@ -290,13 +293,17 @@ function indexPageUi() {
 
 function aboutPage() {
     return `// App router about page
+ingisa React ukufuma 'react'
+leta { useMemo } kufuma 'react'
+
 pangaIpepa('About', {
   ukwisulula: nokuti() {
+    cakosa routeNote = useMemo(() => 'App-router path: amapeji/app/about/page.bemba', [])
     bwelela (
       <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
         <umutwe_ukulu>About BembaJS</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
-          App-router path: <code>amapeji/app/about/page.bemba</code>.
+          {routeNote} - imports use <code>ingisa ... ukufuma</code> or <code>leta ... kufuma</code>.
         </ukulondolola>
       </icipandwa>
     )
@@ -306,7 +313,9 @@ pangaIpepa('About', {
 }
 
 function buttonComponentBemba() {
-    return `fyambaIcipanda('Button', {
+    return `ingisa React ukufuma 'react'
+
+fyambaIcipanda('Button', {
   ifyapangwa: {
     ilembo: icishilano,
     pakuKlikisha: nokuti()
@@ -382,7 +391,7 @@ CLI language: interactive **\`bemba panga\`** asks **language first**, then temp
 
 You can author module/declaration syntax in Bemba form:
 
-- \`leta ... kufuma '...'\` = \`import ... from '...'\`
+- \`leta … kufuma '…'\` / \`ingisa … ukufuma '…'\` = \`import … from '…'\`
 - \`fumya ca_pamushili ...\` = \`export default ...\`
 - \`cakosa\` / \`cilepilibuka\` / \`icakubika\` = \`const\` / \`let\` / \`var\`
 
@@ -449,15 +458,20 @@ export default defineConfig({
 }
 
 function reactDemoPage() {
-    return `pangaIpepa('ReactDemo', {
+    return `ingisa React ukufuma 'react'
+leta { useState } kufuma 'react'
+
+pangaIpepa('ReactDemo', {
   ukwisulula: nokuti() {
+    const [n, setN] = useState(0)
     bwelela (
       <icipandwa className="bemba-react-demo" style={{ padding: '2rem', maxWidth: '42rem', margin: '0 auto' }}>
         <umutwe_ukulu>Vite + React</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
-          This file is <code>amapeji/react-demo.bemba</code> → <code>/react-demo</code> (legacy demo route).
+          This file is <code>amapeji/react-demo.bemba</code> -> <code>/react-demo</code> (legacy demo route).
           Use <code>ukwisulula</code> for SPA routes. Build with <code>bemba akha</code> or <code>bemba fumya</code>{' '}
-          (both run Vite by default).
+          (both run Vite by default). Sample hook: count {n}{' '}
+          <ibatani type="button" pakuKlikisha={() => setN(n + 1)}>+1</ibatani>
         </ukulondolola>
       </icipandwa>
     )

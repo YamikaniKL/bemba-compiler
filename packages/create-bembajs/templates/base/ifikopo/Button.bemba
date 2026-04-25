@@ -1,4 +1,6 @@
 // Reusable Button component
+ingisa React ukufuma 'react'
+
 fyambaIcipanda('Button', {
     // Component props
     ifyapangwa: {

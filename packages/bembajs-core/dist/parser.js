@@ -229,8 +229,8 @@ class BembaParser {
         this.imports = new Map();
         this.exports = new Map();
         this.keywordAliases = {
-            import: ['import', 'leta'],
-            from: ['from', 'kufuma'],
+            import: ['import', 'leta', 'ingisa'],
+            from: ['from', 'kufuma', 'ukufuma'],
             export: ['export', 'fumya'],
             default: ['default', 'ca_pamushili'],
             const: ['const', 'cakosa'],
