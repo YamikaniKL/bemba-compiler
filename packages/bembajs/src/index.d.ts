@@ -80,6 +80,12 @@ export interface WrappersApi {
 }
 
 export interface BembajsExports extends bembajsCore {
+    createDevServer(options?: Record<string, unknown>): Promise<unknown>;
+    build(options?: Record<string, unknown>): Promise<unknown>;
+    cindika(code: string, options?: Record<string, unknown>): ReturnType<bembajsCore['compile']>;
+    tungulula(options?: Record<string, unknown>): Promise<unknown>;
+    akha(options?: Record<string, unknown>): Promise<unknown>;
+    fumya(options?: Parameters<bembajsCore['exportStaticHtmlSite']>[0]): ReturnType<bembajsCore['exportStaticHtmlSite']>;
     wrappers: WrappersApi;
     framework: FrameworkMetadata;
     version: string;
