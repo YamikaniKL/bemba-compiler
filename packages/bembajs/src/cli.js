@@ -437,6 +437,24 @@ program
     .option('--site-title <title>', msg('optSiteTitle'))
     .option('--no-bemba-site', msg('optNoBembaSite'))
     .action(async (opts) => {
+        const CoreCli = resolveCoreCliClass();
+        if (CoreCli) {
+            try {
+                const coreCli = new CoreCli();
+                await coreCli.buildProject({
+                    output: opts.output,
+                    baseUrl: opts.baseUrl,
+                    locale: opts.locale,
+                    siteTitle: opts.siteTitle,
+                    bembaSite: opts.bembaSite
+                });
+                return;
+            } catch (e) {
+                console.error(e.message || e);
+                process.exit(1);
+            }
+        }
+
         const mod = resolveCoreExport();
         if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
             console.error(msg('exportMissing'));
@@ -466,6 +484,24 @@ program
     .option('--site-title <title>', msg('optSiteTitle'))
     .option('--no-bemba-site', msg('optNoBembaSite'))
     .action(async (opts) => {
+        const CoreCli = resolveCoreCliClass();
+        if (CoreCli) {
+            try {
+                const coreCli = new CoreCli();
+                await coreCli.exportStatic({
+                    output: opts.output,
+                    baseUrl: opts.baseUrl,
+                    locale: opts.locale,
+                    siteTitle: opts.siteTitle,
+                    bembaSite: opts.bembaSite
+                });
+                return;
+            } catch (e) {
+                console.error(e.message || e);
+                process.exit(1);
+            }
+        }
+
         const mod = resolveCoreExport();
         if (!mod || typeof mod.exportStaticHtmlSite !== 'function') {
             console.error(msg('exportMissing'));

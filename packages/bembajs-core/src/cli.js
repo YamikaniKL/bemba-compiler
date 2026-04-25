@@ -429,7 +429,7 @@ export default defineConfig({
 </head>
 <body>
   <div id="root"><!--app-html--></div>
-  <script type="module" src="/@id/virtual:bemba-app-entry-client"></script>
+  <script type="module" src="virtual:bemba-app-entry-client"></script>
 </body>
 </html>
 `;
