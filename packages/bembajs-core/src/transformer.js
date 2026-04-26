@@ -163,9 +163,22 @@ class BembaTransformer {
         if (!render) {
             return null;
         }
+        if (render.type === 'RawValue' && typeof render.raw === 'string') {
+            const jsxInner = this.extractJsxFromRenderFunctionSource(render.raw);
+            if (jsxInner) {
+                const preambleRaw = this.extractPreambleBeforeBwelela(render.raw);
+                const preambleJs = preambleRaw ? this.translateBembaPreambleToJs(preambleRaw) : null;
+                return {
+                    type: 'JSXReturn',
+                    preamble: preambleJs,
+                    expression: this.transformNode({ type: 'RawValue', raw: jsxInner })
+                };
+            }
+        }
         const normalized = this.normalizeRenderExpression(render);
         return {
             type: 'JSXReturn',
+            preamble: null,
             expression: this.transformNode(normalized)
         };
     }
@@ -179,6 +192,32 @@ class BembaTransformer {
             }
         }
         return render;
+    }
+
+    /**
+     * Statements inside `nokuti() { ... bwelela(...) }` before `bwelela` (e.g. `cakosa x = useId()`).
+     * Token-joined source may look like: `nokuti ( ) { cakosa reactId = useId ( ) bwelela (`
+     */
+    extractPreambleBeforeBwelela(src) {
+        const s = String(src || '');
+        const bwelelaIdx = s.indexOf('bwelela');
+        if (bwelelaIdx < 0) return '';
+        const before = s.slice(0, bwelelaIdx).trim();
+        const braceIdx = before.indexOf('{');
+        if (braceIdx < 0) return '';
+        const inner = before.slice(braceIdx + 1).trim();
+        return inner;
+    }
+
+    /** Map Bemba decl keywords in loose preamble text to JavaScript. */
+    translateBembaPreambleToJs(src) {
+        let out = String(src || '').trim();
+        if (!out) return '';
+        out = out.replace(/\bcakosa\b/g, 'const');
+        out = out.replace(/\bcilepilibuka\b/g, 'let');
+        out = out.replace(/\bicakubika\b/g, 'var');
+        if (!/;\s*$/.test(out)) out += ';';
+        return out;
     }
 
     extractJsxFromRenderFunctionSource(src) {

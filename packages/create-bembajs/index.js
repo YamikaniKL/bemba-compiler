@@ -434,7 +434,7 @@ async function createApp(projectDirectory, options) {
         try {
             execSync(`bun install --registry ${NPM_PUBLIC_REGISTRY}`, {
                 cwd: projectPath,
-                stdio: 'ignore',
+                stdio: 'inherit',
                 env: installEnv()
             });
             logDone(lang, 'spinnerInstallOk');
@@ -442,7 +442,7 @@ async function createApp(projectDirectory, options) {
             try {
                 execSync(`npm install --registry=${NPM_PUBLIC_REGISTRY}`, {
                     cwd: projectPath,
-                    stdio: 'ignore',
+                    stdio: 'inherit',
                     env: installEnv()
                 });
                 logDone(lang, 'spinnerInstallOk');
@@ -461,11 +461,11 @@ async function createApp(projectDirectory, options) {
     if (shouldInitGit) {
         logDoing(lang, 'spinnerGit');
         try {
-            execSync('git init -b main', { cwd: projectPath, stdio: 'ignore', env: gitEnv() });
-            execSync('git add -A', { cwd: projectPath, stdio: 'ignore', env: gitEnv() });
+            execSync('git init -b main', { cwd: projectPath, stdio: 'inherit', env: gitEnv() });
+            execSync('git add -A', { cwd: projectPath, stdio: 'inherit', env: gitEnv() });
             execSync(
                 'git -c user.email=noreply@create-bembajs.local -c user.name=create-bembajs commit -m "Initial commit from create-bembajs"',
-                { cwd: projectPath, stdio: 'ignore', env: gitEnv() }
+                { cwd: projectPath, stdio: 'inherit', env: gitEnv() }
             );
             logDone(lang, 'spinnerGitOk');
         } catch (error) {

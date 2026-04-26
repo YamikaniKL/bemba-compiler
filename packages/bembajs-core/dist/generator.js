@@ -89,12 +89,19 @@ class BembaGenerator {
         const imports = this._skipBundledReactImportFromReact ? '' : this.generateReactImports();
         const hooks = (node.hooks || []).map(hook => this.generateReactHook(hook)).join('\n');
         const methods = this.generateMethods(node.methods);
+        const renderPreamble =
+            node.render &&
+            node.render.type === 'JSXReturn' &&
+            typeof node.render.preamble === 'string' &&
+            node.render.preamble.trim() !== ''
+                ? node.render.preamble.trim()
+                : '';
         const render = this.generateJSXReturn(node.render);
         const importBlock = imports ? `${imports}\n\n` : '';
         const body = `${importBlock}${this.generateComponentComment(node.name)}
 function ${node.name}({ ${this.generatePropsSignature(node.props)} }) {
 ${this.increaseIndent()}${hooks}
-${methods}
+${renderPreamble ? `${this.getIndent()}${renderPreamble}\n` : ''}${methods}
 ${this.increaseIndent()}return (
 ${this.increaseIndent()}${render}
 ${this.decreaseIndent()});
