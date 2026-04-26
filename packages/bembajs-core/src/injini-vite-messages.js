@@ -24,6 +24,9 @@ function shouldUseCibembaPhishaChrome(projectRoot) {
     }
 }
 
+/** CSI SGR sequences (e.g. consola colors) often wrap `[vite]` so plain string split misses the tag. */
+const ANSI_CSI = '(?:\u001b\\[[0-9;]*m)+';
+
 /**
  * Rebrand Vite log tags for every CLI language (runs even when message has ANSI SGR codes).
  * `[vite-plugin-bemba]` is handled first so we never split the plugin id.
@@ -31,6 +34,10 @@ function shouldUseCibembaPhishaChrome(projectRoot) {
 function skinViteTagsToPhisha(s) {
     let t = String(s == null ? '' : s);
     t = t.replace(/\[vite-plugin-bemba\]/gi, '[Phisha ya BembaJS]');
+    const viteColon = new RegExp(`${ANSI_CSI}?\\[${ANSI_CSI}?vite${ANSI_CSI}?:`, 'gi');
+    const viteBracket = new RegExp(`${ANSI_CSI}?\\[${ANSI_CSI}?vite${ANSI_CSI}?\\]`, 'gi');
+    t = t.replace(viteColon, '[Phisha:');
+    t = t.replace(viteBracket, '[Phisha]');
     t = t.split('[vite:').join('[Phisha:');
     t = t.split('[vite]').join('[Phisha]');
     t = t.replace(/\bVite\b/g, 'Phisha');
