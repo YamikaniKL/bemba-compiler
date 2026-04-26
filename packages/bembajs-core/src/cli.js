@@ -586,7 +586,7 @@ export default defineConfig({
       ${stack ? `<details><summary>${escapeHtml(L.stackHeading)}</summary><pre>${escapeHtml(stack)}</pre></details>` : ''}
     </div>
   </div>
-  <button class="fab" id="phisha-show-btn" type="button" onclick="showPhishaPanel()" style="display:none" aria-label="${escapeHtml(L.showPanelAction || 'Show panel')}" title="${escapeHtml(L.showPanelAction || 'Show panel')}">
+  <button class="fab" id="phisha-show-btn" type="button" onclick="togglePhishaPanel()" aria-label="${escapeHtml(L.showPanelAction || 'Show panel')}" title="${escapeHtml(L.showPanelAction || 'Show panel')}">
     ●
   </button>
   <script>
@@ -600,13 +600,13 @@ export default defineConfig({
       var x = phishaPanelElements();
       if (!x.panel || !x.showBtn) return;
       x.panel.classList.add('hidden');
-      x.showBtn.style.display = 'inline-flex';
+      x.showBtn.setAttribute('title', ${JSON.stringify(escapeHtml(L.showPanelAction || 'Show panel'))});
     }
     function showPhishaPanel() {
       var x = phishaPanelElements();
       if (!x.panel || !x.showBtn) return;
       x.panel.classList.remove('hidden');
-      x.showBtn.style.display = 'none';
+      x.showBtn.setAttribute('title', ${JSON.stringify(escapeHtml(L.hidePanelAction || 'Hide panel'))});
     }
     function copyPhishaError() {
       const text = ${JSON.stringify(copyPayload).replace(/</g, '\\u003c')};
@@ -623,11 +623,13 @@ export default defineConfig({
     document.addEventListener('keydown', function (event) {
       var key = String(event && event.key ? event.key : '').toLowerCase();
       var isCtrlShiftK = event.ctrlKey && event.shiftKey && key === 'k';
-      if (isCtrlShiftK) {
+      var isAltShiftD = event.altKey && event.shiftKey && key === 'd';
+      if (isCtrlShiftK || isAltShiftD) {
         event.preventDefault();
         togglePhishaPanel();
       }
     });
+    showPhishaPanel();
   </script>
 </body>
 </html>`;
