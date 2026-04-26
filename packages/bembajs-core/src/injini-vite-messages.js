@@ -1,5 +1,7 @@
 /**
- * Phisha = BembaJS dev surface on top of Vite (Injini). Logs are skinned [vite]→[Phisha];
+ * Phisha = BembaJS dev surface on top of Vite (Injini). Log *bodies* are skinned [vite]→[Phisha];
+ * callers must pass `createLogger(..., { prefix: '[Phisha]' })` as the inner logger so Vite’s
+ * timestamp formatter does not prepend the default `[vite]` tag.
  * Cibemba phrasebook runs when `bemba -l bem` OR when `bemba.config.js` has `framework.phishaErrorsInBemba: true`.
  */
 const { activeLang } = require('./cli-i18n');
