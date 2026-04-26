@@ -245,11 +245,28 @@ class BembaLexer {
             case '%':
                 this.addToken(this.TOKEN_TYPES.MODULO);
                 break;
-            case '=':
-                this.addToken(this.match('=') ? this.TOKEN_TYPES.EQUALS : this.TOKEN_TYPES.ASSIGN);
+            case '=': {
+                // Support JS-style `===` / `!==` inside expressions (templates often copy-paste comparisons).
+                // Without consuming the third `=`, `===` tokenizes as `==` (EQUALS) + `=` (ASSIGN) and breaks parsing.
+                if (this.match('=')) {
+                    if (this.match('=')) {
+                        // consumed optional third '=' for JS `===`
+                    }
+                    this.addToken(this.TOKEN_TYPES.EQUALS);
+                } else {
+                    this.addToken(this.TOKEN_TYPES.ASSIGN);
+                }
                 break;
+            }
             case '!':
-                this.addToken(this.match('=') ? this.TOKEN_TYPES.NOT_EQUALS : this.TOKEN_TYPES.BANG);
+                if (this.match('=')) {
+                    if (this.match('=')) {
+                        // consumed optional second '=' for JS `!==`
+                    }
+                    this.addToken(this.TOKEN_TYPES.NOT_EQUALS);
+                } else {
+                    this.addToken(this.TOKEN_TYPES.BANG);
+                }
                 break;
             case '<':
                 if (this.match('=')) {

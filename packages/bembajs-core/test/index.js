@@ -9,4 +9,5 @@ require('./test-bemba-import-alias-static.js');
 require('./test-bemba-alias-vite-compile.js');
 require('./test-bemba-import-grammar.js');
 require('./test-bemba-component-event-props.js');
+require('./test-lexer-strict-equality.js');
 require('./test-next-style-core.js');
