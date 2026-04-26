@@ -531,6 +531,7 @@ export default defineConfig({
     body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #08090d; color: #e6e7ea; }
     .wrap { max-width: 1040px; margin: 0 auto; padding: 22px; }
     .card { border: 1px solid rgba(150,170,255,.28); border-radius: 14px; padding: 18px; background: rgba(10,12,18,.92); box-shadow: 0 24px 72px rgba(0,0,0,.35); }
+    .card.hidden { display: none; }
     h1 { font-size: 20px; margin: 0 0 8px; }
     h2 { font-size:14px; margin:16px 0 8px }
     p { margin: 6px 0; opacity: .9; }
@@ -546,13 +547,15 @@ export default defineConfig({
     .actions { margin-top: 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .btn { border: 1px solid rgba(145,176,255,.45); border-radius: 8px; background: rgba(74,112,242,.15); color: #dbe8ff; font: inherit; font-size: 12px; padding: 6px 10px; cursor: pointer; }
     .btn:hover { background: rgba(74,112,242,.25); }
+    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 9999; border: 1px solid rgba(145,176,255,.55); border-radius: 999px; background: rgba(24,36,84,.9); color: #dbe8ff; font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .02em; padding: 9px 14px; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .fab:hover { background: rgba(42,59,126,.95); }
     details { margin-top: 12px; }
     details summary { cursor: pointer; color: #bdd2ff; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="card">
+    <div class="card" id="phisha-dev-panel">
       <div class="panel">
         <div>
           <div class="panel-title">${escapeHtml(L.panelTitle || 'Phisha Dev Panel')}</div>
@@ -573,6 +576,7 @@ export default defineConfig({
           <strong class="meta">${escapeHtml(L.quickActionsHeading || 'Quick actions')}:</strong>
           <button class="btn" type="button" onclick="location.reload()">${escapeHtml(L.refreshAction || 'Refresh')}</button>
           <button class="btn" type="button" onclick="copyPhishaError()">${escapeHtml(L.copyAction || 'Copy error')}</button>
+          <button class="btn" id="phisha-hide-btn" type="button" onclick="hidePhishaPanel()">${escapeHtml(L.hidePanelAction || 'Hide panel')}</button>
         </div>
       </div>
       <h2>${escapeHtml(L.errorHeading)}</h2>
@@ -581,7 +585,28 @@ export default defineConfig({
       ${stack ? `<details><summary>${escapeHtml(L.stackHeading)}</summary><pre>${escapeHtml(stack)}</pre></details>` : ''}
     </div>
   </div>
+  <button class="fab" id="phisha-show-btn" type="button" onclick="showPhishaPanel()" style="display:none">
+    ${escapeHtml(L.showPanelAction || 'Show panel')}
+  </button>
   <script>
+    function phishaPanelElements() {
+      return {
+        panel: document.getElementById('phisha-dev-panel'),
+        showBtn: document.getElementById('phisha-show-btn')
+      };
+    }
+    function hidePhishaPanel() {
+      var x = phishaPanelElements();
+      if (!x.panel || !x.showBtn) return;
+      x.panel.classList.add('hidden');
+      x.showBtn.style.display = 'inline-flex';
+    }
+    function showPhishaPanel() {
+      var x = phishaPanelElements();
+      if (!x.panel || !x.showBtn) return;
+      x.panel.classList.remove('hidden');
+      x.showBtn.style.display = 'none';
+    }
     function copyPhishaError() {
       const text = ${JSON.stringify(copyPayload).replace(/</g, '\\u003c')};
       if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
