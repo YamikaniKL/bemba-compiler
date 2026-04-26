@@ -402,10 +402,6 @@ export default defineConfig({
       plugins: [tailwindcss(), autoprefixer()]
     }
   },
-  esbuild: {
-    include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
-    loader: 'jsx'
-  },
   resolve: {
     extensions: ['.bemba', '.bsx', '.jsx', '.js', '.tsx', '.ts', '.json']
   },
@@ -454,6 +450,10 @@ export default defineConfig({
     }
 
     async startViteDevServer(options, configFile) {
+        const managedCfg = path.join(process.cwd(), '.bemba', 'injini-vite.config.mjs');
+        if (path.resolve(String(configFile)) === path.resolve(managedCfg)) {
+            this.ensureManagedInjiniViteConfig(process.cwd());
+        }
         console.log(msg('viteDevReact'));
         let createServer;
         let createLogger;
@@ -464,7 +464,7 @@ export default defineConfig({
                 'Injini dependencies are missing. Run `bun install` in this project (if resolution fails, try `bun install --registry https://registry.npmjs.org/`), then run `bemba tungulula` again.'
             );
         }
-        const { createBembaInjiniLogger, translateInjiniEngineText, injiniSsrErrorLabels } = require('./injini-vite-messages');
+        const { createBembaInjiniLogger, formatPhishaDevLog, injiniSsrErrorLabels } = require('./injini-vite-messages');
         const injiniLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
         const glue = this.ensureManagedInjiniGlue(process.cwd());
         const { loadBembaFrameworkConfig } = require('./framework-config');
@@ -513,8 +513,8 @@ export default defineConfig({
                     ? `${id}:${loc.line}:${loc.column}`
                     : id || '';
 
-            const messageShown = translateInjiniEngineText(message);
-            const frameShown = frame ? translateInjiniEngineText(frame) : '';
+            const messageShown = formatPhishaDevLog(message);
+            const frameShown = frame ? formatPhishaDevLog(frame) : '';
 
             return `<!DOCTYPE html>
 <html lang="${escapeHtml(L.htmlLang)}">
@@ -615,9 +615,9 @@ export default defineConfig({
         const urls = server.resolvedUrls || {};
         const local = Array.from(urls.local || []);
         if (local.length > 0) {
-            console.log(`  ➜  Local Injini:   ${local[0]}`);
+            console.log(msg('phishaLocalUrl', local[0]));
         } else {
-            console.log(`  ➜  Local Injini:   http://localhost:${port}`);
+            console.log(msg('phishaLocalUrl', `http://localhost:${port}`));
         }
     }
 

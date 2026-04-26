@@ -1,6 +1,6 @@
 /**
- * Bemba-facing copy for Vite/Rollup/Injini console and SSR error pages.
- * When `BEMBA_CLI_LANG` is bem/bemba, user-facing strings are translated; technical paths stay as-is.
+ * Phisha = BembaJS dev surface on top of Vite (Injini). Logs are skinned [vite]→[Phisha];
+ * with BEMBA_CLI_LANG=bem, common Vite lines are translated to Cibemba.
  */
 const { activeLang } = require('./cli-i18n');
 
@@ -9,15 +9,37 @@ function isBembaCliLang() {
     return s === 'bem';
 }
 
+/** After Bemba phrase pass, rebrand remaining Vite tags for every CLI language. */
+function skinViteTagsToPhisha(s) {
+    return String(s == null ? '' : s)
+        .replace(/\[vite:/gi, '[Phisha:')
+        .replace(/\[vite\]/gi, '[Phisha]');
+}
+
 /**
- * Ordered rules: first match wins (use specific patterns before broad ones).
- * Each `replace` receives (match, ...captures) and returns the Bemba string.
  * @type {{ test: RegExp, replace: (...args: string[]) => string }[]}
  */
 const BEMBA_VITE_PHRASEBOOK = [
     {
         test: /^\[vite-plugin-bemba\]\s*/i,
-        replace: () => '[Injini ya BembaJS] '
+        replace: () => '[Phisha ya BembaJS] '
+    },
+    {
+        test: /Both esbuild and oxc options were set\.[^\n]*/i,
+        replace: () =>
+            'Pa config mwabika oxc na esbuild bonse; Phisha talafwa oxc. Ifilubo fya esbuild fyakonkololwa.'
+    },
+    {
+        test: /Port (\d+) is in use, trying another one\.\.\./i,
+        replace: (_m, p) => `Port ${p} nkuti usesha kale; Phisha ileesha port ingine…`
+    },
+    {
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)\[vite\]\s*\(([^)]+)\)\s*\[optimizer\]\s*bundling dependencies.*$/im,
+        replace: (_m, ts, env) => `${ts}[Phisha] (${env}) [optimizer] tulapanga dependencies…`
+    },
+    {
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)\[vite\]\s*\(([^)]+)\)\s*✨\s*new dependencies optimized:\s*(.+)$/im,
+        replace: (_m, ts, env, deps) => `${ts}[Phisha] (${env}) ✨ dependencies ishya shasansa: ${deps.trim()}`
     },
     {
         test: /Failed to resolve import\s+"([^"]+)"\s+from\s+"([^"]+)"/i,
@@ -111,11 +133,11 @@ const BEMBA_VITE_PHRASEBOOK = [
     },
     {
         test: /Outdated optimize dep/i,
-        replace: () => `Dependencies sha kale; leka ulesanse vite cache nangu \`bun run dev\` panono.`
+        replace: () => `Dependencies sha kale; leka ulesanse cache ya Phisha nangu \`bun run dev\` panono.`
     },
     {
         test: /504\s*\(Outdated Optimize Dep\)/i,
-        replace: () => `504: dependencies sha kale — sansa cache ya Vite.`
+        replace: () => `504: dependencies sha kale — sansa cache ya Phisha.`
     },
     {
         test: /The requested module .+ does not provide an export named/i,
@@ -124,34 +146,11 @@ const BEMBA_VITE_PHRASEBOOK = [
     {
         test: /\[commonjs--resolver\]/i,
         replace: () => `[CommonJS resolver]`
-    },
-    {
-        test: /\[vite:esbuild\]/i,
-        replace: () => `[esbuild mu Injini]`
-    },
-    {
-        test: /\[vite:css\]/i,
-        replace: () => `[CSS mu Injini]`
-    },
-    {
-        test: /\[vite:react-babel\]/i,
-        replace: () => `[React/Babel mu Injini]`
-    },
-    {
-        test: /\[vite\]/i,
-        replace: () => `[Injini]`
     }
 ];
 
-/**
- * Translate a single-line or multi-line Vite/Rollup/engine message for Bemba CLI users.
- * Unknown text is prefixed with a short Bemba lead; English detail is kept for debugging.
- * @param {string} text
- * @returns {string}
- */
-function translateInjiniEngineText(text) {
+function translateViteBodyToBembaOnly(text) {
     const raw = String(text == null ? '' : text);
-    if (!isBembaCliLang()) return raw;
     if (!raw.trim()) return raw;
 
     let out = raw;
@@ -164,15 +163,29 @@ function translateInjiniEngineText(text) {
     }
 
     if (out !== raw) return out;
-    return `Ifyo Injini (Vite) yalandile:\n${raw}`;
+    return `Ifyo Phisha yalandile:\n${raw}`;
 }
+
+/**
+ * Phisha-branded dev/build log line: always [vite]→[Phisha]; with `-l bem`, translate known copy to Cibemba.
+ * @param {string} text
+ * @returns {string}
+ */
+function formatPhishaDevLog(text) {
+    const raw = String(text == null ? '' : text);
+    const body = isBembaCliLang() ? translateViteBodyToBembaOnly(raw) : raw;
+    return skinViteTagsToPhisha(body);
+}
+
+/** @deprecated use formatPhishaDevLog — kept for callers */
+const translateInjiniEngineText = formatPhishaDevLog;
 
 /**
  * @param {import('vite').Logger} base
  * @returns {import('vite').Logger}
  */
 function createBembaInjiniLogger(base) {
-    const wrap = (m) => translateInjiniEngineText(m);
+    const wrap = (m) => formatPhishaDevLog(m);
     return {
         get hasWarned() {
             return base.hasWarned;
@@ -201,14 +214,14 @@ function createBembaInjiniLogger(base) {
     };
 }
 
-/** Labels for SSR HTML error page when lang is bem */
+/** Labels for SSR HTML error page */
 function injiniSsrErrorLabels() {
     const bem = isBembaCliLang();
     if (!bem) {
         return {
             htmlLang: 'en',
-            title: 'Injini (Vite) Error',
-            lead: 'Something failed while compiling/rendering this page. See details below.',
+            title: 'Phisha error (dev)',
+            lead: 'Something failed while compiling or rendering this page. Details are below.',
             hint: 'Tip: fix the file, then refresh.',
             errorHeading: 'Error',
             codeFrameHeading: 'Code frame',
@@ -219,7 +232,7 @@ function injiniSsrErrorLabels() {
     }
     return {
         htmlLang: 'bem',
-        title: 'Fyabupwa mu Injini',
+        title: 'Fyabupwa mu Phisha',
         lead: 'Pali ifyo fileluba pa kupanga nangu ukwisulula ipena iyi. Mona ifyo fyalandila panshi.',
         hint: 'Ukulefwaya: konkola file, elyo ulesanse (refresh).',
         errorHeading: 'Ubulubulo',
@@ -232,7 +245,9 @@ function injiniSsrErrorLabels() {
 
 module.exports = {
     isBembaCliLang,
+    formatPhishaDevLog,
     translateInjiniEngineText,
     createBembaInjiniLogger,
-    injiniSsrErrorLabels
+    injiniSsrErrorLabels,
+    skinViteTagsToPhisha
 };

@@ -539,10 +539,6 @@ export default defineConfig({
       plugins: [tailwindcss(), autoprefixer()]
     }
   },
-  esbuild: {
-    include: /src\\/.*\\.(jsx|bsx|tsx|js|ts)$/,
-    loader: 'jsx'
-  },
   resolve: {
     extensions: ['.bemba', '.bsx', '.jsx', '.js', '.tsx', '.ts', '.json']
   },
