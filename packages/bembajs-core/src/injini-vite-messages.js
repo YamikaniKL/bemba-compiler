@@ -24,12 +24,17 @@ function shouldUseCibembaPhishaChrome(projectRoot) {
     }
 }
 
-/** After Bemba phrase pass, rebrand Vite log tags and standalone product name for every CLI language. */
+/**
+ * Rebrand Vite log tags for every CLI language (runs even when message has ANSI SGR codes).
+ * `[vite-plugin-bemba]` is handled first so we never split the plugin id.
+ */
 function skinViteTagsToPhisha(s) {
-    return String(s == null ? '' : s)
-        .replace(/\[vite:/gi, '[Phisha:')
-        .replace(/\[vite\]/gi, '[Phisha]')
-        .replace(/\bVite\b/g, 'Phisha');
+    let t = String(s == null ? '' : s);
+    t = t.replace(/\[vite-plugin-bemba\]/gi, '[Phisha ya BembaJS]');
+    t = t.split('[vite:').join('[Phisha:');
+    t = t.split('[vite]').join('[Phisha]');
+    t = t.replace(/\bVite\b/g, 'Phisha');
+    return t;
 }
 
 /**
@@ -41,7 +46,21 @@ const BEMBA_VITE_PHRASEBOOK = [
         replace: () => '[Phisha ya BembaJS] '
     },
     {
-        test: /Error when evaluating SSR module\s+([^:]+):\s*Cannot find module '([^']+)'\s+imported from '([^']+)'/i,
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)?(?:\[vite\]|\[Phisha\])\s*\(ssr\)\s*Error when evaluating SSR module\s+(.+?):\s*Cannot find module '([^']+)'\s+imported from '([^']+)'/i,
+        replace: (_m, ts, ssrMod, pkg, fromFile) => {
+            const head = ts ? String(ts) : '';
+            return `${head}[Phisha] (ssr) Fyabupwa mu SSR pa module ${String(ssrMod).trim()}: Taile ukusanga module '${pkg}' ukufuma '${fromFile}'.`;
+        }
+    },
+    {
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)?(?:\[vite\]|\[Phisha\])\s*\(ssr\)\s*Error when evaluating SSR module\s+(.+?):\s*Taile ukusanga module '([^']+)'\s+ukufuma '([^']+)'\.?/i,
+        replace: (_m, ts, ssrMod, pkg, fromFile) => {
+            const head = ts ? String(ts) : '';
+            return `${head}[Phisha] (ssr) Fyabupwa mu SSR pa module ${String(ssrMod).trim()}: Taile ukusanga module '${pkg}' ukufuma '${fromFile}'.`;
+        }
+    },
+    {
+        test: /Error when evaluating SSR module\s+(.+?):\s*Cannot find module '([^']+)'\s+imported from '([^']+)'/i,
         replace: (_m, ssrMod, pkg, fromFile) =>
             `Fyabupwa mu SSR pa module ${String(ssrMod).trim()}: Taile ukusanga module '${pkg}' ukufuma '${fromFile}'.`
     },
@@ -54,6 +73,18 @@ const BEMBA_VITE_PHRASEBOOK = [
         replace: (_m, pkg, fromFile) => `Taile ukusanga module "${pkg}" ukufuma "${fromFile}".`
     },
     {
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)?(?:\[vite\]|\[Phisha\])\s*\(([^)]+)\)\s*page reload\s+([^\n]+)/gi,
+        replace: (_m, ts, env, p) => `${ts || ''}[Phisha] (${env}) Ipena yalesanswa: ${String(p).trim()}`
+    },
+    {
+        test: /page reload\s+([^\n]+)/gi,
+        replace: (_m, path) => `Ipena yalesanswa: ${String(path).trim()}`
+    },
+    {
+        test: /✨\s*new dependencies optimized:\s*(.+)$/im,
+        replace: (_m, deps) => `✨ Dependencies ishya shasansa: ${String(deps).trim()}`
+    },
+    {
         test: /Both esbuild and oxc options were set\.[^\n]*/i,
         replace: () =>
             'Pa config mwabika oxc na esbuild bonse; Phisha talafwa oxc. Ifilubo fya esbuild fyakonkololwa.'
@@ -63,12 +94,16 @@ const BEMBA_VITE_PHRASEBOOK = [
         replace: (_m, p) => `Port ${p} nkuti usesha kale; Phisha ileesha port ingine…`
     },
     {
-        test: /(\d{1,2}:\d{2}:\d{2}\s*)\[vite\]\s*\(([^)]+)\)\s*\[optimizer\]\s*bundling dependencies.*$/im,
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)(?:\[vite\]|\[Phisha\])\s*\(([^)]+)\)\s*\[optimizer\]\s*bundling dependencies.*$/im,
         replace: (_m, ts, env) => `${ts}[Phisha] (${env}) [optimizer] tulapanga dependencies…`
     },
     {
-        test: /(\d{1,2}:\d{2}:\d{2}\s*)\[vite\]\s*\(([^)]+)\)\s*✨\s*new dependencies optimized:\s*(.+)$/im,
-        replace: (_m, ts, env, deps) => `${ts}[Phisha] (${env}) ✨ dependencies ishya shasansa: ${deps.trim()}`
+        test: /(\d{1,2}:\d{2}:\d{2}\s*)(?:\[vite\]|\[Phisha\])\s*\(([^)]+)\)\s*✨\s*new dependencies optimized:\s*(.+)$/im,
+        replace: (_m, ts, env, deps) => `${ts}[Phisha] (${env}) ✨ Dependencies ishya shasansa: ${deps.trim()}`
+    },
+    {
+        test: /(?:\[vite\]|\[Phisha\])\s*\(([^)]+)\)\s*✨\s*new dependencies optimized:\s*(.+)$/im,
+        replace: (_m, env, deps) => `[Phisha] (${env}) ✨ Dependencies ishya shasansa: ${deps.trim()}`
     },
     {
         test: /Failed to resolve import\s+"([^"]+)"\s+from\s+"([^"]+)"/i,
@@ -204,7 +239,8 @@ function translateViteBodyToBembaOnly(text) {
 function formatPhishaDevLog(text, projectRoot) {
     const raw = String(text == null ? '' : text);
     const root = projectRoot || process.cwd();
-    const body = shouldUseCibembaPhishaChrome(root) ? translateViteBodyToBembaOnly(raw) : raw;
+    const skinned = skinViteTagsToPhisha(raw);
+    const body = shouldUseCibembaPhishaChrome(root) ? translateViteBodyToBembaOnly(skinned) : skinned;
     return skinViteTagsToPhisha(body);
 }
 
@@ -215,8 +251,9 @@ const translateInjiniEngineText = formatPhishaDevLog;
  * @param {import('vite').Logger} base
  * @returns {import('vite').Logger}
  */
-function createBembaInjiniLogger(base) {
-    const wrap = (m) => formatPhishaDevLog(m);
+function createBembaInjiniLogger(base, projectRoot) {
+    const root = projectRoot || process.cwd();
+    const wrap = (m) => formatPhishaDevLog(m, root);
     return {
         get hasWarned() {
             return base.hasWarned;

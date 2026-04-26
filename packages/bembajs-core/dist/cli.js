@@ -465,7 +465,7 @@ export default defineConfig({
             );
         }
         const { createBembaInjiniLogger, formatPhishaDevLog, injiniSsrErrorLabels } = require('./injini-vite-messages');
-        const injiniLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
+        const injiniLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }), process.cwd());
         const glue = this.ensureManagedInjiniGlue(process.cwd());
         const { loadBembaFrameworkConfig } = require('./framework-config');
         const fw = loadBembaFrameworkConfig(process.cwd());
@@ -672,7 +672,7 @@ export default defineConfig({
             console.log(msg('viteBuildReact'));
             const { build, createLogger } = await import('vite');
             const { createBembaInjiniLogger } = require('./injini-vite-messages');
-            const injiniBuildLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
+            const injiniBuildLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }), process.cwd());
             const glue = this.ensureManagedInjiniGlue(process.cwd());
             const outDir = options.output || 'dist';
 
@@ -774,7 +774,7 @@ app.listen(port, () => {
             console.log(msg('viteBuildReact'));
             const { build, createLogger } = await import('vite');
             const { createBembaInjiniLogger } = require('./injini-vite-messages');
-            const injiniExportLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
+            const injiniExportLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }), process.cwd());
             const glue = this.ensureManagedInjiniGlue(process.cwd());
             await build({
                 configFile: viteConfig,

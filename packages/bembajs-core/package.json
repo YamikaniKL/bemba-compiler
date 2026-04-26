@@ -1,6 +1,6 @@
 {
   "name": "bembajs-core",
-  "version": "1.4.27",
+  "version": "1.4.28",
   "description": "BembaJS Core - Compiler and runtime for Bemba language with conditionals, loops, and async/await support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
