@@ -123,7 +123,7 @@ const DEFAULT_CONFIG = {
      */
     framework: {
         reactSsrDev: true,
-        /** When true and a Vite config exists, `bemba tungulula` / `bemba akha` use Vite (full React SPA). */
+        /** When true and a Vite config exists, `bemba tungulula` / `bemba akha` use Phisha (Injini / full React SPA). */
         reactApp: true,
         /** Tailwind-first responsive defaults used by starter templates and shell output. */
         responsive: {

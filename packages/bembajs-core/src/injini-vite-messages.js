@@ -1,6 +1,6 @@
 /**
  * Phisha = BembaJS dev surface on top of Vite (Injini). Logs are skinned [vite]→[Phisha];
- * with BEMBA_CLI_LANG=bem, common Vite lines are translated to Cibemba.
+ * Cibemba phrasebook runs when `bemba -l bem` OR when `bemba.config.js` has `framework.phishaErrorsInBemba: true`.
  */
 const { activeLang } = require('./cli-i18n');
 
@@ -9,11 +9,27 @@ function isBembaCliLang() {
     return s === 'bem';
 }
 
-/** After Bemba phrase pass, rebrand remaining Vite tags for every CLI language. */
+/**
+ * Use Cibemba for Phisha chrome (terminal + SSR error HTML + translated engine lines).
+ * True when `bemba -l bem`, or when `bemba.config.js` sets `framework.phishaErrorsInBemba: true`.
+ */
+function shouldUseCibembaPhishaChrome(projectRoot) {
+    if (isBembaCliLang()) return true;
+    try {
+        const { loadBembaFrameworkConfig } = require('./framework-config');
+        const fw = loadBembaFrameworkConfig(projectRoot || process.cwd());
+        return fw.phishaErrorsInBemba === true;
+    } catch (_) {
+        return false;
+    }
+}
+
+/** After Bemba phrase pass, rebrand Vite log tags and standalone product name for every CLI language. */
 function skinViteTagsToPhisha(s) {
     return String(s == null ? '' : s)
         .replace(/\[vite:/gi, '[Phisha:')
-        .replace(/\[vite\]/gi, '[Phisha]');
+        .replace(/\[vite\]/gi, '[Phisha]')
+        .replace(/\bVite\b/g, 'Phisha');
 }
 
 /**
@@ -23,6 +39,19 @@ const BEMBA_VITE_PHRASEBOOK = [
     {
         test: /^\[vite-plugin-bemba\]\s*/i,
         replace: () => '[Phisha ya BembaJS] '
+    },
+    {
+        test: /Error when evaluating SSR module\s+([^:]+):\s*Cannot find module '([^']+)'\s+imported from '([^']+)'/i,
+        replace: (_m, ssrMod, pkg, fromFile) =>
+            `Fyabupwa mu SSR pa module ${String(ssrMod).trim()}: Taile ukusanga module '${pkg}' ukufuma '${fromFile}'.`
+    },
+    {
+        test: /Cannot find module '([^']+)'\s+imported from '([^']+)'/i,
+        replace: (_m, pkg, fromFile) => `Taile ukusanga module '${pkg}' ukufuma '${fromFile}'.`
+    },
+    {
+        test: /Cannot find module "([^"]+)"\s+imported from "([^"]+)"/i,
+        replace: (_m, pkg, fromFile) => `Taile ukusanga module "${pkg}" ukufuma "${fromFile}".`
     },
     {
         test: /Both esbuild and oxc options were set\.[^\n]*/i,
@@ -105,7 +134,8 @@ const BEMBA_VITE_PHRASEBOOK = [
     },
     {
         test: /Module externalized for browser compatibility/i,
-        replace: () => `Module yafumishe pa browser (externalized); mona ingisa nangu vite.config.`
+        replace: () =>
+            `Module yafumishe pa browser (externalized); mona ingisa nangu ifishi ya config (vite.config).`
     },
     {
         test: /Invalid hook call/i,
@@ -171,9 +201,10 @@ function translateViteBodyToBembaOnly(text) {
  * @param {string} text
  * @returns {string}
  */
-function formatPhishaDevLog(text) {
+function formatPhishaDevLog(text, projectRoot) {
     const raw = String(text == null ? '' : text);
-    const body = isBembaCliLang() ? translateViteBodyToBembaOnly(raw) : raw;
+    const root = projectRoot || process.cwd();
+    const body = shouldUseCibembaPhishaChrome(root) ? translateViteBodyToBembaOnly(raw) : raw;
     return skinViteTagsToPhisha(body);
 }
 
@@ -215,8 +246,8 @@ function createBembaInjiniLogger(base) {
 }
 
 /** Labels for SSR HTML error page */
-function injiniSsrErrorLabels() {
-    const bem = isBembaCliLang();
+function injiniSsrErrorLabels(projectRoot) {
+    const bem = shouldUseCibembaPhishaChrome(projectRoot || process.cwd());
     if (!bem) {
         return {
             htmlLang: 'en',
@@ -245,6 +276,7 @@ function injiniSsrErrorLabels() {
 
 module.exports = {
     isBembaCliLang,
+    shouldUseCibembaPhishaChrome,
     formatPhishaDevLog,
     translateInjiniEngineText,
     createBembaInjiniLogger,

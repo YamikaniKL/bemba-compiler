@@ -36,7 +36,7 @@ const CODE_STYLE_MARKDOWN = [
     '2. **Reusable blocks** are `pangaIcapaba` partials under `ifikopo/cipanda/`, included with `ingisa: [ \'Name\' ]`.',
     '3. **Tweak in place** — duplicate `StarterCard.bemba`, rename, and edit HTML/CSS without fighting upstream versions.',
     '',
-    'For rich **React** UI, use `bemba emit-react` and add [shadcn/ui](https://ui.shadcn.com/) in that Vite/React app (see BembaJS docs).',
+    'For rich **React** UI, use `bemba emit-react` and add [shadcn/ui](https://ui.shadcn.com/) in that Phisha/React app (see BembaJS docs).',
     '',
     '## Responsive defaults (Tailwind-first)',
     '',
@@ -235,6 +235,8 @@ function indexPage() {
 ingisa React ukufuma 'react'
 leta { useId } kufuma 'react'
 ingisa Button ukufuma '../../ifikopo/Button.bemba'
+// Phisha error test: run \`bemba -l bem tungulula\`, uncomment ONLY the next line, save — terminal + overlay should show Cibemba / [Phisha]. Re-comment after.
+// ingisa _PhishaBreak ukufuma '___phony-package-for-phisha-test___'
 
 pangaIpepa('Home', {
   ukwisulula: nokuti() {
@@ -461,10 +463,10 @@ bun install
 bun run dev
 \`\`\`
 
-\`bun run dev\` runs **\`bemba tungulula\`** and starts **Injini** with app-router pages from \`amapeji/app/**/page.bemba\`.
+\`bun run dev\` runs **\`bemba tungulula\`** and starts **Phisha** (Injini) with app-router pages from \`amapeji/app/**/page.bemba\`.
 If this is a fresh scaffold, run \`bun install\` first.
 
-\`bun run build\` and \`bun run export\` also use Injini by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
+\`bun run build\` and \`bun run export\` also use **Phisha** (Injini) by default. Use \`--legacy-static\` only if you intentionally want the old static HTML compiler path.
 
 (\`npm install\` / \`npm run dev\` work too if you use npm.)
 
@@ -556,11 +558,11 @@ pangaIpepa('ReactDemo', {
     const [n, setN] = useState(0)
     bwelela (
       <icipandwa className="bemba-react-demo" style={{ padding: '2rem', maxWidth: '42rem', margin: '0 auto' }}>
-        <umutwe_ukulu>Vite + React</umutwe_ukulu>
+        <umutwe_ukulu>Phisha + React</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
           This file is <code>amapeji/react-demo.bemba</code> to <code>/react-demo</code> (legacy demo route).
           Use <code>ukwisulula</code> for SPA routes. Build with <code>bemba akha</code> or <code>bemba fumya</code>{' '}
-          (both run Vite by default). Sample hook: count {n}{' '}
+          (both use Phisha / Injini by default). Sample hook: count {n}{' '}
           <ibatani type="button" pakuKlikisha={() => setN(n + 1)}>+1</ibatani>
         </ukulondolola>
       </icipandwa>

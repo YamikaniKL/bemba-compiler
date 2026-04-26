@@ -501,7 +501,7 @@ export default defineConfig({
                 .replace(/'/g, '&#39;');
 
         const renderViteSsrErrorHtml = (err, urlPath) => {
-            const L = injiniSsrErrorLabels();
+            const L = injiniSsrErrorLabels(process.cwd());
             const message = err && err.message ? String(err.message) : String(err);
             const stack = err && err.stack ? String(err.stack) : '';
             const plugin = err && err.plugin ? String(err.plugin) : '';
@@ -513,8 +513,8 @@ export default defineConfig({
                     ? `${id}:${loc.line}:${loc.column}`
                     : id || '';
 
-            const messageShown = formatPhishaDevLog(message);
-            const frameShown = frame ? formatPhishaDevLog(frame) : '';
+            const messageShown = formatPhishaDevLog(message, process.cwd());
+            const frameShown = frame ? formatPhishaDevLog(frame, process.cwd()) : '';
 
             return `<!DOCTYPE html>
 <html lang="${escapeHtml(L.htmlLang)}">

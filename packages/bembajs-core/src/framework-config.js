@@ -3,7 +3,7 @@ const path = require('path');
 
 /**
  * @param {string} projectRoot
- * @returns {{ reactSsrDev: boolean, reactApp: boolean }}
+ * @returns {{ reactSsrDev: boolean, reactApp: boolean, phishaErrorsInBemba?: boolean }}
  */
 function loadBembaFrameworkConfig(projectRoot) {
     const out = { reactSsrDev: true, reactApp: true };
@@ -22,6 +22,9 @@ function loadBembaFrameworkConfig(projectRoot) {
             }
             if (typeof c.framework.reactApp === 'boolean') {
                 out.reactApp = c.framework.reactApp;
+            }
+            if (typeof c.framework.phishaErrorsInBemba === 'boolean') {
+                out.phishaErrorsInBemba = c.framework.phishaErrorsInBemba;
             }
         }
     } catch (_) {

@@ -7,7 +7,9 @@ module.exports = {
   // Framework settings (see bembajs-core DEFAULT_CONFIG)
   framework: {
     reactSsrDev: true,
-    reactApp: true
+    reactApp: true,
+    // Phisha: SSR error page + Vite log phrasebook in Cibemba (optional; omit or false for English-only)
+    phishaErrorsInBemba: true
   },
   
   // Folder structure (using Bemba names)

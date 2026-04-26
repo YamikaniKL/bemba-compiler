@@ -2,6 +2,8 @@
 ingisa React ukufuma 'react'
 leta { useId } kufuma 'react'
 ingisa Button ukufuma '../../ifikopo/Button.bemba'
+// Phisha error test: run `bemba -l bem tungulula`, uncomment ONLY the next line, save — terminal + overlay should show Cibemba / [Phisha]. Re-comment after.
+// ingisa _PhishaBreak ukufuma '___phony-package-for-phisha-test___'
 
 pangaIpepa('Home', {
   ukwisulula: nokuti() {
