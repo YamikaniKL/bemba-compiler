@@ -1,6 +1,6 @@
 {
   "name": "create-bembajs",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "Create BembaJS apps with one command (like create-next-app) - Now with control flow syntax and Chakra UI support",
   "main": "./index.js",
   "bin": {
