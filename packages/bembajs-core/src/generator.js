@@ -89,9 +89,6 @@ class BembaGenerator {
         const imports = this._skipBundledReactImportFromReact ? '' : this.generateReactImports();
         const hooks = (node.hooks || []).map(hook => this.generateReactHook(hook)).join('\n');
         const methods = this.generateMethods(node.methods);
-        // #region agent log
-        fetch('http://127.0.0.1:7643/ingest/eee19454-7096-4bc0-b3df-8a7c34ee0559',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b0e74e'},body:JSON.stringify({sessionId:'b0e74e',runId:'pre-fix',hypothesisId:'H3',location:'generator.js:93',message:'generateReactComponent props before signature',data:{componentName:node&&node.name?node.name:'unknown',propsKeys:node&&node.props&&typeof node.props==='object'?Object.keys(node.props).slice(0,8):[],propsPreview:node&&node.props&&typeof node.props==='object'?Object.fromEntries(Object.entries(node.props).slice(0,3)):{}},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         const renderPreamble =
             node.render &&
             node.render.type === 'JSXReturn' &&

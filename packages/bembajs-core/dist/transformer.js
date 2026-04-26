@@ -87,9 +87,6 @@ class BembaTransformer {
     }
     
     transformProps(props) {
-        // #region agent log
-        fetch('http://127.0.0.1:7643/ingest/eee19454-7096-4bc0-b3df-8a7c34ee0559',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b0e74e'},body:JSON.stringify({sessionId:'b0e74e',runId:'pre-fix',hypothesisId:'H2',location:'transformer.js:90',message:'transformProps input shape',data:{propsType:props&&props.type?props.type:typeof props,topLevelKeys:props&&typeof props==='object'?Object.keys(props).slice(0,8):[]},timestamp:Date.now()})}).catch(()=>{});
-        // #endregion
         if (!props || typeof props !== 'object') {
             return {};
         }
