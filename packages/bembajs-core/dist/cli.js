@@ -451,13 +451,16 @@ export default defineConfig({
     async startViteDevServer(options, configFile) {
         console.log(msg('viteDevReact'));
         let createServer;
+        let createLogger;
         try {
-            ({ createServer } = await import('vite'));
+            ({ createServer, createLogger } = await import('vite'));
         } catch (e) {
             throw new Error(
                 'Injini dependencies are missing. Run `bun install` in this project (if resolution fails, try `bun install --registry https://registry.npmjs.org/`), then run `bemba tungulula` again.'
             );
         }
+        const { createBembaInjiniLogger, translateInjiniEngineText, injiniSsrErrorLabels } = require('./injini-vite-messages');
+        const injiniLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
         const glue = this.ensureManagedInjiniGlue(process.cwd());
         const { loadBembaFrameworkConfig } = require('./framework-config');
         const fw = loadBembaFrameworkConfig(process.cwd());
@@ -466,7 +469,8 @@ export default defineConfig({
         try {
             server = await createServer({
                 configFile,
-                logLevel: 'silent',
+                customLogger: injiniLogger,
+                logLevel: 'info',
                 appType: glue.managedIndex ? 'custom' : undefined,
                 server: {
                     port,
@@ -483,11 +487,6 @@ export default defineConfig({
             throw e;
         }
 
-        const isBembaLang = () => {
-            const s = String(process.env.BEMBA_CLI_LANG || 'en').trim().toLowerCase();
-            return s === 'bem' || s === 'bemba' || s === 'ci-bemba';
-        };
-
         const escapeHtml = (s) =>
             String(s == null ? '' : s)
                 .replace(/&/g, '&amp;')
@@ -497,15 +496,7 @@ export default defineConfig({
                 .replace(/'/g, '&#39;');
 
         const renderViteSsrErrorHtml = (err, urlPath) => {
-            const bem = isBembaLang();
-            const title = bem ? 'Fyabupwa mu Injini (Vite)' : 'Injini (Vite) Error';
-            const lead = bem
-                ? 'Pali ifyo fileluba pa kupanga/ukwisulula ipena. Mone ifyo fyabupwa panshi.'
-                : 'Something failed while compiling/rendering this page. See details below.';
-            const hint = bem
-                ? 'Ukulefwaya: mona file, ukonkolole, elyo ulesanse (refresh).'
-                : 'Tip: fix the file, then refresh.';
-
+            const L = injiniSsrErrorLabels();
             const message = err && err.message ? String(err.message) : String(err);
             const stack = err && err.stack ? String(err.stack) : '';
             const plugin = err && err.plugin ? String(err.plugin) : '';
@@ -517,12 +508,15 @@ export default defineConfig({
                     ? `${id}:${loc.line}:${loc.column}`
                     : id || '';
 
+            const messageShown = translateInjiniEngineText(message);
+            const frameShown = frame ? translateInjiniEngineText(frame) : '';
+
             return `<!DOCTYPE html>
-<html lang="${bem ? 'bem' : 'en'}">
+<html lang="${escapeHtml(L.htmlLang)}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>${escapeHtml(title)}</title>
+  <title>${escapeHtml(L.title)}</title>
   <style>
     :root { color-scheme: light dark; }
     body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; }
@@ -542,18 +536,18 @@ export default defineConfig({
 <body>
   <div class="wrap">
     <div class="card">
-      <h1>${escapeHtml(title)}</h1>
-      <p>${escapeHtml(lead)}</p>
-      <p class="meta">${escapeHtml(hint)}</p>
+      <h1>${escapeHtml(L.title)}</h1>
+      <p>${escapeHtml(L.lead)}</p>
+      <p class="meta">${escapeHtml(L.hint)}</p>
       <p class="meta">${escapeHtml(urlPath || '/')}</p>
       <div style="margin-top:12px">
-        ${plugin ? `<span class="pill">${escapeHtml(bem ? 'plugin' : 'plugin')}: ${escapeHtml(plugin)}</span>` : ''}
-        ${where ? `<span class="pill">${escapeHtml(bem ? 'pa' : 'at')}: ${escapeHtml(where)}</span>` : ''}
+        ${plugin ? `<span class="pill">${escapeHtml(L.pluginPill)}: ${escapeHtml(plugin)}</span>` : ''}
+        ${where ? `<span class="pill">${escapeHtml(L.atPill)}: ${escapeHtml(where)}</span>` : ''}
       </div>
-      <h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Ubulubulo' : 'Error')}</h2>
-      <pre>${escapeHtml(message)}</pre>
-      ${frame ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Icipande ca code' : 'Code frame')}</h2><pre>${escapeHtml(frame)}</pre>` : ''}
-      ${stack ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(bem ? 'Stack' : 'Stack')}</h2><pre>${escapeHtml(stack)}</pre>` : ''}
+      <h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.errorHeading)}</h2>
+      <pre>${escapeHtml(messageShown)}</pre>
+      ${frame ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.codeFrameHeading)}</h2><pre>${escapeHtml(frameShown)}</pre>` : ''}
+      ${stack ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.stackHeading)}</h2><pre>${escapeHtml(stack)}</pre>` : ''}
     </div>
   </div>
 </body>
@@ -671,13 +665,17 @@ export default defineConfig({
         const viteConfig = this.shouldUseViteReactApp(options);
         if (viteConfig) {
             console.log(msg('viteBuildReact'));
-            const { build } = await import('vite');
+            const { build, createLogger } = await import('vite');
+            const { createBembaInjiniLogger } = require('./injini-vite-messages');
+            const injiniBuildLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
             const glue = this.ensureManagedInjiniGlue(process.cwd());
             const outDir = options.output || 'dist';
 
             // Client build (browser/hydration)
             await build({
                 configFile: viteConfig,
+                customLogger: injiniBuildLogger,
+                logLevel: 'info',
                 ...(glue.managedIndex
                     ? { build: { outDir, rollupOptions: { input: glue.managedIndex } } }
                     : { build: { outDir } })
@@ -686,6 +684,8 @@ export default defineConfig({
             // Server build (SSR entry)
             await build({
                 configFile: viteConfig,
+                customLogger: injiniBuildLogger,
+                logLevel: 'info',
                 build: {
                     ssr: true,
                     outDir: path.join(outDir, 'server'),
@@ -767,10 +767,14 @@ app.listen(port, () => {
         const viteConfig = this.shouldUseViteReactApp(options);
         if (viteConfig) {
             console.log(msg('viteBuildReact'));
-            const { build } = await import('vite');
+            const { build, createLogger } = await import('vite');
+            const { createBembaInjiniLogger } = require('./injini-vite-messages');
+            const injiniExportLogger = createBembaInjiniLogger(createLogger('info', { allowClearScreen: true }));
             const glue = this.ensureManagedInjiniGlue(process.cwd());
             await build({
                 configFile: viteConfig,
+                customLogger: injiniExportLogger,
+                logLevel: 'info',
                 ...(glue.managedIndex ? { build: { outDir: options.output || 'out', rollupOptions: { input: glue.managedIndex } } } : {}),
                 ...(glue.managedIndex ? {} : { build: { outDir: options.output || 'out' } })
             });

@@ -11,5 +11,6 @@ require('./test-bemba-import-grammar.js');
 require('./test-bemba-component-event-props.js');
 require('./test-lexer-strict-equality.js');
 require('./test-responsive-template-output.js');
+require('./test-injini-vite-messages.js');
 require('./test-generator-responsive-class-aliases.js');
 require('./test-next-style-core.js');
