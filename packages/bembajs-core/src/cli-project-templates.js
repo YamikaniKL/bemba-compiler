@@ -393,6 +393,19 @@ function globalCss(projectName) {
 body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
+  background-color: #09090b;
+  color: #fafafa;
+  min-height: 100%;
+}
+
+html {
+  background-color: #09090b;
+  color: #fafafa;
+  min-height: 100%;
+}
+
+#root {
+  min-height: 100%;
 }
 `;
 }

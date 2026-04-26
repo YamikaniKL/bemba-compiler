@@ -434,8 +434,11 @@ export default defineConfig({
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BembaJS</title>
   <link rel="icon" href="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" />
-  <style>
-    html, body, #root { margin: 0; padding: 0; min-height: 100%; }
+  <style id="bemba-injini-first-paint">
+    /* Sync first paint: Tailwind loads with the JS graph; this avoids a white flash before utilities apply */
+    html { background-color: #09090b; color: #fafafa; }
+    body { margin: 0; min-height: 100%; background-color: #09090b; color: #fafafa; }
+    #root { margin: 0; padding: 0; min-height: 100%; }
   </style>
 </head>
 <body>
