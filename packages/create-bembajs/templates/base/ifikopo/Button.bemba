@@ -18,10 +18,10 @@ fyambaIcipanda('Button', {
     ukwisulula: nokuti() {
         bwelela (
             <ibatani 
-                className={`button ${umutindo}`} 
-                onClick={pakuKlikisha}
+                className={`button ${ici.ifyapangwa.umutindo}`} 
+                onClick={ici.ifyapangwa.pakuKlikisha}
             >
-                {ilembo}
+                {ici.ifyapangwa.ilembo}
             </ibatani>
         )
     },
