@@ -18,9 +18,9 @@ fyambaIcipanda('Button', {
     ukwisulula: nokuti() {
         cakosa isSecondary = umutindo === 'secondary'
         cakosa isDanger = umutindo === 'danger'
-        cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#667eea')
+    cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#000000')
         cakosa textColor = isSecondary ? '#333' : '#fff'
-        cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : 'none'
+    cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : (isDanger ? 'none' : '2px solid #ffffff')
         bwelela (
             <ibatani 
                 className={`button ${umutindo}`}
@@ -61,8 +61,8 @@ fyambaIcipanda('Button', {
             color: white;
         }
         
-        .button.primary:hover {
-            background: #5a6fd8;
+    .button.primary:hover {
+      background: #111111;
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }

@@ -241,19 +241,19 @@ pangaIpepa('Home', {
               bembajs v1.0.0 <span hidden id={reactId}>app-root</span>
             </ukulondolola>
             <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.6rem, 6vw, 4rem)', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 700 }}>
-              Build with JavaScript
+              Akeni na JavaScript
             </umutwe_ukulu>
           </icipandwa>
           <icipandwa>
             <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.15rem, 2.3vw, 1.55rem)' }}>
-              A modern JavaScript framework for web development
+              Framework ya JavaScript iyapya iya kupanga ama website
             </umutwe_ukalamba>
             <ukulondolola style={{ color: '#a1a1aa', maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
-              Fast, simple, and powerful. Built for developers who value simplicity and performance. Get started in seconds with zero configuration.
+              Yacilaka, yalula, kabili yakosa. Yapangilwe ba developer abafwaya ukululama no bucushi bwanono pa performance. Tandikeni bwangu ne setup sha pa ntanshi.
             </ukulondolola>
           </icipandwa>
           <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem', alignItems: 'center' }}>
-            <Button ilembo="Get started" pakuKlikisha={() => londolola('Get started')} umutindo="primary" />
+            <Button ilembo="Tandikeni" pakuKlikisha={() => londolola('Tandikeni')} umutindo="primary" />
             <a href="${BEMBA_COMPILER_REPO_URL}" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
               Documentation
             </a>
@@ -322,9 +322,9 @@ fyambaIcipanda('Button', {
   ukwisulula: nokuti() {
     cakosa isSecondary = umutindo === 'secondary'
     cakosa isDanger = umutindo === 'danger'
-    cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#667eea')
+    cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#000000')
     cakosa textColor = isSecondary ? '#333' : '#fff'
-    cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : 'none'
+    cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : (isDanger ? 'none' : '2px solid #ffffff')
     bwelela (
       <ibatani
         className={\`button \${umutindo}\`}
@@ -347,7 +347,7 @@ fyambaIcipanda('Button', {
   },
   imikalile: \`
     .button.primary:hover {
-      background: #5a6fd8;
+      background: #111111;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
