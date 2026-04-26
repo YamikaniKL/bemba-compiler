@@ -16,10 +16,26 @@ fyambaIcipanda('Button', {
     
     // Component render function
     ukwisulula: nokuti() {
+        cakosa isSecondary = umutindo === 'secondary'
+        cakosa isDanger = umutindo === 'danger'
+        cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#667eea')
+        cakosa textColor = isSecondary ? '#333' : '#fff'
+        cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : 'none'
         bwelela (
             <ibatani 
-                className={`button ${umutindo}`} 
+                className={`button ${umutindo}`}
                 onClick={pakuKlikisha}
+                style={{
+                    padding: '12px 24px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: 500,
+                    transition: 'all 0.2s ease',
+                    background: bgColor,
+                    color: textColor,
+                    border: borderStyle
+                }}
             >
                 {ilembo}
             </ibatani>

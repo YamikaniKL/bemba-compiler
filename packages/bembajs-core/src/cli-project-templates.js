@@ -316,15 +316,49 @@ function buttonComponentBemba() {
 fyambaIcipanda('Button', {
   ifyapangwa: {
     ilembo: icishilano,
-    pakuKlikisha: nokuti()
+    pakuKlikisha: nokuti(),
+    umutindo: 'primary'
   },
   ukwisulula: nokuti() {
+    cakosa isSecondary = umutindo === 'secondary'
+    cakosa isDanger = umutindo === 'danger'
+    cakosa bgColor = isSecondary ? '#f8f9fa' : (isDanger ? '#dc3545' : '#667eea')
+    cakosa textColor = isSecondary ? '#333' : '#fff'
+    cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : 'none'
     bwelela (
-      <ibatani className="button" pakuKlikisha={pakuKlikisha}>
+      <ibatani
+        className={\`button \${umutindo}\`}
+        pakuKlikisha={pakuKlikisha}
+        style={{
+          padding: '12px 24px',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          fontSize: '16px',
+          fontWeight: 500,
+          transition: 'all 0.2s ease',
+          background: bgColor,
+          color: textColor,
+          border: borderStyle
+        }}
+      >
         {ilembo}
       </ibatani>
     )
-  }
+  },
+  imikalile: \`
+    .button.primary:hover {
+      background: #5a6fd8;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .button.secondary:hover {
+      background: #e9ecef;
+      border-color: #adb5bd;
+    }
+    .button.danger:hover {
+      background: #c82333;
+    }
+  \`
 });
 `;
 }
