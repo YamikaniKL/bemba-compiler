@@ -209,6 +209,25 @@ class BembaTransformer {
         return inner;
     }
 
+    /**
+     * Loose `RawValue` preambles join tokens with spaces, producing invalid JS like
+     * `useMemo ( ( ) =>` or `useId ( )` — fix before emitting.
+     */
+    normalizeLoosePreambleJs(out) {
+        let s = String(out || '');
+        let prev;
+        do {
+            prev = s;
+            s = s.replace(/\(\s+\)/g, '()');
+            s = s.replace(/\[\s+\]/g, '[]');
+        } while (s !== prev);
+        s = s.replace(
+            /\b(useMemo|useCallback|useEffect|useLayoutEffect|useId|useRef)\s+\(\s*\(/g,
+            '$1(('
+        );
+        return s;
+    }
+
     /** Map Bemba decl keywords in loose preamble text to JavaScript. */
     translateBembaPreambleToJs(src) {
         let out = String(src || '').trim();
@@ -216,6 +235,7 @@ class BembaTransformer {
         out = out.replace(/\bcakosa\b/g, 'const');
         out = out.replace(/\bcilepilibuka\b/g, 'let');
         out = out.replace(/\bicakubika\b/g, 'var');
+        out = this.normalizeLoosePreambleJs(out);
         if (!/;\s*$/.test(out)) out += ';';
         return out;
     }

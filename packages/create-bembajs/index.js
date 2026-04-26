@@ -542,7 +542,9 @@ function copyDirectory(src, dest) {
 
     for (const entry of entries) {
         const srcPath = path.join(src, entry.name);
-        const destPath = path.join(dest, entry.name);
+        // npm pack omits `.gitignore` from tarballs; ship as `gitignore` and rename on copy.
+        const destName = entry.isFile() && entry.name === 'gitignore' ? '.gitignore' : entry.name;
+        const destPath = path.join(dest, destName);
 
         if (entry.isDirectory()) {
             copyDirectory(srcPath, destPath);
