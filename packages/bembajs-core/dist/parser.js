@@ -457,6 +457,9 @@ class BembaParser {
                 }
             }
         }
+        // #region agent log
+        fetch('http://127.0.0.1:7643/ingest/eee19454-7096-4bc0-b3df-8a7c34ee0559',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'b0e74e'},body:JSON.stringify({sessionId:'b0e74e',runId:'pre-fix',hypothesisId:'H1',location:'parser.js:460',message:'parseComponent assigned raw props node',data:{componentName:component.name,propsType:component.props&&component.props.type?component.props.type:typeof component.props,propsKeys:component.props&&typeof component.props==='object'?Object.keys(component.props).slice(0,8):[]},timestamp:Date.now()})}).catch(()=>{});
+        // #endregion
         
         return component;
     }
