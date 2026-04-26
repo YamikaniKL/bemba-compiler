@@ -622,7 +622,9 @@ export default defineConfig({
     }
     document.addEventListener('keydown', function (event) {
       var key = String(event && event.key ? event.key : '').toLowerCase();
-      if ((event.ctrlKey || event.metaKey) && key === 'l') {
+      var isAltShiftD = event.altKey && event.shiftKey && key === 'd';
+      var isCtrlAltD = event.ctrlKey && event.altKey && key === 'd';
+      if (isAltShiftD || isCtrlAltD) {
         event.preventDefault();
         togglePhishaPanel();
       }
