@@ -1,6 +1,6 @@
 {
   "name": "bembajs-pisha",
-  "version": "1.1.0",
+  "version": "1.4.34",
   "description": "Pisha - The Vite-based build tool for BembaJS",
   "main": "./src/index.js",
   "type": "module",
@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "vite": "^8.0.10",
-    "bembajs": "^1.4.0"
+    "bembajs": "^1.4.34"
   },
   "peerDependencies": {
     "react": "^18.0.0",
