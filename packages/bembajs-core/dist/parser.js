@@ -3279,6 +3279,87 @@ class BembaParser {
             font-size: 1rem;
         }
 
+        @media (max-width: 1024px) {
+            .hero-banner__inner {
+                padding-inline: clamp(1rem, 5vw, 1.5rem);
+            }
+            .site-body-wrap {
+                padding-inline: clamp(1rem, 5vw, 1.5rem);
+            }
+            .site-footer {
+                padding-inline: clamp(1rem, 5vw, 1.5rem);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-nav {
+                min-height: 3rem;
+                padding: 0 0.85rem;
+            }
+            .top-nav-inner {
+                gap: 0.5rem;
+            }
+            .top-nav-links {
+                gap: 0.55rem;
+                overflow-x: auto;
+                scrollbar-width: thin;
+                padding-bottom: 0.2rem;
+            }
+            .hero-banner__inner {
+                padding: 2.35rem 1rem 2rem;
+            }
+            .hero-banner__content {
+                max-width: 100%;
+            }
+            .hero-title {
+                font-size: clamp(1.95rem, 9vw, 2.7rem);
+            }
+            .hero-lead {
+                font-size: 0.98rem;
+                line-height: 1.62;
+            }
+            .button-container.hero-actions {
+                margin-top: 1.4rem;
+            }
+            .hero-actions .ibatani {
+                width: 100%;
+                max-width: 20rem;
+            }
+            .site-body {
+                margin-top: 0.25rem;
+            }
+            .body-section {
+                margin-top: 1.5rem;
+                padding-top: 1.25rem;
+            }
+            .footer-directory {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 1.1rem 1.2rem;
+            }
+            .footer-legal {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: clamp(1.72rem, 11vw, 2.2rem);
+            }
+            .hero-lead {
+                font-size: 0.92rem;
+            }
+            .button-container {
+                gap: 0.5rem;
+            }
+            .button-container .ibatani {
+                width: 100%;
+                max-width: none;
+            }
+            .footer-directory {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .site-body-wrap {
             width: 100%;
             max-width: 56rem;

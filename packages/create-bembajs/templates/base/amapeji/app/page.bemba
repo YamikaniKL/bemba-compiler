@@ -7,30 +7,35 @@ pangaIpepa('Home', {
   ukwisulula: nokuti() {
     cakosa reactId = useId()
     bwelela (
-            <icipandwa style={{ height: '100dvh', overflow: 'hidden', background: '#0a0a0a', color: '#f5f5f5', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box' }}>
-        <icipandwa style={{ width: '100%', maxWidth: '42rem', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <icipandwa style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}>
-            <img src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" alt="Bemba logo" style={{ width: '72px', height: '72px', borderRadius: '14px' }} />
+      <icipandwa className="min-h-screen w-full bg-black text-zinc-100 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <icipandwa className="mx-auto flex w-full max-w-3xl flex-col gap-8 text-center sm:gap-10">
+          <icipandwa className="mb-2 flex justify-center">
+            <img src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" alt="Bemba logo" className="h-16 w-16 rounded-2xl sm:h-20 sm:w-20" />
           </icipandwa>
           <icipandwa>
-            <ukulondolola style={{ color: '#a1a1aa', fontSize: '0.875rem', fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace' }}>
+            <ukulondolola className="font-mono text-xs tracking-wide text-zinc-400 sm:text-sm">
               bembajs v1.0.0 <span hidden id={reactId}>app-root</span>
             </ukulondolola>
-            <umutwe_ukulu style={{ marginTop: '0.75rem', fontSize: 'clamp(2.6rem, 6vw, 4rem)', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 700 }}>
+            <umutwe_ukulu className="mt-3 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               Akeni na JavaScript
             </umutwe_ukulu>
           </icipandwa>
           <icipandwa>
-            <umutwe_ukalamba style={{ color: '#a1a1aa', fontWeight: 300, fontSize: 'clamp(1.15rem, 2.3vw, 1.55rem)' }}>
+            <umutwe_ukalamba className="text-lg font-light text-zinc-400 sm:text-xl lg:text-2xl">
               Framework ya JavaScript iyapya iya kupanga ama website
             </umutwe_ukalamba>
-            <ukulondolola style={{ color: '#a1a1aa', maxWidth: '40rem', margin: '1rem auto 0', lineHeight: 1.7 }}>
+            <ukulondolola className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
               Yacilaka, yalula, kabili yakosa. Yapangilwe ba developer abafwaya ukululama no bucushi bwanono pa performance. Tandikeni bwangu ne setup sha pa ntanshi.
             </ukulondolola>
           </icipandwa>
-          <icipandwa style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', justifyContent: 'center', paddingTop: '0.25rem', alignItems: 'center' }}>
-            <Button ilembo="Tandikeni" pakuKlikisha={() => londolola('Tandikeni')} umutindo="primary" />
-            <a href="https://github.com/YamikaniKL/bemba-compiler" style={{ padding: '0.75rem 2rem', borderRadius: '0.65rem', border: '1px solid #2a2a2a', color: '#e4e4e7', fontWeight: 500, textDecoration: 'none' }}>
+          <icipandwa className="flex flex-col items-stretch justify-center gap-3 pt-1 sm:flex-row sm:items-center">
+            <Button
+              ilembo="Tandikeni"
+              pakuKlikisha={() => londolola('Tandikeni')}
+              umutindo="primary"
+              amakalasi="w-full sm:w-auto"
+            />
+            <a href="https://github.com/YamikaniKL/bemba-compiler" className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 px-6 py-3 font-medium text-zinc-200 no-underline transition hover:border-zinc-500 sm:w-auto">
               Documentation
             </a>
           </icipandwa>

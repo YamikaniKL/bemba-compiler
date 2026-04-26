@@ -301,7 +301,8 @@ ${this.decreaseIndent()}}`;
         
         const propStrings = Object.entries(props).map(([key, value]) => {
             if (typeof value === 'string') {
-                return ` ${key}="${value}"`;
+                const normalizedValue = this.normalizeResponsiveClassValue(key, value);
+                return ` ${key}="${normalizedValue}"`;
             } else if (typeof value === 'boolean' && value) {
                 return ` ${key}`;
             } else {
@@ -310,6 +311,22 @@ ${this.decreaseIndent()}}`;
         });
         
         return propStrings.join('');
+    }
+
+    /**
+     * Tailwind-first responsive shorthand for Bemba authoring:
+     * s:/m:/l:/x:/xx: -> sm:/md:/lg:/xl:/2xl:
+     */
+    normalizeResponsiveClassValue(key, value) {
+        if (key !== 'className' && key !== 'class') {
+            return value;
+        }
+        return String(value)
+            .replace(/\bs:/g, 'sm:')
+            .replace(/\bm:/g, 'md:')
+            .replace(/\bl:/g, 'lg:')
+            .replace(/\bx:/g, 'xl:')
+            .replace(/\bxx:/g, '2xl:');
     }
     
     generateJSXReturn(node) {

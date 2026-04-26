@@ -124,7 +124,19 @@ const DEFAULT_CONFIG = {
     framework: {
         reactSsrDev: true,
         /** When true and a Vite config exists, `bemba tungulula` / `bemba akha` use Vite (full React SPA). */
-        reactApp: true
+        reactApp: true,
+        /** Tailwind-first responsive defaults used by starter templates and shell output. */
+        responsive: {
+            strategy: 'tailwind-first',
+            mobileFirst: true,
+            breakpoints: {
+                sm: 640,
+                md: 768,
+                lg: 1024,
+                xl: 1280,
+                '2xl': 1536
+            }
+        }
     },
     server: {
         port: 3000

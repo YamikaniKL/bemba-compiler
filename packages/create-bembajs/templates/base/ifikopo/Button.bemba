@@ -6,7 +6,8 @@ fyambaIcipanda('Button', {
     ifyapangwa: {
         ilembo: 'Button',
         pakuKlikisha: 'londolola("Button clicked!")',
-        umutindo: 'primary'
+        umutindo: 'primary',
+        amakalasi: ''
     },
     
     // Component state
@@ -23,7 +24,7 @@ fyambaIcipanda('Button', {
     cakosa borderStyle = isSecondary ? '2px solid #dee2e6' : (isDanger ? 'none' : '2px solid #ffffff')
         bwelela (
             <ibatani 
-                className={`button ${umutindo}`}
+                className={`button ${umutindo} ${amakalasi}`}
                 onClick={pakuKlikisha}
                 style={{
                     padding: '12px 24px',
