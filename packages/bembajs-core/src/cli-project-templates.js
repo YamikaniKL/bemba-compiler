@@ -240,10 +240,10 @@ pangaIpepa('Home', {
   ukwisulula: nokuti() {
     cakosa reactId = useId()
     bwelela (
-      <icipandwa className="tw-min-h-screen tw-w-full tw-bg-black tw-text-zinc-100 tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-10 lg:tw-px-8">
-        <icipandwa className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-gap-8 tw-text-center sm:tw-gap-10">
-          <icipandwa className="tw-mb-2 tw-flex tw-justify-center">
-            <img src="${BEMBA_BRAND_LOGO_URL}" alt="Bemba logo" className="tw-h-16 tw-w-16 tw-rounded-2xl sm:tw-h-20 sm:tw-w-20" />
+      <icipandwa className="tw-flex tw-min-h-screen tw-w-full tw-flex-col tw-items-center tw-justify-center tw-bg-black tw-text-zinc-100 tw-px-4 tw-py-12 sm:tw-px-8 sm:tw-py-16">
+        <icipandwa className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-items-center tw-gap-8 tw-text-center sm:tw-gap-10">
+          <icipandwa className="tw-flex tw-shrink-0 tw-justify-center">
+            <img src="${BEMBA_BRAND_LOGO_URL}" alt="Bemba logo" width={256} height={256} className="tw-block tw-h-auto tw-w-44 tw-max-w-[min(85vw,16rem)] tw-rounded-2xl sm:tw-w-56 sm:tw-max-w-[min(90vw,18rem)] lg:tw-w-64 lg:tw-max-w-[20rem]" />
           </icipandwa>
           <icipandwa>
             <ukulondolola className="tw-font-mono tw-text-xs tw-tracking-wide tw-text-zinc-400 sm:tw-text-sm">
@@ -261,7 +261,7 @@ pangaIpepa('Home', {
               Yacilaka, yalula, kabili yakosa. Yapangilwe ba developer abafwaya ukululama no bucushi bwanono pa performance. Tandikeni bwangu ne setup sha pa ntanshi.
             </ukulondolola>
           </icipandwa>
-          <icipandwa className="tw-flex tw-flex-col tw-items-stretch tw-justify-center tw-gap-3 tw-pt-1 sm:tw-flex-row sm:tw-items-center">
+          <icipandwa className="tw-flex tw-w-full tw-max-w-md tw-flex-col tw-items-stretch tw-justify-center tw-gap-3 tw-pt-1 sm:tw-max-w-none sm:tw-flex-row sm:tw-items-center sm:tw-justify-center">
             <Button
               ilembo="Tandikeni"
               pakuKlikisha={() => londolola('Tandikeni')}
