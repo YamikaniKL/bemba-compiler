@@ -7,35 +7,35 @@ pangaIpepa('Home', {
   ukwisulula: nokuti() {
     cakosa reactId = useId()
     bwelela (
-      <icipandwa className="min-h-screen w-full bg-black text-zinc-100 px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
-        <icipandwa className="mx-auto flex w-full max-w-3xl flex-col gap-8 text-center sm:gap-10">
-          <icipandwa className="mb-2 flex justify-center">
-            <img src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" alt="Bemba logo" className="h-16 w-16 rounded-2xl sm:h-20 sm:w-20" />
+      <icipandwa className="tw-min-h-screen tw-w-full tw-bg-black tw-text-zinc-100 tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-10 lg:tw-px-8">
+        <icipandwa className="tw-mx-auto tw-flex tw-w-full tw-max-w-3xl tw-flex-col tw-gap-8 tw-text-center sm:tw-gap-10">
+          <icipandwa className="tw-mb-2 tw-flex tw-justify-center">
+            <img src="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" alt="Bemba logo" className="tw-h-16 tw-w-16 tw-rounded-2xl sm:tw-h-20 sm:tw-w-20" />
           </icipandwa>
           <icipandwa>
-            <ukulondolola className="font-mono text-xs tracking-wide text-zinc-400 sm:text-sm">
+            <ukulondolola className="tw-font-mono tw-text-xs tw-tracking-wide tw-text-zinc-400 sm:tw-text-sm">
               bembajs v1.0.0 <span hidden id={reactId}>app-root</span>
             </ukulondolola>
-            <umutwe_ukulu className="mt-3 text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            <umutwe_ukulu className="tw-mt-3 tw-text-4xl tw-font-bold tw-leading-tight tw-tracking-tight sm:tw-text-5xl lg:tw-text-6xl">
               Akeni na JavaScript
             </umutwe_ukulu>
           </icipandwa>
           <icipandwa>
-            <umutwe_ukalamba className="text-lg font-light text-zinc-400 sm:text-xl lg:text-2xl">
+            <umutwe_ukalamba className="tw-text-lg tw-font-light tw-text-zinc-400 sm:tw-text-xl lg:tw-text-2xl">
               Framework ya JavaScript iyapya iya kupanga ama website
             </umutwe_ukalamba>
-            <ukulondolola className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-zinc-400 sm:text-base">
+            <ukulondolola className="tw-mx-auto tw-mt-4 tw-max-w-2xl tw-text-sm tw-leading-7 tw-text-zinc-400 sm:tw-text-base">
               Yacilaka, yalula, kabili yakosa. Yapangilwe ba developer abafwaya ukululama no bucushi bwanono pa performance. Tandikeni bwangu ne setup sha pa ntanshi.
             </ukulondolola>
           </icipandwa>
-          <icipandwa className="flex flex-col items-stretch justify-center gap-3 pt-1 sm:flex-row sm:items-center">
+          <icipandwa className="tw-flex tw-flex-col tw-items-stretch tw-justify-center tw-gap-3 tw-pt-1 sm:tw-flex-row sm:tw-items-center">
             <Button
               ilembo="Tandikeni"
               pakuKlikisha={() => londolola('Tandikeni')}
               umutindo="primary"
-              amakalasi="w-full sm:w-auto"
+              amakalasi="tw-w-full sm:tw-w-auto"
             />
-            <a href="https://github.com/YamikaniKL/bemba-compiler" className="inline-flex w-full items-center justify-center rounded-xl border border-zinc-700 px-6 py-3 font-medium text-zinc-200 no-underline transition hover:border-zinc-500 sm:w-auto">
+            <a href="https://github.com/YamikaniKL/bemba-compiler" className="tw-inline-flex tw-w-full tw-items-center tw-justify-center tw-rounded-xl tw-border tw-border-zinc-700 tw-px-6 tw-py-3 tw-font-medium tw-text-zinc-200 tw-no-underline tw-transition hover:tw-border-zinc-500 sm:tw-w-auto">
               Documentation
             </a>
           </icipandwa>

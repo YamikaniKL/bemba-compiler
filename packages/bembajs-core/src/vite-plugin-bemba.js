@@ -203,6 +203,7 @@ function pickLegacyPageForPath(urlPath) {
 function virtualClientEntrySource() {
     return `import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
+import '/imikalile/global.css';
 
 const appPages = import.meta.glob('/amapeji/app/**/page.bemba');
 const appLayouts = import.meta.glob('/amapeji/app/**/layout.bemba', { eager: true });
@@ -323,6 +324,7 @@ renderUrl(location.pathname || '/');
 function virtualServerEntrySource() {
     return `import React from 'react';
 import { renderToString } from 'react-dom/server';
+import '/imikalile/global.css';
 
 const appPages = import.meta.glob('/amapeji/app/**/page.bemba', { eager: true });
 const appLayouts = import.meta.glob('/amapeji/app/**/layout.bemba', { eager: true });
