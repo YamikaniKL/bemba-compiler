@@ -320,8 +320,8 @@ fyambaIcipanda('Button', {
   },
   ukwisulula: nokuti() {
     bwelela (
-      <ibatani className="button" pakuKlikisha={ici.ifyapangwa.pakuKlikisha}>
-        {ici.ifyapangwa.ilembo}
+      <ibatani className="button" pakuKlikisha={pakuKlikisha}>
+        {ilembo}
       </ibatani>
     )
   }
