@@ -293,16 +293,15 @@ function indexPageUi() {
 
 function aboutPage() {
     return `// App router about page
-ingisa React, { useMemo } ukufuma 'react'
+ingisa React ukufuma 'react'
 
 pangaIpepa('About', {
   ukwisulula: nokuti() {
-    cakosa routeNote = useMemo(() => 'App-router path: amapeji/app/about/page.bemba', [])
     bwelela (
       <icipandwa style={{ maxWidth: '52rem', margin: '0 auto', padding: '2rem 1rem' }}>
         <umutwe_ukulu>About BembaJS</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.7 }}>
-          {routeNote} - imports use <code>ingisa ... ukufuma</code> or <code>leta ... kufuma</code>.
+          App-router path: amapeji/app/about/page.bemba - imports use <code>ingisa ... ukufuma</code> or <code>leta ... kufuma</code>.
         </ukulondolola>
       </icipandwa>
     )

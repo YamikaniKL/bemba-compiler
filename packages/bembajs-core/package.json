@@ -1,6 +1,6 @@
 {
   "name": "bembajs-core",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "BembaJS Core - Compiler and runtime for Bemba language with conditionals, loops, and async/await support",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -68,8 +68,12 @@
     "react-dom": ">=18.0.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-dom": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "react": "^19.2.5",
