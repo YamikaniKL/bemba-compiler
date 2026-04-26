@@ -518,6 +518,7 @@ export default defineConfig({
 
             const messageShown = formatPhishaDevLog(message, process.cwd());
             const frameShown = frame ? formatPhishaDevLog(frame, process.cwd()) : '';
+            const copyPayload = [messageShown, frameShown, stack].filter(Boolean).join('\n\n');
 
             return `<!DOCTYPE html>
 <html lang="${escapeHtml(L.htmlLang)}">
@@ -527,37 +528,67 @@ export default defineConfig({
   <title>${escapeHtml(L.title)}</title>
   <style>
     :root { color-scheme: light dark; }
-    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 24px; }
-    .card { border: 1px solid rgba(0,0,0,.12); border-radius: 12px; padding: 18px; }
-    @media (prefers-color-scheme: dark) { .card { border-color: rgba(255,255,255,.15); } }
-    h1 { font-size: 18px; margin: 0 0 8px; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; background: #08090d; color: #e6e7ea; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 22px; }
+    .card { border: 1px solid rgba(150,170,255,.28); border-radius: 14px; padding: 18px; background: rgba(10,12,18,.92); box-shadow: 0 24px 72px rgba(0,0,0,.35); }
+    h1 { font-size: 20px; margin: 0 0 8px; }
+    h2 { font-size:14px; margin:16px 0 8px }
     p { margin: 6px 0; opacity: .9; }
     code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Cascadia Code", "Courier New", monospace; }
-    pre { white-space: pre-wrap; word-break: break-word; background: rgba(0,0,0,.04); padding: 12px; border-radius: 10px; overflow: auto; }
-    @media (prefers-color-scheme: dark) { pre { background: rgba(255,255,255,.06); } }
+    pre { white-space: pre-wrap; word-break: break-word; background: rgba(3,8,20,.95); color: #d9f0ff; border: 1px solid rgba(125,171,255,.25); padding: 12px; border-radius: 10px; overflow: auto; }
     .meta { font-size: 13px; opacity: .85; }
-    .pill { display:inline-block; padding: 2px 8px; border-radius: 999px; border: 1px solid rgba(0,0,0,.12); margin-right: 8px; }
-    @media (prefers-color-scheme: dark) { .pill { border-color: rgba(255,255,255,.15); } }
+    .panel { display:flex; justify-content:space-between; align-items:center; gap: 10px; margin-bottom: 8px; }
+    .panel-title { font-size: 12px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #8fa6ff; }
+    .panel-desc { font-size: 12px; opacity: .8; }
+    .summary { border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 12px; margin-top: 12px; background: rgba(255,255,255,.02); }
+    .pills { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+    .pill { display:inline-flex; align-items:center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(145,176,255,.4); color: #dbe8ff; font-size: 12px; }
+    .actions { margin-top: 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .btn { border: 1px solid rgba(145,176,255,.45); border-radius: 8px; background: rgba(74,112,242,.15); color: #dbe8ff; font: inherit; font-size: 12px; padding: 6px 10px; cursor: pointer; }
+    .btn:hover { background: rgba(74,112,242,.25); }
+    details { margin-top: 12px; }
+    details summary { cursor: pointer; color: #bdd2ff; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="card">
+      <div class="panel">
+        <div>
+          <div class="panel-title">${escapeHtml(L.panelTitle || 'Phisha Dev Panel')}</div>
+          <div class="panel-desc">${escapeHtml(L.title)}</div>
+        </div>
+      </div>
       <h1>${escapeHtml(L.title)}</h1>
       <p>${escapeHtml(L.lead)}</p>
       <p class="meta">${escapeHtml(L.hint)}</p>
-      <p class="meta">${escapeHtml(urlPath || '/')}</p>
-      <div style="margin-top:12px">
-        ${plugin ? `<span class="pill">${escapeHtml(L.pluginPill)}: ${escapeHtml(plugin)}</span>` : ''}
-        ${where ? `<span class="pill">${escapeHtml(L.atPill)}: ${escapeHtml(where)}</span>` : ''}
+      <div class="summary">
+        <h2>${escapeHtml(L.summaryHeading || 'Issue summary')}</h2>
+        <div class="pills">
+          <span class="pill">${escapeHtml(L.routePill || 'route')}: ${escapeHtml(urlPath || '/')}</span>
+          ${plugin ? `<span class="pill">${escapeHtml(L.pluginPill)}: ${escapeHtml(plugin)}</span>` : ''}
+          ${where ? `<span class="pill">${escapeHtml(L.atPill)}: ${escapeHtml(where)}</span>` : ''}
+        </div>
+        <div class="actions">
+          <strong class="meta">${escapeHtml(L.quickActionsHeading || 'Quick actions')}:</strong>
+          <button class="btn" type="button" onclick="location.reload()">${escapeHtml(L.refreshAction || 'Refresh')}</button>
+          <button class="btn" type="button" onclick="copyPhishaError()">${escapeHtml(L.copyAction || 'Copy error')}</button>
+        </div>
       </div>
-      <h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.errorHeading)}</h2>
+      <h2>${escapeHtml(L.errorHeading)}</h2>
       <pre>${escapeHtml(messageShown)}</pre>
-      ${frame ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.codeFrameHeading)}</h2><pre>${escapeHtml(frameShown)}</pre>` : ''}
-      ${stack ? `<h2 style="font-size:14px;margin:16px 0 8px">${escapeHtml(L.stackHeading)}</h2><pre>${escapeHtml(stack)}</pre>` : ''}
+      ${frame ? `<details open><summary>${escapeHtml(L.codeFrameHeading)}</summary><pre>${escapeHtml(frameShown)}</pre></details>` : ''}
+      ${stack ? `<details><summary>${escapeHtml(L.stackHeading)}</summary><pre>${escapeHtml(stack)}</pre></details>` : ''}
     </div>
   </div>
+  <script>
+    function copyPhishaError() {
+      const text = ${JSON.stringify(copyPayload).replace(/</g, '\\u003c')};
+      if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).catch(function () {});
+      }
+    }
+  </script>
 </body>
 </html>`;
         };
