@@ -435,11 +435,13 @@ export default defineConfig({
   <title>BembaJS</title>
   <link rel="icon" href="https://ik.imagekit.io/1umfxhnju/bemba-logo.svg?updatedAt=1761557358350" />
   <style id="bemba-injini-first-paint">
-    /* Sync first paint: Tailwind loads with the JS graph; this avoids a white flash before utilities apply */
+    /* Fallback until linked CSS finishes (should match starter shell) */
     html { background-color: #09090b; color: #fafafa; }
     body { margin: 0; min-height: 100%; background-color: #09090b; color: #fafafa; }
     #root { margin: 0; padding: 0; min-height: 100%; }
   </style>
+  <!-- Blocking stylesheet: loads Tailwind/PostCSS before the module graph so tw-* applies on first React paint -->
+  <link rel="stylesheet" href="/imikalile/global.css" />
 </head>
 <body>
   <div id="root"><!--app-html--></div>

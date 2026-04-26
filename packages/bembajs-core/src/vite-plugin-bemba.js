@@ -203,7 +203,7 @@ function pickLegacyPageForPath(urlPath) {
 function virtualClientEntrySource() {
     return `import React from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
-import '/imikalile/global.css';
+/* global.css is linked from index HTML so Tailwind is render-blocking before this entry runs */
 
 const appPages = import.meta.glob('/amapeji/app/**/page.bemba');
 const appLayouts = import.meta.glob('/amapeji/app/**/layout.bemba', { eager: true });
@@ -474,6 +474,14 @@ function vitePluginBemba() {
                     '</body>',
                     `  <script type="module" src="${viteClientSrc}"></script>\n</body>`
                 );
+            }
+
+            // Render-blocking Tailwind entry: avoids FOUC when global.css was only imported from JS.
+            if (
+                out.includes(viteClientSrc) &&
+                !/\/imikalile\/global\.css/i.test(out)
+            ) {
+                out = out.replace('</head>', '  <link rel="stylesheet" href="/imikalile/global.css" />\n</head>');
             }
 
             return out;
