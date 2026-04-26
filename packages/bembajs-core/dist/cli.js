@@ -547,7 +547,7 @@ export default defineConfig({
     .actions { margin-top: 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
     .btn { border: 1px solid rgba(145,176,255,.45); border-radius: 8px; background: rgba(74,112,242,.15); color: #dbe8ff; font: inherit; font-size: 12px; padding: 6px 10px; cursor: pointer; }
     .btn:hover { background: rgba(74,112,242,.25); }
-    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 9999; border: 1px solid rgba(145,176,255,.55); border-radius: 999px; background: rgba(24,36,84,.9); color: #dbe8ff; font: inherit; font-size: 12px; font-weight: 600; letter-spacing: .02em; padding: 9px 14px; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .fab { position: fixed; right: 16px; bottom: 16px; z-index: 9999; width: 42px; height: 42px; border: 1px solid rgba(145,176,255,.55); border-radius: 50%; background: rgba(24,36,84,.9); color: #dbe8ff; font: inherit; font-size: 18px; font-weight: 700; line-height: 1; padding: 0; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,.35); display: inline-flex; align-items: center; justify-content: center; }
     .fab:hover { background: rgba(42,59,126,.95); }
     details { margin-top: 12px; }
     details summary { cursor: pointer; color: #bdd2ff; font-weight: 600; }
@@ -574,6 +574,7 @@ export default defineConfig({
         </div>
         <div class="actions">
           <strong class="meta">${escapeHtml(L.quickActionsHeading || 'Quick actions')}:</strong>
+          <span class="meta">${escapeHtml(L.toggleShortcutHint || 'Shortcut: Ctrl+L')}</span>
           <button class="btn" type="button" onclick="location.reload()">${escapeHtml(L.refreshAction || 'Refresh')}</button>
           <button class="btn" type="button" onclick="copyPhishaError()">${escapeHtml(L.copyAction || 'Copy error')}</button>
           <button class="btn" id="phisha-hide-btn" type="button" onclick="hidePhishaPanel()">${escapeHtml(L.hidePanelAction || 'Hide panel')}</button>
@@ -585,8 +586,8 @@ export default defineConfig({
       ${stack ? `<details><summary>${escapeHtml(L.stackHeading)}</summary><pre>${escapeHtml(stack)}</pre></details>` : ''}
     </div>
   </div>
-  <button class="fab" id="phisha-show-btn" type="button" onclick="showPhishaPanel()" style="display:none">
-    ${escapeHtml(L.showPanelAction || 'Show panel')}
+  <button class="fab" id="phisha-show-btn" type="button" onclick="showPhishaPanel()" style="display:none" aria-label="${escapeHtml(L.showPanelAction || 'Show panel')}" title="${escapeHtml(L.showPanelAction || 'Show panel')}">
+    ●
   </button>
   <script>
     function phishaPanelElements() {
@@ -613,6 +614,19 @@ export default defineConfig({
         navigator.clipboard.writeText(text).catch(function () {});
       }
     }
+    function togglePhishaPanel() {
+      var x = phishaPanelElements();
+      if (!x.panel || !x.showBtn) return;
+      if (x.panel.classList.contains('hidden')) showPhishaPanel();
+      else hidePhishaPanel();
+    }
+    document.addEventListener('keydown', function (event) {
+      var key = String(event && event.key ? event.key : '').toLowerCase();
+      if ((event.ctrlKey || event.metaKey) && key === 'l') {
+        event.preventDefault();
+        togglePhishaPanel();
+      }
+    });
   </script>
 </body>
 </html>`;
