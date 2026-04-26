@@ -466,7 +466,7 @@ pangaIpepa('ReactDemo', {
       <icipandwa className="bemba-react-demo" style={{ padding: '2rem', maxWidth: '42rem', margin: '0 auto' }}>
         <umutwe_ukulu>Vite + React</umutwe_ukulu>
         <ukulondolola style={{ marginTop: '0.75rem', lineHeight: 1.6 }}>
-          This file is <code>amapeji/react-demo.bemba</code> -> <code>/react-demo</code> (legacy demo route).
+          This file is <code>amapeji/react-demo.bemba</code> to <code>/react-demo</code> (legacy demo route).
           Use <code>ukwisulula</code> for SPA routes. Build with <code>bemba akha</code> or <code>bemba fumya</code>{' '}
           (both run Vite by default). Sample hook: count {n}{' '}
           <ibatani type="button" pakuKlikisha={() => setN(n + 1)}>+1</ibatani>
